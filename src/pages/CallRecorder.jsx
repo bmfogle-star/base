@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Mic, StopCircle, Loader, CheckCircle, ArrowLeft, AlertCircle,
-  Upload, Video, FileAudio, RefreshCw, X, Clock
+  Upload, Video, FileAudio, RefreshCw, X, Clock, Zap, Lock
 } from 'lucide-react';
+import { decodeAudio, transcribeInBrowser, transcribeWithOpenAI } from '../lib/transcribe';
 
 const MODES = { PICK: 'pick', MIC: 'mic', UPLOAD: 'upload', ZOOM: 'zoom' };
 const S = { IDLE: 'idle', RECORDING: 'recording', PROCESSING: 'processing', WAITING: 'waiting', DONE: 'done', ERROR: 'error' };
@@ -31,24 +32,6 @@ async function extractWithClaude(transcript, apiKey) {
   if (!res.ok) throw new Error(`Claude error ${res.status}`);
   const data = await res.json();
   return data.content[0].text;
-}
-
-async function transcribeWithWhisper(file, openaiKey) {
-  if (!openaiKey) throw new Error('OpenAI API key required for file transcription. Add it in Settings.');
-  const form = new FormData();
-  form.append('file', file);
-  form.append('model', 'whisper-1');
-  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${openaiKey}` },
-    body: form,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Whisper error ${res.status}`);
-  }
-  const data = await res.json();
-  return data.text;
 }
 
 async function createRecallBot(meetingUrl, recallKey) {
@@ -129,6 +112,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
   // upload
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [engine, setEngine] = useState('browser'); // 'browser' (free) | 'openai' (paid, faster)
   const fileInputRef = useRef(null);
 
   // zoom
@@ -210,9 +194,23 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
     if (!uploadFile) return;
     setStatus(S.PROCESSING);
     try {
-      setUploadProgress('Transcribing audio with Whisper...');
-      const text = await transcribeWithWhisper(uploadFile, openaiKey);
-      setUploadProgress('Extracting client details with AI...');
+      let text;
+      if (engine === 'openai') {
+        setUploadProgress('Transcribing with OpenAI Whisper…');
+        text = await transcribeWithOpenAI(uploadFile, openaiKey);
+      } else {
+        setUploadProgress('Decoding audio…');
+        const audio = await decodeAudio(uploadFile);
+        text = await transcribeInBrowser(audio, {
+          model: 'Xenova/whisper-tiny.en',
+          onProgress: (m) => {
+            if (m.type === 'download') setUploadProgress(`Downloading speech model… ${m.progress}% (one-time)`);
+            else if (m.status === 'transcribing') setUploadProgress('Transcribing on your device…');
+          },
+        });
+      }
+      if (!text?.trim()) throw new Error('No speech detected in that file.');
+      setUploadProgress('Extracting client details with AI…');
       await runExtraction(text);
     } catch (e) {
       err(e.message);
@@ -380,6 +378,29 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             )}
           </div>
 
+          {/* Transcription engine toggle */}
+          <div className="mt-4">
+            <p className="text-xs text-gray-500 font-medium mb-2">Transcription engine</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setEngine('browser')}
+                className={`border-2 rounded-xl p-3 text-left transition-colors ${engine === 'browser' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Lock size={13} className="text-purple-600" />
+                  <span className="text-sm font-semibold text-gray-900">Free & private</span>
+                </div>
+                <p className="text-xs text-gray-500">Runs on your device. No key needed. ~40MB one-time download, slower.</p>
+              </button>
+              <button onClick={() => setEngine('openai')}
+                className={`border-2 rounded-xl p-3 text-left transition-colors ${engine === 'openai' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Zap size={13} className="text-amber-500" />
+                  <span className="text-sm font-semibold text-gray-900">Fast (paid)</span>
+                </div>
+                <p className="text-xs text-gray-500">OpenAI Whisper. Quick & accurate. Needs API key.</p>
+              </button>
+            </div>
+          </div>
+
           <div className="mt-3 bg-purple-50 border border-purple-100 rounded-lg p-3">
             <p className="text-xs text-purple-700 font-medium mb-1">📱 From your iPhone</p>
             <p className="text-xs text-purple-600">After a call: Open <strong>Voice Memos</strong> → tap the recording → share icon → "Save to Files" → upload here. Or use any call recording app and export the file.</p>
@@ -389,7 +410,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             className="mt-4 w-full bg-purple-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
             Transcribe & Extract Info
           </button>
-          {!openaiKey && <p className="text-xs text-amber-600 mt-2 text-center">⚠ OpenAI key not set — add it in Settings to enable transcription</p>}
+          {engine === 'openai' && !openaiKey && <p className="text-xs text-amber-600 mt-2 text-center">⚠ OpenAI key not set — add it in Settings, or switch to Free</p>}
           {!selectedClientId && <p className="text-xs text-gray-400 mt-1 text-center">Select a client first</p>}
         </div>
       )}
