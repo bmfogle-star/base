@@ -13,7 +13,7 @@ function ApiKeyField({ label, value, onChange, placeholder, hint }) {
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
         />
         <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
           {show ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -65,12 +65,12 @@ export default function Settings({ onKeysChange }) {
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Your Name</label>
             <input type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="John Smith"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
           </div>
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Email</label>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@example.com"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function Settings({ onKeysChange }) {
             value={form.botServerUrl}
             onChange={e => set('botServerUrl', e.target.value)}
             placeholder="https://your-server.com"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 mb-2"
           />
           <ApiKeyField
             label="Bot server token"
@@ -119,7 +119,7 @@ export default function Settings({ onKeysChange }) {
           />
 
           <details className="mt-1">
-            <summary className="text-xs text-blue-600 cursor-pointer">Prefer a managed option instead? (paid)</summary>
+            <summary className="text-xs text-green-700 cursor-pointer">Prefer a managed option instead? (paid)</summary>
             <div className="mt-2">
               <ApiKeyField
                 label="Recall.ai API Key"
@@ -138,8 +138,8 @@ export default function Settings({ onKeysChange }) {
         <h3 className="text-sm font-semibold text-gray-700 mb-3">How call recording works</h3>
         <div className="space-y-3">
           <div className="flex gap-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Mic size={14} className="text-blue-600" />
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Mic size={14} className="text-green-700" />
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-700">Live mic</p>
@@ -175,10 +175,10 @@ export default function Settings({ onKeysChange }) {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div onClick={() => set('plan', 'premium')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
               <p className="font-bold text-gray-900 text-sm">Premium</p>
-              <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">Popular</span>
+              <span className="text-xs bg-green-700 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">Up to 20 clients + AI + Bots</p>
             <p className="text-lg font-bold text-gray-900 mt-2">$4.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
@@ -194,7 +194,7 @@ export default function Settings({ onKeysChange }) {
           </div>
         </div>
         {form.plan === 'premium' && (
-          <button className="mt-3 w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+          <button className="mt-3 w-full bg-green-700 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors">
             Subscribe to Premium — $4.99/month
           </button>
         )}
@@ -205,13 +205,13 @@ export default function Settings({ onKeysChange }) {
         )}
       </div>
 
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 flex gap-3">
-        <Info size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-700">All API keys are stored locally on your device only. They are never sent to Spark servers.</p>
+      <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 flex gap-3">
+        <Info size={16} className="text-green-700 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-green-800">All API keys are stored locally on your device only. They are never sent to Spark servers.</p>
       </div>
 
       <button onClick={handleSave}
-        className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+        className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-green-700 text-white hover:bg-green-800'}`}>
         <Save size={16} />
         {saved ? '✓ Saved!' : 'Save Settings'}
       </button>

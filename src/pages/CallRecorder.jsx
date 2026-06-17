@@ -337,7 +337,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
         <label className="text-sm font-semibold text-gray-700 block mb-2">Link to client</label>
         <select value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)}
           disabled={status !== S.IDLE}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-white">
           <option value="">-- Select a client --</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name || 'Unnamed'}</option>)}
         </select>
@@ -347,7 +347,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
       {mode === MODES.PICK && (
         <div className="space-y-3">
           <p className="text-sm font-medium text-gray-600 px-1">How do you want to capture this call?</p>
-          <ModeCard icon={<Mic size={18} className="text-blue-600" />} color="blue" title="Live mic recording"
+          <ModeCard icon={<Mic size={18} className="text-green-700" />} color="green" title="Live mic recording"
             desc="Records your microphone in real time. Put the other person on speaker to capture both sides."
             onClick={() => setMode(MODES.MIC)} />
           <ModeCard icon={<FileAudio size={18} className="text-purple-600" />} color="purple" title="Upload a recording"
@@ -362,13 +362,13 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
       {/* ── MIC MODE ── */}
       {mode === MODES.MIC && status === S.IDLE && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
-          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Mic size={32} className="text-blue-600" />
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Mic size={32} className="text-green-700" />
           </div>
           <h3 className="font-semibold text-gray-900 mb-1">Ready to record</h3>
           <p className="text-sm text-gray-500 mb-5">Uses your browser mic. Put the call on speaker for both sides.</p>
           <button onClick={startMic} disabled={!selectedClientId}
-            className="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="bg-green-700 text-white px-8 py-3 rounded-xl font-medium hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed">
             Start Recording
           </button>
           {!selectedClientId && <p className="text-xs text-gray-400 mt-2">Select a client first</p>}
@@ -508,7 +508,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
       {/* ── PROCESSING ── */}
       {status === S.PROCESSING && (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <Loader size={40} className="text-blue-600 mx-auto mb-4 animate-spin" />
+          <Loader size={40} className="text-green-700 mx-auto mb-4 animate-spin" />
           <p className="font-semibold text-gray-900">
             {uploadProgress || 'Analyzing call…'}
           </p>
@@ -553,7 +553,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
               Record Another
             </button>
             <button onClick={handleSave} disabled={!selectedClientId}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
+              className="flex-1 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
               Save to {client?.name?.split(' ')[0] || 'Client'}
             </button>
           </div>

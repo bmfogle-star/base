@@ -6,7 +6,7 @@ function getInitials(name) {
 }
 
 function getAvatarColor(name) {
-  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
+  const colors = ['bg-amber-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
   const idx = name ? name.charCodeAt(0) % colors.length : 0;
   return colors[idx];
 }
@@ -41,7 +41,7 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
         </div>
         <button
           onClick={onAdd}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors"
         >
           <Plus size={16} />
           Add Client
@@ -56,7 +56,7 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
           placeholder="Search clients, companies, tags..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-9 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
         />
         {search && (
           <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -72,7 +72,7 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
-              filter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+              filter === f ? 'bg-green-700 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}
           >
             {f === 'starred' ? '⭐ Starred' : 'All Clients'}
@@ -88,7 +88,7 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
             {search ? 'No clients match your search.' : 'No clients yet. Add your first one!'}
           </p>
           {!search && (
-            <button onClick={onAdd} className="mt-4 bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-medium">
+            <button onClick={onAdd} className="mt-4 bg-green-700 text-white px-5 py-2 rounded-xl text-sm font-medium">
               Add Client
             </button>
           )}

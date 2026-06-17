@@ -33,7 +33,7 @@ export default function Layout({ page, onNav, children }) {
               onClick={() => onNav(id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 page === id
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-green-50 text-green-800'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -53,7 +53,7 @@ export default function Layout({ page, onNav, children }) {
               onClick={() => { onNav(id); setMenuOpen(false); }}
               className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                 page === id
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-green-50 text-green-800'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -76,7 +76,7 @@ export default function Layout({ page, onNav, children }) {
             key={id}
             onClick={() => onNav(id)}
             className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs font-medium transition-colors ${
-              page === id ? 'text-blue-600' : 'text-gray-500'
+              page === id ? 'text-green-700' : 'text-gray-500'
             }`}
           >
             <Icon size={20} />

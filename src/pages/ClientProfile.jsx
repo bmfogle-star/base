@@ -6,7 +6,7 @@ function getInitials(name) {
 }
 
 function getAvatarColor(name) {
-  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
+  const colors = ['bg-amber-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
   const idx = name ? name.charCodeAt(0) % colors.length : 0;
   return colors[idx];
 }
@@ -25,7 +25,7 @@ function Section({ title, icon: Icon, children }) {
 
 function TagChip({ label, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+    <span className="inline-flex items-center gap-1 bg-green-50 text-green-800 text-xs px-2 py-1 rounded-full">
       {label}
       {onRemove && <button onClick={onRemove}><X size={11} /></button>}
     </span>
@@ -52,7 +52,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
             type={type}
             value={draft[field] || ''}
             onChange={e => setDraft(p => ({ ...p, [field]: e.target.value }))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
           />
         ) : (
           <p className="text-sm text-gray-800">{value || <span className="text-gray-400 italic">Not set</span>}</p>
@@ -113,7 +113,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
             </button>
             <button
               onClick={() => { setDraft(client); setEditing(true); }}
-              className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
+              className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium"
             >
               <Edit2 size={14} />
               Edit
@@ -145,7 +145,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
               value={draft.name || ''}
               onChange={e => setDraft(p => ({ ...p, name: e.target.value }))}
               placeholder="Full Name"
-              className="text-xl font-bold text-gray-900 w-full border-b border-gray-300 focus:outline-none focus:border-blue-500 pb-1"
+              className="text-xl font-bold text-gray-900 w-full border-b border-gray-300 focus:outline-none focus:border-green-600 pb-1"
             />
           ) : (
             <h2 className="text-xl font-bold text-gray-900">{c.name || 'Unnamed Client'}</h2>
@@ -169,9 +169,9 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
                 value={newTag}
                 onChange={e => setNewTag(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addTag()}
-                className="text-xs border border-gray-200 rounded-full px-2 py-1 w-24 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="text-xs border border-gray-200 rounded-full px-2 py-1 w-24 focus:outline-none focus:ring-1 focus:ring-green-600"
               />
-              <button onClick={addTag} className="text-blue-600"><Plus size={14} /></button>
+              <button onClick={addTag} className="text-green-700"><Plus size={14} /></button>
             </div>
           )}
           {!c.tags?.length && !editing && <span className="text-xs text-gray-400 italic">No tags</span>}
@@ -206,7 +206,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
                   value={newHobby}
                   onChange={e => setNewHobby(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addHobby()}
-                  className="text-xs border border-gray-200 rounded-full px-2 py-1 w-28 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="text-xs border border-gray-200 rounded-full px-2 py-1 w-28 focus:outline-none focus:ring-1 focus:ring-green-600"
                 />
                 <button onClick={addHobby} className="text-purple-600"><Plus size={14} /></button>
               </div>
@@ -222,7 +222,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
               onChange={e => setDraft(p => ({ ...p, notes: e.target.value }))}
               rows={3}
               placeholder="Any personal notes..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
             />
           ) : (
             <p className="text-sm text-gray-800 whitespace-pre-wrap">{c.notes || <span className="text-gray-400 italic">No notes yet</span>}</p>
@@ -255,16 +255,16 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
               placeholder="Name"
               value={newFamilyMember.name}
               onChange={e => setNewFamilyMember(p => ({ ...p, name: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <input
               type="text"
               placeholder="Relation"
               value={newFamilyMember.relation}
               onChange={e => setNewFamilyMember(p => ({ ...p, relation: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
-            <button onClick={addFamily} className="bg-blue-600 text-white px-3 py-2 rounded-lg">
+            <button onClick={addFamily} className="bg-green-700 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
             </button>
           </div>
@@ -296,15 +296,15 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
               placeholder="Event title"
               value={newEvent.title}
               onChange={e => setNewEvent(p => ({ ...p, title: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <input
               type="date"
               value={newEvent.date}
               onChange={e => setNewEvent(p => ({ ...p, date: e.target.value }))}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
-            <button onClick={addEvent} className="bg-blue-600 text-white px-3 py-2 rounded-lg">
+            <button onClick={addEvent} className="bg-green-700 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
             </button>
           </div>
@@ -315,7 +315,7 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
       <Section title="Call History" icon={Mic}>
         <button
           onClick={() => onRecord(client.id)}
-          className="w-full flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-2.5 text-sm font-medium mb-3 hover:bg-blue-100 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium mb-3 hover:bg-green-100 transition-colors"
         >
           <Mic size={15} />
           Record New Call

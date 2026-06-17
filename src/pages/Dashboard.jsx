@@ -13,7 +13,7 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
   }
 
   function getAvatarColor(name) {
-    const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
+    const colors = ['bg-amber-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
     const idx = name ? name.charCodeAt(0) % colors.length : 0;
     return colors[idx];
   }
@@ -28,8 +28,8 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-white rounded-xl p-4 border border-gray-200">
-          <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
-            <Users size={18} className="text-blue-600" />
+          <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+            <Users size={18} className="text-green-700" />
           </div>
           <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
           <p className="text-xs text-gray-500 mt-1">Clients</p>
@@ -56,7 +56,7 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
           <h2 className="font-semibold text-gray-900 text-sm">Recent Clients</h2>
           <button
             onClick={() => onNav('clients')}
-            className="text-blue-600 text-xs font-medium hover:underline"
+            className="text-green-700 text-xs font-medium hover:underline"
           >
             View all
           </button>
@@ -67,7 +67,7 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
             <p className="text-sm">No clients yet.</p>
             <button
               onClick={() => onNav('clients')}
-              className="mt-3 text-blue-600 text-sm font-medium hover:underline"
+              className="mt-3 text-green-700 text-sm font-medium hover:underline"
             >
               Add your first client →
             </button>
@@ -93,12 +93,12 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
       </div>
 
       {/* Quick tip */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+      <div className="bg-green-50 border border-green-100 rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <TrendingUp size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
+          <TrendingUp size={18} className="text-green-700 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-blue-900">Pro tip</p>
-            <p className="text-xs text-blue-700 mt-0.5">
+            <p className="text-sm font-semibold text-green-900">Pro tip</p>
+            <p className="text-xs text-green-800 mt-0.5">
               Record your next sales call to automatically extract client details, hobbies, and personal info.
             </p>
           </div>

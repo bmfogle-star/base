@@ -39,7 +39,7 @@ export default function AddClient({ onBack, onSave }) {
                 placeholder="Jane Smith"
                 value={form.name}
                 onChange={e => set('name', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
@@ -49,7 +49,7 @@ export default function AddClient({ onBack, onSave }) {
                 placeholder="+1 (555) 000-0000"
                 value={form.phone}
                 onChange={e => set('phone', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
@@ -59,7 +59,7 @@ export default function AddClient({ onBack, onSave }) {
                 placeholder="jane@example.com"
                 value={form.email}
                 onChange={e => set('email', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
@@ -69,7 +69,7 @@ export default function AddClient({ onBack, onSave }) {
                 placeholder="Acme Corp"
                 value={form.company}
                 onChange={e => set('company', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function AddClient({ onBack, onSave }) {
                 placeholder="CEO"
                 value={form.position}
                 onChange={e => set('position', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
           </div>
@@ -92,14 +92,14 @@ export default function AddClient({ onBack, onSave }) {
             value={form.notes}
             onChange={e => set('notes', e.target.value)}
             rows={3}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={!form.name.trim() || saving}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <UserPlus size={16} />
           Create Client
