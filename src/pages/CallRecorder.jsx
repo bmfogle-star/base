@@ -63,6 +63,37 @@ async function getRecallBotStatus(botId, recallKey) {
   return res.json();
 }
 
+// ── self-hosted bot server (free) ──
+async function createSelfHostedBot(meetingUrl, clientId, baseUrl, token) {
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/bots`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ meetingUrl, clientId, botName: 'ClientIQ Recorder' }),
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error || `Bot server error ${res.status}`);
+  }
+  return res.json();
+}
+
+async function getSelfHostedStatus(id, baseUrl, token) {
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/bots/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Status check failed ${res.status}`);
+  return res.json();
+}
+
+async function getSelfHostedTranscript(id, baseUrl, token) {
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/bots/${id}/transcript`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Transcript fetch failed ${res.status}`);
+  const data = await res.json();
+  return data.transcript || '';
+}
+
 async function getRecallTranscript(botId, recallKey) {
   const res = await fetch(`https://us-east-1.recall.ai/api/v1/bot/${botId}/transcript/`, {
     headers: { Authorization: `Token ${recallKey}` },
@@ -95,7 +126,8 @@ function ModeCard({ icon, title, desc, color, onClick }) {
 
 // ── main component ────────────────────────────────────────────────────────────
 
-export default function CallRecorder({ clients, preselectedClientId, onSaveCall, onBack, apiKey, openaiKey, recallKey }) {
+export default function CallRecorder({ clients, preselectedClientId, onSaveCall, onBack, apiKey, openaiKey, recallKey, botServerUrl, botServerToken }) {
+  const useSelfHosted = !!botServerUrl;
   const [mode, setMode] = useState(MODES.PICK);
   const [status, setStatus] = useState(S.IDLE);
   const [selectedClientId, setSelectedClientId] = useState(preselectedClientId || '');
@@ -229,7 +261,9 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
     if (!meetingUrl.trim()) return;
     setStatus(S.PROCESSING);
     try {
-      const bot = await createRecallBot(meetingUrl.trim(), recallKey);
+      const bot = useSelfHosted
+        ? await createSelfHostedBot(meetingUrl.trim(), selectedClientId, botServerUrl, botServerToken)
+        : await createRecallBot(meetingUrl.trim(), recallKey);
       setBotId(bot.id);
       setBotStatus('joining');
       setStatus(S.WAITING);
@@ -242,14 +276,22 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
   function startPoll(id) {
     pollRef.current = setInterval(async () => {
       try {
-        const bot = await getRecallBotStatus(id, recallKey);
-        const s = bot.status_changes?.at(-1)?.code || bot.status || '';
+        let s, getText;
+        if (useSelfHosted) {
+          const bot = await getSelfHostedStatus(id, botServerUrl, botServerToken);
+          s = bot.status || '';
+          getText = () => getSelfHostedTranscript(id, botServerUrl, botServerToken);
+        } else {
+          const bot = await getRecallBotStatus(id, recallKey);
+          s = bot.status_changes?.at(-1)?.code || bot.status || '';
+          getText = () => getRecallTranscript(id, recallKey);
+        }
         setBotStatus(s);
         if (s === 'done' || s === 'call_ended') {
           stopPoll();
           setStatus(S.PROCESSING);
           setBotStatus('fetching transcript...');
-          const text = await getRecallTranscript(id, recallKey);
+          const text = await getText();
           await runExtraction(text);
         } else if (s === 'fatal' || s === 'error') {
           stopPoll();
@@ -436,7 +478,9 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             className="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
             Send Bot to Meeting
           </button>
-          {!recallKey && <p className="text-xs text-amber-600 mt-2 text-center">⚠ Recall.ai key not set — add it in Settings to enable the meeting bot</p>}
+          {useSelfHosted
+            ? <p className="text-xs text-green-600 mt-2 text-center">✓ Using your self-hosted bot server (free)</p>
+            : !recallKey && <p className="text-xs text-amber-600 mt-2 text-center">⚠ No bot configured — add your free bot server URL (or Recall.ai key) in Settings</p>}
           {!selectedClientId && <p className="text-xs text-gray-400 mt-1 text-center">Select a client first</p>}
         </div>
       )}

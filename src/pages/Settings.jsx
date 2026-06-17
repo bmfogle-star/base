@@ -32,6 +32,8 @@ export default function Settings({ onKeysChange }) {
     apiKey: user.apiKey || '',
     openaiKey: user.openaiKey || '',
     recallKey: user.recallKey || '',
+    botServerUrl: user.botServerUrl || '',
+    botServerToken: user.botServerToken || '',
     plan: user.plan || 'free',
   });
   const [saved, setSaved] = useState(false);
@@ -41,7 +43,10 @@ export default function Settings({ onKeysChange }) {
   function handleSave() {
     const updated = { ...user, ...form };
     saveUser(updated);
-    if (onKeysChange) onKeysChange({ apiKey: form.apiKey, openaiKey: form.openaiKey, recallKey: form.recallKey });
+    if (onKeysChange) onKeysChange({
+      apiKey: form.apiKey, openaiKey: form.openaiKey, recallKey: form.recallKey,
+      botServerUrl: form.botServerUrl, botServerToken: form.botServerToken,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -94,13 +99,38 @@ export default function Settings({ onKeysChange }) {
           hint="Used by Whisper to transcribe uploaded call recordings. Get yours at platform.openai.com"
         />
 
-        <ApiKeyField
-          label="Recall.ai API Key — Zoom / Meet / Teams bot"
-          value={form.recallKey}
-          onChange={v => set('recallKey', v)}
-          placeholder="Token ..."
-          hint="Sends a bot to join and record your video meetings. Get yours at recall.ai"
-        />
+        <div className="border-t border-gray-100 pt-3 mt-1">
+          <p className="text-xs font-semibold text-gray-600 mb-2">Meeting bot (Zoom / Google Meet)</p>
+
+          <label className="text-xs text-gray-500 font-medium block mb-1">Your bot server URL (self-hosted, free)</label>
+          <input
+            type="url"
+            value={form.botServerUrl}
+            onChange={e => set('botServerUrl', e.target.value)}
+            placeholder="https://your-server.com"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          />
+          <ApiKeyField
+            label="Bot server token"
+            value={form.botServerToken}
+            onChange={v => set('botServerToken', v)}
+            placeholder="The BOT_API_TOKEN you set on your server"
+            hint="Run the free bot server in /server (see its README) on a ~$5/mo VPS. Google Meet works best."
+          />
+
+          <details className="mt-1">
+            <summary className="text-xs text-blue-600 cursor-pointer">Prefer a managed option instead? (paid)</summary>
+            <div className="mt-2">
+              <ApiKeyField
+                label="Recall.ai API Key"
+                value={form.recallKey}
+                onChange={v => set('recallKey', v)}
+                placeholder="Token ..."
+                hint="Managed bot service — no server to run, but charges per minute. From recall.ai"
+              />
+            </div>
+          </details>
+        </div>
       </div>
 
       {/* How it works */}

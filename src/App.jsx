@@ -16,7 +16,10 @@ export default function App() {
   const [recordForClientId, setRecordForClientId] = useState(null);
   const [keys, setKeys] = useState(() => {
     const u = getUser() || {};
-    return { apiKey: u.apiKey || '', openaiKey: u.openaiKey || '', recallKey: u.recallKey || '' };
+    return {
+      apiKey: u.apiKey || '', openaiKey: u.openaiKey || '', recallKey: u.recallKey || '',
+      botServerUrl: u.botServerUrl || '', botServerToken: u.botServerToken || '',
+    };
   });
 
   const { clients, addClient, updateClient, removeClient } = useClients();
@@ -107,6 +110,8 @@ export default function App() {
           apiKey={keys.apiKey}
           openaiKey={keys.openaiKey}
           recallKey={keys.recallKey}
+          botServerUrl={keys.botServerUrl}
+          botServerToken={keys.botServerToken}
         />
       )}
       {page === 'settings' && (
