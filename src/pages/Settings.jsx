@@ -81,7 +81,27 @@ export default function Settings({ onKeysChange }) {
           <Key size={15} className="text-gray-500" />
           <h3 className="text-sm font-semibold text-gray-700">AI & Integrations</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-4">These keys power call transcription and AI extraction. All stored locally on your device.</p>
+        <p className="text-xs text-gray-500 mb-3">These keys power call transcription and AI extraction. All stored locally on your device.</p>
+
+        {/* Setup guide */}
+        <details className="mb-4 bg-green-50 border border-green-100 rounded-lg overflow-hidden">
+          <summary className="flex items-center gap-2 px-3 py-2.5 cursor-pointer text-xs font-semibold text-green-800 select-none">
+            <Info size={14} className="text-green-700" />
+            New here? How to set up your AI key (2 min)
+          </summary>
+          <div className="px-3 pb-3 pt-1 text-xs text-green-800 space-y-2">
+            <p>Spark uses AI to read your call transcripts and pull out the personal details about each client. To turn that on, you just need one free-to-create key:</p>
+            <ol className="list-decimal list-inside space-y-1.5 text-green-700">
+              <li>Go to <span className="font-semibold">console.anthropic.com</span> and sign up (or log in).</li>
+              <li>On the left, click <span className="font-semibold">API Keys</span>.</li>
+              <li>Click <span className="font-semibold">Create Key</span>, give it a name like “Spark”, and copy the key (it starts with <span className="font-mono">sk-ant-</span>).</li>
+              <li>Paste it into the <span className="font-semibold">Claude API Key</span> box below and tap <span className="font-semibold">Save Settings</span>.</li>
+              <li>Tip: under <span className="font-semibold">Billing → Limits</span>, set a low monthly cap (e.g. $5) so there are no surprises. Each call costs only a fraction of a cent.</li>
+            </ol>
+            <p className="pt-1">The other keys below are <span className="font-semibold">optional</span> — file transcription already works for free on your device, and the meeting-bot keys are only needed if you want a bot to auto-join Zoom/Meet calls.</p>
+            <p className="text-green-600">🔒 Your key is stored only on this device and is never sent to Spark’s servers.</p>
+          </div>
+        </details>
 
         <ApiKeyField
           label="Claude API Key — AI info extraction"
