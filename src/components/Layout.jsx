@@ -16,9 +16,7 @@ export default function Layout({ page, onNav, children }) {
       {/* Top bar */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Users size={16} className="text-white" />
-          </div>
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Spark" className="w-8 h-8 rounded-lg" />
           <span className="font-bold text-gray-900 text-lg">Spark</span>
         </div>
         <button
