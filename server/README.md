@@ -35,17 +35,42 @@ npm install
 npm start
 ```
 
-## Deploy with Docker (recommended)
+## Deploy to Fly.io (recommended — ~$5/mo)
 
-The bot needs a virtual display (Xvfb) and audio sink (PulseAudio) to capture
-tab audio — the included `Dockerfile` sets all of that up.
+The included `fly.toml` + `Dockerfile` set up everything (Chrome, virtual
+display, audio sink, a persistent volume for recordings).
+
+**One-time setup:**
+
+```bash
+curl -L https://fly.io/install.sh | sh   # install the flyctl CLI
+fly auth login                           # log into (or create) your Fly account
+```
+
+**Deploy** — from inside the `server/` directory:
+
+```bash
+cd server
+./deploy-fly.sh                # uses a default app name
+# or pick your own name + region:
+./deploy-fly.sh my-bot-server iad
+```
+
+The script creates the app, a 1GB recordings volume, generates a secret
+token, and deploys. When it finishes it prints your **bot server URL** and
+**token** — paste both into ClientIQ → Settings → Meeting bot.
+
+> Fly's free allowance has shrunk over time, so expect roughly $3–5/month for a
+> single always-on 1GB machine. Still cheaper than Recall.ai, with no per-minute fees.
+
+## Deploy with plain Docker (any VPS)
+
+The `Dockerfile` works anywhere Docker runs:
 
 ```bash
 docker build -t clientiq-bot .
 docker run -p 4000:4000 --env-file .env clientiq-bot
 ```
-
-Point your $5 droplet / Fly app at this image and you're live.
 
 ## Wire it into the app
 
