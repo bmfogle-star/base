@@ -44,7 +44,7 @@ async function createRecallBot(meetingUrl, recallKey) {
     },
     body: JSON.stringify({
       meeting_url: meetingUrl,
-      bot_name: 'ClientIQ Recorder',
+      bot_name: 'Spark Recorder',
       transcription_options: { provider: 'assembly_ai' },
     }),
   });
@@ -68,7 +68,7 @@ async function createSelfHostedBot(meetingUrl, clientId, baseUrl, token) {
   const res = await fetch(`${baseUrl.replace(/\/$/, '')}/bots`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ meetingUrl, clientId, botName: 'ClientIQ Recorder' }),
+    body: JSON.stringify({ meetingUrl, clientId, botName: 'Spark Recorder' }),
   });
   if (!res.ok) {
     const e = await res.json().catch(() => ({}));
@@ -471,7 +471,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
           <div className="bg-green-50 border border-green-100 rounded-lg p-3 mb-4">
             <p className="text-xs text-green-700 font-medium mb-1">Supported platforms</p>
             <p className="text-xs text-green-600">✓ Zoom &nbsp; ✓ Google Meet &nbsp; ✓ Microsoft Teams &nbsp; ✓ Webex</p>
-            <p className="text-xs text-green-600 mt-1">The bot appears as "ClientIQ Recorder" in your meeting. You can remove it at any time.</p>
+            <p className="text-xs text-green-600 mt-1">The bot appears as "Spark Recorder" in your meeting. You can remove it at any time.</p>
           </div>
 
           <button onClick={sendBot} disabled={!meetingUrl.trim() || !selectedClientId}

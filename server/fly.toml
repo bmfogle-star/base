@@ -1,7 +1,7 @@
-# Fly.io config for the ClientIQ meeting bot server.
+# Fly.io config for the Spark meeting bot server.
 # Rename "app" to something unique before deploying (or let `fly launch` set it).
 
-app = "clientiq-bot"
+app = "spark-bot"
 primary_region = "iad"   # change to a region near you: https://fly.io/docs/reference/regions/
 
 [build]

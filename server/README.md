@@ -1,8 +1,8 @@
-# ClientIQ Bot Server
+# Spark Bot Server
 
 A self-hosted meeting bot that replaces the paid Recall.ai service. It joins a
 Google Meet call as a guest, records the audio, and posts the transcript back to
-the ClientIQ app.
+the Spark app.
 
 ## What it costs
 
@@ -58,7 +58,7 @@ cd server
 
 The script creates the app, a 1GB recordings volume, generates a secret
 token, and deploys. When it finishes it prints your **bot server URL** and
-**token** — paste both into ClientIQ → Settings → Meeting bot.
+**token** — paste both into Spark → Settings → Meeting bot.
 
 > Fly's free allowance has shrunk over time, so expect roughly $3–5/month for a
 > single always-on 1GB machine. Still cheaper than Recall.ai, with no per-minute fees.
@@ -68,13 +68,13 @@ token, and deploys. When it finishes it prints your **bot server URL** and
 The `Dockerfile` works anywhere Docker runs:
 
 ```bash
-docker build -t clientiq-bot .
-docker run -p 4000:4000 --env-file .env clientiq-bot
+docker build -t spark-bot .
+docker run -p 4000:4000 --env-file .env spark-bot
 ```
 
 ## Wire it into the app
 
-In ClientIQ → Settings → "Bot server URL", enter your server's address
+In Spark → Settings → "Bot server URL", enter your server's address
 (e.g. `https://your-server.com`) and the same token you set as `BOT_API_TOKEN`.
 The app will dispatch bots to your server instead of Recall.ai.
 

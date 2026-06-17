@@ -1,4 +1,4 @@
-# ClientIQ — Progress & Next Steps
+# Spark — Progress & Next Steps
 
 _Last updated: 2026-06-17_
 

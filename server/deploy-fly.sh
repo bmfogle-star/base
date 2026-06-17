@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-shot Fly.io deploy for the ClientIQ bot server.
+# One-shot Fly.io deploy for the Spark bot server.
 # Run this from the server/ directory after installing flyctl and logging in.
 #
 #   curl -L https://fly.io/install.sh | sh   # install flyctl
@@ -8,7 +8,7 @@
 #
 set -euo pipefail
 
-APP_NAME="${1:-clientiq-bot-$(whoami)}"
+APP_NAME="${1:-spark-bot-$(whoami)}"
 REGION="${2:-iad}"
 
 echo "▶ Deploying app: $APP_NAME (region: $REGION)"
@@ -38,4 +38,4 @@ echo "✅ Deployed!"
 echo "   Bot server URL:   https://$APP_NAME.fly.dev"
 echo "   Bot server token: $TOKEN"
 echo ""
-echo "Paste both into ClientIQ → Settings → Meeting bot. Keep the token secret."
+echo "Paste both into Spark → Settings → Meeting bot. Keep the token secret."

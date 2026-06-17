@@ -1,6 +1,6 @@
-// ClientIQ self-hosted meeting bot server.
+// Spark self-hosted meeting bot server.
 //
-// Exposes a tiny REST API the ClientIQ app calls to dispatch a bot into a
+// Exposes a tiny REST API the Spark app calls to dispatch a bot into a
 // meeting. The bot joins, records audio, and when the call ends it posts the
 // recording (and optional transcript) back to a callback URL the app provides.
 //
@@ -45,7 +45,7 @@ app.post('/bots', async (req, res) => {
   // Kick off the bot in the background; respond immediately so the app can poll.
   runMeetBot({
     meetingUrl,
-    botName: botName || 'ClientIQ Recorder',
+    botName: botName || 'Spark Recorder',
     onStatus: (status) => { job.status = status; },
     onDone: async ({ audioPath, transcript }) => {
       job.status = 'done';
@@ -85,4 +85,4 @@ app.get('/bots/:id/transcript', (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`ClientIQ bot server listening on :${PORT}`));
+app.listen(PORT, () => console.log(`Spark bot server listening on :${PORT}`));

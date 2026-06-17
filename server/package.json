@@ -1,7 +1,7 @@
 {
-  "name": "clientiq-bot-server",
+  "name": "spark-bot-server",
   "version": "1.0.0",
-  "description": "Self-hosted meeting bot for ClientIQ — joins Google Meet / Zoom calls, records, transcribes, and posts the transcript back to the app.",
+  "description": "Self-hosted meeting bot for Spark — joins Google Meet / Zoom calls, records, transcribes, and posts the transcript back to the app.",
   "type": "module",
   "main": "index.js",
   "scripts": {

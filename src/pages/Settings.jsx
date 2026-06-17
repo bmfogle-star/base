@@ -207,7 +207,7 @@ export default function Settings({ onKeysChange }) {
 
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 flex gap-3">
         <Info size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-700">All API keys are stored locally on your device only. They are never sent to ClientIQ servers.</p>
+        <p className="text-xs text-blue-700">All API keys are stored locally on your device only. They are never sent to Spark servers.</p>
       </div>
 
       <button onClick={handleSave}

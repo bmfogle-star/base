@@ -19,7 +19,7 @@ export default function Layout({ page, onNav, children }) {
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
             <Users size={16} className="text-white" />
           </div>
-          <span className="font-bold text-gray-900 text-lg">ClientIQ</span>
+          <span className="font-bold text-gray-900 text-lg">Spark</span>
         </div>
         <button
           className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
