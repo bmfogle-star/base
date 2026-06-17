@@ -14,7 +14,10 @@ export default function App() {
   const [page, setPage] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [recordForClientId, setRecordForClientId] = useState(null);
-  const [apiKey, setApiKey] = useState(() => getUser()?.apiKey || '');
+  const [keys, setKeys] = useState(() => {
+    const u = getUser() || {};
+    return { apiKey: u.apiKey || '', openaiKey: u.openaiKey || '', recallKey: u.recallKey || '' };
+  });
 
   const { clients, addClient, updateClient, removeClient } = useClients();
 
@@ -101,11 +104,13 @@ export default function App() {
           preselectedClientId={recordForClientId}
           onSaveCall={handleSaveCall}
           onBack={() => setPage(recordForClientId ? 'profile' : 'dashboard')}
-          apiKey={apiKey}
+          apiKey={keys.apiKey}
+          openaiKey={keys.openaiKey}
+          recallKey={keys.recallKey}
         />
       )}
       {page === 'settings' && (
-        <Settings onApiKeyChange={setApiKey} />
+        <Settings onKeysChange={setKeys} />
       )}
     </Layout>
   );
