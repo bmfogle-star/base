@@ -34,7 +34,7 @@ export default function Settings({ onKeysChange }) {
     recallKey: user.recallKey || '',
     botServerUrl: user.botServerUrl || '',
     botServerToken: user.botServerToken || '',
-    plan: user.plan || 'free',
+    plan: user.plan || 'standard',
   });
   const [saved, setSaved] = useState(false);
 
@@ -174,25 +174,33 @@ export default function Settings({ onKeysChange }) {
           <h3 className="text-sm font-semibold text-gray-700">Subscription</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div onClick={() => set('plan', 'free')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'free' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
-            <p className="font-bold text-gray-900 text-sm">Free</p>
-            <p className="text-xs text-gray-500 mt-1">Up to 5 clients</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">$0</p>
-          </div>
-          <div onClick={() => set('plan', 'pro')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'pro' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+          <div onClick={() => set('plan', 'standard')}
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'standard' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
-              <p className="font-bold text-gray-900 text-sm">Pro</p>
+              <p className="font-bold text-gray-900 text-sm">Standard</p>
               <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Unlimited + AI + Bots</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">$4<span className="text-xs font-normal text-gray-500">/mo</span></p>
+            <p className="text-xs text-gray-500 mt-1">Up to 20 clients + AI + Bots</p>
+            <p className="text-lg font-bold text-gray-900 mt-2">$4.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
+          </div>
+          <div onClick={() => set('plan', 'platinum')}
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'platinum' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            <div className="flex items-center justify-between">
+              <p className="font-bold text-gray-900 text-sm">Platinum</p>
+              <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">Pro</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Unlimited clients (20+)</p>
+            <p className="text-lg font-bold text-gray-900 mt-2">$11.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
           </div>
         </div>
-        {form.plan === 'pro' && (
+        {form.plan === 'standard' && (
           <button className="mt-3 w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
-            Upgrade to Pro — $4/month
+            Subscribe to Standard — $4.99/month
+          </button>
+        )}
+        {form.plan === 'platinum' && (
+          <button className="mt-3 w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
+            Subscribe to Platinum — $11.99/month
           </button>
         )}
       </div>
