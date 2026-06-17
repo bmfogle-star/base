@@ -7,7 +7,7 @@ details (hobbies, family, events) to feel more personable, with AI that extracts
 those details from recorded calls.
 
 **Pricing:**
-- **Standard — $4.99/mo:** up to 20 clients, full AI + bots.
+- **Premium — $4.99/mo:** up to 20 clients, full AI + bots.
 - **Platinum — $11.99/mo:** unlimited clients (for 20+).
 
 **Live app:** https://bmfogle-star.github.io/base/
@@ -30,7 +30,7 @@ those details from recorded calls.
   3. **Zoom/Meet/Teams bot** — dispatches a bot to join + record + transcribe.
 - **AI extraction** — Claude pulls names, hobbies, family, events from transcripts.
 - **Settings** — stores API keys locally (Claude, OpenAI, bot server URL+token,
-  Recall.ai fallback), profile, Standard ($4.99) vs Platinum ($11.99) plan UI.
+  Recall.ai fallback), profile, Premium ($4.99) vs Platinum ($11.99) plan UI.
 - **Self-hostable bot server** in `/server` — Express + Puppeteer Google Meet
   bot. Dockerfile (Chrome + Xvfb + PulseAudio), Fly.io config (`fly.toml`),
   one-shot deploy script (`deploy-fly.sh`). Replaces paid Recall.ai.
@@ -62,8 +62,8 @@ Then paste the printed URL + token into Settings → Meeting bot.
 
 - Pre-fill a sample client so a finished profile is visible before real data entry.
 - Tighten Zoom/Teams join logic (currently Meet-first; Zoom/Teams are best-effort).
-- Real Stripe payments for the Standard/Platinum plans (currently UI only).
-- Enforce the 20-client limit on Standard + auto-nudge to Platinum past 20.
+- Real Stripe payments for the Premium/Platinum plans (currently UI only).
+- Enforce the 20-client limit on Premium + auto-nudge to Platinum past 20.
 - Optional cloud sync / multi-device (currently local-only).
 - Auto-merge AI-extracted details into structured profile fields (currently saved
   as a text block in call history; could parse into hobbies/family/events arrays).

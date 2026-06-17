@@ -34,7 +34,7 @@ export default function Settings({ onKeysChange }) {
     recallKey: user.recallKey || '',
     botServerUrl: user.botServerUrl || '',
     botServerToken: user.botServerToken || '',
-    plan: user.plan || 'standard',
+    plan: user.plan || 'premium',
   });
   const [saved, setSaved] = useState(false);
 
@@ -174,10 +174,10 @@ export default function Settings({ onKeysChange }) {
           <h3 className="text-sm font-semibold text-gray-700">Subscription</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div onClick={() => set('plan', 'standard')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'standard' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+          <div onClick={() => set('plan', 'premium')}
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
-              <p className="font-bold text-gray-900 text-sm">Standard</p>
+              <p className="font-bold text-gray-900 text-sm">Premium</p>
               <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">Up to 20 clients + AI + Bots</p>
@@ -193,9 +193,9 @@ export default function Settings({ onKeysChange }) {
             <p className="text-lg font-bold text-gray-900 mt-2">$11.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
           </div>
         </div>
-        {form.plan === 'standard' && (
+        {form.plan === 'premium' && (
           <button className="mt-3 w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
-            Subscribe to Standard — $4.99/month
+            Subscribe to Premium — $4.99/month
           </button>
         )}
         {form.plan === 'platinum' && (
