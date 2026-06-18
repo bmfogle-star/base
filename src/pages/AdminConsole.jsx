@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2 } from 'lucide-react';
-import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole } from '../lib/api';
+import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole, fetchMe } from '../lib/api';
 
 function monthlyPrice(seats) { return seats > 50 ? 1000 : 500; }
 
@@ -44,6 +44,7 @@ export default function AdminConsole({ onBack }) {
     setSavedMsg('');
     try {
       await updateOrgSettings({ branding, customFields });
+      await fetchMe().catch(() => {}); // refresh cached custom fields for the forms
       setSavedMsg('Saved');
       setTimeout(() => setSavedMsg(''), 1500);
     } catch (e) {

@@ -54,6 +54,7 @@ export function createClient(data) {
     upcomingEvents: [],
     tags: [],
     attachments: [],
+    customFields: {},
     callHistory: [],
     ...data,
   };

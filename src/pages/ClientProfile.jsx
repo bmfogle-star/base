@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock, Pin, ChevronUp, ChevronDown } from 'lucide-react';
+import { getCustomFields } from '../lib/api';
 
 // Order calls: pinned always float to top, then by the chosen sort.
 function orderCalls(calls, sort) {
@@ -152,6 +153,24 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
   }
 
   const c = editing ? draft : client;
+  const orgCustomFields = getCustomFields();
+
+  // Auto-save: while editing, persist the draft a beat after the user stops typing.
+  const [autoSaved, setAutoSaved] = useState(true);
+  const autosaveTimer = useRef(null);
+  const skipFirstAutosave = useRef(true);
+
+  useEffect(() => {
+    if (!editing) { skipFirstAutosave.current = true; return; }
+    if (skipFirstAutosave.current) { skipFirstAutosave.current = false; return; }
+    setAutoSaved(false);
+    clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      onUpdate({ ...draft, updatedAt: new Date().toISOString() });
+      setAutoSaved(true);
+    }, 600);
+    return () => clearTimeout(autosaveTimer.current);
+  }, [draft, editing]);
 
   function field(label, value, field, type = 'text', icon) {
     return (
@@ -290,12 +309,10 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
         )}
         {editing && (
           <>
-            <button onClick={() => setEditing(false)} className="text-gray-500 px-3 py-2 rounded-lg text-sm hover:bg-gray-100">
-              Cancel
-            </button>
-            <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium">
+            <span className="text-xs text-gray-400 mr-1">{autoSaved ? '✓ Saved' : 'Auto-saving…'}</span>
+            <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium">
               <Save size={14} />
-              Save
+              Done
             </button>
           </>
         )}
@@ -408,6 +425,27 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
             <p className="text-sm text-gray-800 whitespace-pre-wrap">{c.notes || <span className="text-gray-400 italic">No notes yet</span>}</p>
           )}
         </div>
+
+        {/* Org custom fields */}
+        {orgCustomFields.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
+            {orgCustomFields.map(f => (
+              <div key={f.key}>
+                <label className="text-xs text-gray-500 font-medium block mb-1">{f.label}</label>
+                {editing ? (
+                  <input
+                    type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
+                    value={draft.customFields?.[f.key] || ''}
+                    onChange={e => setDraft(p => ({ ...p, customFields: { ...(p.customFields || {}), [f.key]: e.target.value } }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-800">{c.customFields?.[f.key] || <span className="text-gray-400 italic">Not set</span>}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Attachments */}
         <div className="mt-4 pt-4 border-t border-gray-100">

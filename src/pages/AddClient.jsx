@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
+import { getCustomFields } from '../lib/api';
 
 export default function AddClient({ onBack, onSave }) {
+  const customFields = getCustomFields();
   const [form, setForm] = useState({
-    name: '', phone: '', email: '', company: '', position: '', notes: '',
+    name: '', phone: '', email: '', company: '', position: '', notes: '', customFields: {},
   });
   const [saving, setSaving] = useState(false);
 
   function set(field, value) {
     setForm(p => ({ ...p, [field]: value }));
+  }
+
+  function setCustom(key, value) {
+    setForm(p => ({ ...p, customFields: { ...p.customFields, [key]: value } }));
   }
 
   async function handleSubmit(e) {
@@ -84,6 +90,25 @@ export default function AddClient({ onBack, onSave }) {
             </div>
           </div>
         </div>
+
+        {customFields.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Additional Details</h3>
+            <div className="space-y-3">
+              {customFields.map(f => (
+                <div key={f.key}>
+                  <label className="text-xs text-gray-500 font-medium block mb-1">{f.label}</label>
+                  <input
+                    type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
+                    value={form.customFields[f.key] || ''}
+                    onChange={e => setCustom(f.key, e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Initial Notes</h3>

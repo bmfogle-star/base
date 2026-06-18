@@ -71,13 +71,29 @@ export async function login(email, password) {
 export function logout() {
   setToken('');
   localStorage.removeItem(ACCOUNT_KEY);
+  localStorage.removeItem(CUSTOM_FIELDS_KEY);
 }
 
 const ACCOUNT_KEY = 'spark_account';
+const CUSTOM_FIELDS_KEY = 'spark_custom_fields';
 
 function cacheAccount(a) {
-  if (a) localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ plan: a.plan, org_id: a.org_id || null }));
-  else localStorage.removeItem(ACCOUNT_KEY);
+  if (a) {
+    localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ plan: a.plan, org_id: a.org_id || null }));
+    localStorage.setItem(CUSTOM_FIELDS_KEY, JSON.stringify(a.customFields || []));
+  } else {
+    localStorage.removeItem(ACCOUNT_KEY);
+    localStorage.removeItem(CUSTOM_FIELDS_KEY);
+  }
+}
+
+// Org-defined custom client fields (empty for personal accounts).
+export function getCustomFields() {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_FIELDS_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchMe() {

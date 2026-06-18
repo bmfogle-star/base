@@ -42,6 +42,18 @@ router.post('/login', async (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   const usage = getUsage(req.user.id);
   const plan = PLANS[req.user.plan] || PLANS.premium;
+
+  // Include the org's custom fields + branding so client forms can render them.
+  let customFields = [];
+  let branding = {};
+  if (req.user.org_id) {
+    const s = db.prepare('SELECT * FROM org_settings WHERE org_id = ?').get(req.user.org_id);
+    if (s) {
+      try { customFields = JSON.parse(s.custom_fields_json || '[]'); } catch { /* ignore */ }
+      try { branding = JSON.parse(s.branding_json || '{}'); } catch { /* ignore */ }
+    }
+  }
+
   res.json({
     email: req.user.email,
     plan: req.user.plan,
@@ -49,6 +61,8 @@ router.get('/me', requireAuth, (req, res) => {
     role: req.user.role || null,
     limits: { aiCallsPerMonth: plan.aiCallsPerMonth, maxClients: plan.maxClients },
     usage,
+    customFields,
+    branding,
   });
 });
 
