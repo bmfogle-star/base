@@ -27,6 +27,7 @@ db.exec(`
     name        TEXT NOT NULL,
     plan        TEXT NOT NULL DEFAULT 'enterprise',
     seats       INTEGER NOT NULL DEFAULT 5,
+    join_code   TEXT,
     owner_id    TEXT NOT NULL,
     created_at  TEXT NOT NULL
   );
@@ -71,5 +72,8 @@ db.exec(`
 const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
 if (!userCols.includes('org_id')) db.exec("ALTER TABLE users ADD COLUMN org_id TEXT");
 if (!userCols.includes('role')) db.exec("ALTER TABLE users ADD COLUMN role TEXT");
+
+const orgCols = db.prepare("PRAGMA table_info(organizations)").all().map(c => c.name);
+if (orgCols.length && !orgCols.includes('join_code')) db.exec("ALTER TABLE organizations ADD COLUMN join_code TEXT");
 
 export default db;

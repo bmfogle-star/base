@@ -124,6 +124,19 @@ export async function extractCardViaBackend(imageDataUrl) {
   return data.contact;
 }
 
+// ── Enterprise orgs ──
+export async function createOrg(name) {
+  return call('/orgs', { method: 'POST', auth: true, body: { name } });
+}
+
+export async function joinOrg(code) {
+  return call('/orgs/join', { method: 'POST', auth: true, body: { code } });
+}
+
+export async function getOrg() {
+  return call('/orgs/me', { auth: true });
+}
+
 // Start a Stripe Checkout session for a plan; returns a URL to redirect to.
 export async function startCheckout(plan) {
   const data = await call('/billing/checkout', { method: 'POST', auth: true, body: { plan } });

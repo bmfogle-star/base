@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server } from 'lucide-react';
 import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
-import { isLoggedIn, startCheckout } from '../lib/api';
+import { isLoggedIn, startCheckout, createOrg, joinOrg } from '../lib/api';
 
 function ApiKeyField({ label, value, onChange, placeholder, hint }) {
   const [show, setShow] = useState(false);
@@ -43,7 +43,40 @@ export default function Settings({ onKeysChange }) {
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
+  // Enterprise join/create
+  const [entMode, setEntMode] = useState(null); // null | 'join' | 'create'
+  const [joinCode, setJoinCode] = useState('');
+  const [orgName, setOrgName] = useState('');
+  const [entBusy, setEntBusy] = useState(false);
+  const [entError, setEntError] = useState('');
+  const [createdCode, setCreatedCode] = useState('');
+
   function set(field, val) { setForm(p => ({ ...p, [field]: val })); }
+
+  async function handleJoinEnterprise() {
+    setEntError('');
+    if (!isLoggedIn()) { setEntError('Sign in to your Spark account above first.'); return; }
+    setEntBusy(true);
+    try {
+      await joinOrg(joinCode);
+      window.location.reload(); // refresh account → enterprise, triggers sync
+    } catch (e) {
+      setEntError(e.message); setEntBusy(false);
+    }
+  }
+
+  async function handleCreateEnterprise() {
+    setEntError('');
+    if (!isLoggedIn()) { setEntError('Sign in to your Spark account above first.'); return; }
+    setEntBusy(true);
+    try {
+      const res = await createOrg(orgName);
+      setCreatedCode(res.joinCode);
+      setEntBusy(false);
+    } catch (e) {
+      setEntError(e.message); setEntBusy(false);
+    }
+  }
 
   async function subscribe(plan) {
     setCheckoutError('');
@@ -299,11 +332,78 @@ export default function Settings({ onKeysChange }) {
             <li>• Custom fields + company branding</li>
             <li>• SSO &amp; priority support</li>
           </ul>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { setEntMode(entMode === 'join' ? null : 'join'); setEntError(''); setCreatedCode(''); }}
+              className="text-center bg-white/10 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-white/20 transition-colors border border-white/20"
+            >
+              Join an Enterprise
+            </button>
+            <button
+              onClick={() => { setEntMode(entMode === 'create' ? null : 'create'); setEntError(''); setCreatedCode(''); }}
+              className="text-center bg-white text-gray-900 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Create an Enterprise
+            </button>
+          </div>
+
+          {/* Join flow */}
+          {entMode === 'join' && (
+            <div className="mt-3 bg-white/10 rounded-xl p-3">
+              <p className="text-xs text-gray-300 mb-2">Enter the join code your company gave you.</p>
+              <input
+                type="text"
+                value={joinCode}
+                onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                placeholder="e.g. 7K2QP9"
+                maxLength={6}
+                className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 tracking-widest uppercase focus:outline-none mb-2"
+              />
+              <button onClick={handleJoinEnterprise} disabled={entBusy || !joinCode.trim()}
+                className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
+                {entBusy ? 'Joining…' : 'Join'}
+              </button>
+            </div>
+          )}
+
+          {/* Create flow */}
+          {entMode === 'create' && (
+            <div className="mt-3 bg-white/10 rounded-xl p-3">
+              {createdCode ? (
+                <div className="text-center">
+                  <p className="text-xs text-gray-300 mb-1">Your enterprise is ready! Share this code with your team:</p>
+                  <p className="text-2xl font-bold tracking-widest my-2">{createdCode}</p>
+                  <p className="text-xs text-gray-300 mb-3">Employees enter it under “Join an Enterprise.”</p>
+                  <button onClick={() => window.location.reload()} className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold">
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-gray-300 mb-2">Name your company to create its workspace. You’ll get a code to invite employees.</p>
+                  <input
+                    type="text"
+                    value={orgName}
+                    onChange={e => setOrgName(e.target.value)}
+                    placeholder="Company name"
+                    className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none mb-2"
+                  />
+                  <button onClick={handleCreateEnterprise} disabled={entBusy || !orgName.trim()}
+                    className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
+                    {entBusy ? 'Creating…' : 'Create Enterprise'}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {entError && <p className="text-xs text-red-300 mt-2">{entError}</p>}
+
           <a
             href="mailto:sales@spark.app?subject=Spark%20Enterprise%20Inquiry"
-            className="block w-full text-center bg-white text-gray-900 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
+            className="block text-center text-xs text-gray-400 hover:text-gray-200 mt-3"
           >
-            Contact Sales
+            Or contact sales →
           </a>
         </div>
         {checkoutError && <p className="text-xs text-red-600 mt-2">{checkoutError}</p>}

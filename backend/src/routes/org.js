@@ -14,6 +14,15 @@ export function enterpriseMonthlyPrice(seats) {
   return seats > 50 ? 1000 : 500;
 }
 
+// Short, shareable, unambiguous join code (no 0/O/1/I).
+function generateJoinCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  if (db.prepare('SELECT 1 FROM organizations WHERE join_code = ?').get(code)) return generateJoinCode();
+  return code;
+}
+
 function memberCount(orgId) {
   return db.prepare('SELECT COUNT(*) n FROM users WHERE org_id = ?').get(orgId).n;
 }
@@ -34,13 +43,13 @@ router.post('/', requireAuth, (req, res) => {
   const { name, seats } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: 'Organization name required' });
 
-  const org = { id: randomUUID(), name: name.trim(), plan: 'enterprise', seats: seats || 5, owner_id: req.user.id, created_at: new Date().toISOString() };
-  db.prepare('INSERT INTO organizations (id, name, plan, seats, owner_id, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(org.id, org.name, org.plan, org.seats, org.owner_id, org.created_at);
+  const org = { id: randomUUID(), name: name.trim(), plan: 'enterprise', seats: seats || 5, join_code: generateJoinCode(), owner_id: req.user.id, created_at: new Date().toISOString() };
+  db.prepare('INSERT INTO organizations (id, name, plan, seats, join_code, owner_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(org.id, org.name, org.plan, org.seats, org.join_code, org.owner_id, org.created_at);
   db.prepare('INSERT INTO org_settings (org_id) VALUES (?)').run(org.id);
   db.prepare('UPDATE users SET org_id = ?, role = ?, plan = ? WHERE id = ?').run(org.id, 'owner', 'enterprise', req.user.id);
 
-  res.json({ org, role: 'owner' });
+  res.json({ org, role: 'owner', joinCode: org.join_code });
 });
 
 // Org overview: details, members, settings.
@@ -50,6 +59,7 @@ router.get('/me', requireAuth, requireRole('member'), (req, res) => {
   const settingsRow = db.prepare('SELECT * FROM org_settings WHERE org_id = ?').get(req.user.org_id) || {};
   res.json({
     org,
+    joinCode: org.join_code,
     members,
     seatsUsed: members.length,
     settings: {
@@ -84,6 +94,20 @@ router.post('/accept', requireAuth, (req, res) => {
   db.prepare('UPDATE users SET org_id = ?, role = ?, plan = ? WHERE id = ?').run(invite.org_id, invite.role, 'enterprise', req.user.id);
   db.prepare('DELETE FROM invites WHERE id = ?').run(invite.id);
   res.json({ ok: true, org_id: invite.org_id, role: invite.role });
+});
+
+// Join an organization with a shared code.
+router.post('/join', requireAuth, (req, res) => {
+  if (req.user.org_id) return res.status(409).json({ error: 'You already belong to an organization' });
+  const code = (req.body?.code || '').trim().toUpperCase();
+  if (!code) return res.status(400).json({ error: 'Join code required' });
+
+  const org = db.prepare('SELECT * FROM organizations WHERE join_code = ?').get(code);
+  if (!org) return res.status(404).json({ error: 'Invalid join code' });
+  if (memberCount(org.id) >= org.seats) return res.status(409).json({ error: 'This organization is at seat capacity' });
+
+  db.prepare('UPDATE users SET org_id = ?, role = ?, plan = ? WHERE id = ?').run(org.id, 'member', 'enterprise', req.user.id);
+  res.json({ ok: true, org: { id: org.id, name: org.name }, role: 'member' });
 });
 
 // Update branding + custom fields.
