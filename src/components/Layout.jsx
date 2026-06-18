@@ -1,10 +1,11 @@
-import { Users, Mic, Settings, Home, Menu, X } from 'lucide-react';
+import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 import { getBranding } from '../lib/api';
 
 const navItems = [
   { id: 'dashboard', label: 'Home', icon: Home },
   { id: 'clients', label: 'Clients', icon: Users },
+  { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
   { id: 'recorder', label: 'Record', icon: Mic },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];

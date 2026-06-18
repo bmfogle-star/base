@@ -55,6 +55,7 @@ router.get('/me', requireAuth, (req, res) => {
   }
 
   res.json({
+    id: req.user.id,
     email: req.user.email,
     plan: req.user.plan,
     org_id: req.user.org_id || null,

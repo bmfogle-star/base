@@ -51,6 +51,32 @@ router.post('/business-card', requireAuth, async (req, res) => {
   }
 });
 
+router.post('/extract-events', requireAuth, async (req, res) => {
+  const { transcript } = req.body || {};
+  if (!transcript?.trim()) return res.status(400).json({ error: 'transcript is required' });
+  if (!canUseAI(req.user)) return res.status(429).json({ error: 'Monthly AI limit reached.' });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server is missing its AI key' });
+
+  const today = new Date().toISOString().slice(0, 10);
+  const p = `Today is ${today}. From this sales call transcript, extract any concrete meetings/events that were scheduled. Return ONLY a JSON array; each item {"title":"","start":"YYYY-MM-DDTHH:MM","notes":""}. Resolve relative dates against today; default time 09:00; return [] if none.\n\nTranscript:\n${transcript}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 512, messages: [{ role: 'user', content: p }] }),
+    });
+    if (!r.ok) return res.status(502).json({ error: `AI provider error ${r.status}` });
+    const data = await r.json();
+    const text = data.content?.[0]?.text || '';
+    const m = text.match(/\[[\s\S]*\]/);
+    incrementAI(req.user.id);
+    res.json({ events: m ? JSON.parse(m[0]) : [] });
+  } catch (e) {
+    res.status(502).json({ error: 'Failed to reach AI provider', detail: e.message });
+  }
+});
+
 router.post('/extract', requireAuth, async (req, res) => {
   const { transcript } = req.body || {};
   if (!transcript || !transcript.trim()) {

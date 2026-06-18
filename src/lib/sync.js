@@ -4,10 +4,12 @@
 //   • personal account  → synced privately across that user's own devices
 //   • enterprise account → shared across the whole organization/team
 // Local storage stays the source the UI reads; this keeps it converged.
-import { isLoggedIn, listClientsRemote, upsertClientRemote, deleteClientRemote, registerDevice } from './api';
-import { getClients, saveClients } from '../data/store';
+import { isLoggedIn, listClientsRemote, upsertClientRemote, deleteClientRemote, registerDevice,
+  listEventsRemote, upsertEventRemote, deleteEventRemote } from './api';
+import { getClients, saveClients, getEvents, saveEvents } from '../data/store';
 
 const LAST_PULL_KEY = 'spark_last_pull';
+const LAST_EVENT_PULL_KEY = 'spark_last_event_pull';
 
 // Pull remote changes, merge into local (last-write-wins), then push local rows.
 export async function syncClients() {
@@ -51,6 +53,32 @@ export function pushClient(client) {
 
 export function pushDelete(id) {
   if (isLoggedIn()) deleteClientRemote(id).catch(() => {});
+}
+
+// Same two-way sync for calendar events.
+export async function syncEvents() {
+  if (!isLoggedIn()) return { synced: false };
+  const since = localStorage.getItem(LAST_EVENT_PULL_KEY) || '';
+  const { events: remote, serverTime } = await listEventsRemote(since);
+  const byId = new Map(getEvents().map(e => [e.id, e]));
+  for (const r of remote) {
+    if (r.deleted) { byId.delete(r.id); continue; }
+    const local = byId.get(r.id);
+    if (!local || new Date(r.updatedAt) >= new Date(local.updatedAt || 0)) byId.set(r.id, r.data);
+  }
+  const merged = [...byId.values()];
+  saveEvents(merged);
+  localStorage.setItem(LAST_EVENT_PULL_KEY, serverTime || new Date().toISOString());
+  await Promise.allSettled(merged.map(e => upsertEventRemote(e)));
+  return { synced: true };
+}
+
+export function pushEvent(event) {
+  if (isLoggedIn()) upsertEventRemote(event).catch(() => {});
+}
+
+export function pushDeleteEvent(id) {
+  if (isLoggedIn()) deleteEventRemote(id).catch(() => {});
 }
 
 export { isLoggedIn };

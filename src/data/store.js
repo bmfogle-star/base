@@ -2,6 +2,7 @@
 const CLIENTS_KEY = 'salestracker_clients';
 const USER_KEY = 'salestracker_user';
 const CALLS_KEY = 'salestracker_calls';
+const EVENTS_KEY = 'salestracker_events';
 
 export function getClients() {
   try {
@@ -91,4 +92,49 @@ export function saveCall(call) {
   }
   localStorage.setItem(CALLS_KEY, JSON.stringify(calls));
   return call;
+}
+
+// ── Calendar events ──
+export function getEvents() {
+  try {
+    return JSON.parse(localStorage.getItem(EVENTS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+export function saveEvents(events) {
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(events));
+}
+
+export function saveEvent(event) {
+  const events = getEvents();
+  const idx = events.findIndex(e => e.id === event.id);
+  if (idx >= 0) events[idx] = event;
+  else events.push(event);
+  saveEvents(events);
+  return event;
+}
+
+export function deleteEvent(id) {
+  saveEvents(getEvents().filter(e => e.id !== id));
+}
+
+export function createEvent(data) {
+  const now = new Date().toISOString();
+  const event = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+    title: '',
+    start: now,        // ISO datetime
+    end: '',
+    location: '',
+    notes: '',
+    audience: 'me',    // 'me' | 'org' | { members: [userIds] }
+    clientId: null,
+    source: 'manual',  // 'manual' | 'call'
+    createdAt: now,
+    updatedAt: now,
+    ...data,
+  };
+  return saveEvent(event);
 }

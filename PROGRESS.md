@@ -68,6 +68,16 @@ those details from recorded calls.
   (recent/oldest/custom with manual reorder).
 - **Clients page** = A–Z directory with a Favorites (starred) section on top.
   Home page has an Add Client button.
+- **Calendar tab** (`src/pages/Calendar.jsx`) — month view, create/edit/delete
+  events, auto-save. Apple/Google sync via .ics download + Google "add event"
+  link (`src/lib/ics.js`). Events mentioned on calls are auto-added
+  (`src/lib/callEvents.js` + `/ai/extract-events`). Events cloud-sync like
+  clients (`/backend/src/routes/events.js`, `syncEvents`). Enterprise: admins
+  set an event audience — Just me / Everyone / specific people; display is
+  filtered by audience + creator. Org branding (logo/color) applies app-wide.
+- **Org branding** — admins upload a logo + primary color in the admin console;
+  applied in the header (logo, company name, accent strip) for org members.
+- **Persistent login** — 90-day rolling JWT session (refreshed on each use).
 
 Local storage is the UI source of truth; the backend (when configured) adds
 identity, the AI key, limits, billing, cloud sync, org sharing, and device limits.

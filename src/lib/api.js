@@ -81,7 +81,7 @@ const BRANDING_KEY = 'spark_branding';
 
 function cacheAccount(a) {
   if (a) {
-    localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ plan: a.plan, org_id: a.org_id || null }));
+    localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ id: a.id || null, email: a.email || null, plan: a.plan, org_id: a.org_id || null, role: a.role || null }));
     localStorage.setItem(CUSTOM_FIELDS_KEY, JSON.stringify(a.customFields || []));
     localStorage.setItem(BRANDING_KEY, JSON.stringify(a.branding || {}));
   } else {
@@ -117,6 +117,15 @@ export async function fetchMe() {
   return me;
 }
 
+// Cached account info: { id, email, plan, org_id, role }.
+export function getAccountInfo() {
+  try {
+    return JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null') || {};
+  } catch {
+    return {};
+  }
+}
+
 // True only for an enterprise account (org member). Gates cloud sync.
 export function isEnterprise() {
   if (!isLoggedIn()) return false;
@@ -146,6 +155,22 @@ export async function upsertClientRemote(client) {
 
 export async function deleteClientRemote(id) {
   return call(`/clients/${id}`, { method: 'DELETE', auth: true });
+}
+
+// ── Event sync ──
+export async function listEventsRemote(since) {
+  const qs = since ? `?since=${encodeURIComponent(since)}` : '';
+  return call(`/events${qs}`, { auth: true });
+}
+export async function upsertEventRemote(event) {
+  return call(`/events/${event.id}`, { method: 'PUT', auth: true, body: { data: event, updatedAt: event.updatedAt } });
+}
+export async function deleteEventRemote(id) {
+  return call(`/events/${id}`, { method: 'DELETE', auth: true });
+}
+export async function extractEventsViaBackend(transcript) {
+  const data = await call('/ai/extract-events', { method: 'POST', auth: true, body: { transcript } });
+  return data.events || [];
 }
 
 // Extract contact details from a business card image (server-side vision).

@@ -9,8 +9,12 @@ import ImportContacts from './pages/ImportContacts';
 import CallRecorder from './pages/CallRecorder';
 import Settings from './pages/Settings';
 import AdminConsole from './pages/AdminConsole';
+import Calendar from './pages/Calendar';
 import { useClients } from './hooks/useClients';
+import { useEvents } from './hooks/useEvents';
 import { getUser } from './data/store';
+import { extractCallEvents } from './lib/callEvents';
+import { getAccountInfo } from './lib/api';
 import './index.css';
 
 export default function App() {
@@ -19,6 +23,7 @@ export default function App() {
   const [recordForClientId, setRecordForClientId] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
   const [deviceLimit, setDeviceLimit] = useState('');
+  const [calendarMsg, setCalendarMsg] = useState('');
   const [keys, setKeys] = useState(() => {
     const u = getUser() || {};
     return {
@@ -28,6 +33,7 @@ export default function App() {
   });
 
   const { clients, addClient, updateClient, removeClient } = useClients();
+  const { events, addEvent, updateEvent, removeEvent, addEvents } = useEvents();
 
   // Detect return from Stripe checkout success and clean the URL.
   useEffect(() => {
@@ -80,10 +86,27 @@ export default function App() {
     setPage('recorder');
   }
 
-  function handleSaveCall(updatedClient) {
+  async function handleSaveCall(updatedClient, call) {
     updateClient(updatedClient);
     setSelectedClientId(updatedClient.id);
     setPage('profile');
+
+    // Auto-add any meetings/events mentioned on the call to the calendar.
+    const transcript = call?.transcript;
+    if (transcript) {
+      const found = await extractCallEvents(transcript, keys.apiKey);
+      if (found.length) {
+        addEvents(found.map(e => ({
+          title: e.title,
+          start: new Date(e.start).toISOString(),
+          notes: e.notes || `From a call with ${updatedClient.name || 'a client'}`,
+          source: 'call',
+          clientId: updatedClient.id,
+          createdBy: getAccountInfo().id || null,
+        })));
+        setCalendarMsg(`📅 Added ${found.length} event${found.length > 1 ? 's' : ''} from the call to your calendar.`);
+      }
+    }
   }
 
   // Merge scanned/imported details into an existing client (fill empty fields only).
@@ -126,6 +149,12 @@ export default function App() {
           <button onClick={() => setDeviceLimit('')} className="text-amber-700 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
+      {calendarMsg && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+          <button onClick={() => { setCalendarMsg(''); setPage('calendar'); }} className="text-sm font-medium text-green-800 text-left">{calendarMsg} <span className="underline">View</span></button>
+          <button onClick={() => setCalendarMsg('')} className="text-green-700 text-xs font-medium hover:underline">Dismiss</button>
+        </div>
+      )}
       {page === 'dashboard' && (
         <Dashboard
           clients={clients}
@@ -142,6 +171,14 @@ export default function App() {
           onScan={() => setPage('scan')}
           onImport={() => setPage('import')}
           onToggleStar={handleToggleStar}
+        />
+      )}
+      {page === 'calendar' && (
+        <Calendar
+          events={events}
+          addEvent={addEvent}
+          updateEvent={updateEvent}
+          removeEvent={removeEvent}
         />
       )}
       {page === 'scan' && (
