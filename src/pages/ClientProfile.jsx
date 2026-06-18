@@ -1,5 +1,19 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock } from 'lucide-react';
+import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock, Pin, ChevronUp, ChevronDown } from 'lucide-react';
+
+// Order calls: pinned always float to top, then by the chosen sort.
+function orderCalls(calls, sort) {
+  const arr = [...(calls || [])];
+  if (sort !== 'manual') {
+    arr.sort((a, b) => {
+      const da = new Date(a.date).getTime();
+      const db = new Date(b.date).getTime();
+      return sort === 'oldest' ? da - db : db - da;
+    });
+  }
+  arr.sort((a, b) => (a.pinned ? 0 : 1) - (b.pinned ? 0 : 1)); // stable: pinned first
+  return arr;
+}
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -42,6 +56,9 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editingCallId, setEditingCallId] = useState(null);
   const [callDateDraft, setCallDateDraft] = useState('');
+  const [editingTitleId, setEditingTitleId] = useState(null);
+  const [titleDraft, setTitleDraft] = useState('');
+  const [callSort, setCallSort] = useState('recent'); // 'recent' | 'oldest' | 'manual'
   const [attachError, setAttachError] = useState('');
   const cameraInputRef = useRef(null);
   const photoInputRef = useRef(null);
@@ -208,16 +225,41 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
     setCallDateDraft(isoToLocalInput(call.date));
   }
 
+  function persistCalls(callHistory) {
+    const updated = { ...client, callHistory };
+    onUpdate(updated);
+    setDraft(d => ({ ...d, callHistory }));
+  }
+
   function saveCallDate(callId) {
     if (!callDateDraft) { setEditingCallId(null); return; }
     const iso = new Date(callDateDraft).toISOString();
-    const updated = {
-      ...client,
-      callHistory: (client.callHistory || []).map(c => c.id === callId ? { ...c, date: iso } : c),
-    };
-    onUpdate(updated);
-    setDraft(d => ({ ...d, callHistory: updated.callHistory }));
+    persistCalls((client.callHistory || []).map(c => c.id === callId ? { ...c, date: iso } : c));
     setEditingCallId(null);
+  }
+
+  function startEditTitle(call) {
+    setEditingTitleId(call.id);
+    setTitleDraft(call.title || '');
+  }
+
+  function saveCallTitle(callId) {
+    persistCalls((client.callHistory || []).map(c => c.id === callId ? { ...c, title: titleDraft.trim() } : c));
+    setEditingTitleId(null);
+  }
+
+  function togglePin(callId) {
+    persistCalls((client.callHistory || []).map(c => c.id === callId ? { ...c, pinned: !c.pinned } : c));
+  }
+
+  function moveCall(callId, dir) {
+    const list = orderCalls(client.callHistory, callSort);
+    const idx = list.findIndex(c => c.id === callId);
+    const j = idx + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[idx], list[j]] = [list[j], list[idx]];
+    persistCalls(list);
+    setCallSort('manual');
   }
 
   return (
@@ -547,8 +589,63 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
         {client.callHistory?.length === 0 && (
           <p className="text-sm text-gray-400 italic text-center py-2">No calls recorded yet</p>
         )}
-        {client.callHistory?.map((call, i) => (
-          <div key={call.id || i} className="border border-gray-100 rounded-lg p-3 mb-2">
+
+        {/* Sort controls */}
+        {client.callHistory?.length > 1 && (
+          <div className="flex gap-1.5 mb-3">
+            {[['recent', 'Most recent'], ['oldest', 'Oldest'], ['manual', 'Custom']].map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setCallSort(key)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  callSort === key ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {orderCalls(client.callHistory, callSort).map((call, i, arr) => (
+          <div key={call.id || i} className={`border rounded-lg p-3 mb-2 ${call.pinned ? 'border-green-300 bg-green-50/40' : 'border-gray-100'}`}>
+            {/* Title row */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+              {editingTitleId === call.id ? (
+                <div className="flex items-center gap-1.5 flex-1">
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Call title…"
+                    value={titleDraft}
+                    onChange={e => setTitleDraft(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveCallTitle(call.id)}
+                    className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+                  />
+                  <button onClick={() => saveCallTitle(call.id)} className="text-green-700"><Save size={14} /></button>
+                  <button onClick={() => setEditingTitleId(null)} className="text-gray-400"><X size={14} /></button>
+                </div>
+              ) : (
+                <button onClick={() => startEditTitle(call)} className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 hover:text-green-700 group text-left">
+                  {call.pinned && <Pin size={12} className="text-green-600 flex-shrink-0" fill="currentColor" />}
+                  {call.title || <span className="text-gray-400 font-normal italic">Add a title…</span>}
+                  <Edit2 size={11} className="text-gray-300 group-hover:text-green-700 flex-shrink-0" />
+                </button>
+              )}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {callSort === 'manual' && (
+                  <>
+                    <button onClick={() => moveCall(call.id, -1)} disabled={i === 0} className="text-gray-400 hover:text-green-700 disabled:opacity-30"><ChevronUp size={15} /></button>
+                    <button onClick={() => moveCall(call.id, 1)} disabled={i === arr.length - 1} className="text-gray-400 hover:text-green-700 disabled:opacity-30"><ChevronDown size={15} /></button>
+                  </>
+                )}
+                <button onClick={() => togglePin(call.id)} title={call.pinned ? 'Unpin' : 'Pin to top'} className={call.pinned ? 'text-green-600' : 'text-gray-300 hover:text-green-600'}>
+                  <Pin size={14} fill={call.pinned ? 'currentColor' : 'none'} />
+                </button>
+              </div>
+            </div>
+
+            {/* Date/time row */}
             <div className="flex items-center justify-between mb-1 gap-2">
               {editingCallId === call.id ? (
                 <div className="flex items-center gap-1.5 flex-1">
@@ -564,12 +661,12 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
               ) : (
                 <button
                   onClick={() => startEditCallDate(call)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-green-700 group"
+                  className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-700 group"
                   title="Edit call date & time"
                 >
                   <Clock size={12} className="text-gray-400 group-hover:text-green-700" />
                   {formatCallDateTime(call.date)}
-                  <Edit2 size={11} className="text-gray-300 group-hover:text-green-700" />
+                  <Edit2 size={10} className="text-gray-300 group-hover:text-green-700" />
                 </button>
               )}
               {call.duration && <span className="text-xs text-gray-400 flex-shrink-0">{call.duration}</span>}
