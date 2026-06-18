@@ -242,6 +242,18 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
             <h2 className="text-xl font-bold text-gray-900">{c.name || 'Unnamed Client'}</h2>
           )}
           <p className="text-sm text-gray-500 mt-1">{c.company || ''} {c.position ? `· ${c.position}` : ''}</p>
+          {c.attachments?.length > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <div className="flex -space-x-2">
+                {c.attachments.filter(a => a.type?.startsWith('image/')).slice(0, 3).map(a => (
+                  <img key={a.id} src={a.dataUrl} alt="" className="w-7 h-7 rounded-full border-2 border-white object-cover" />
+                ))}
+              </div>
+              <span className="flex items-center gap-1 text-xs text-gray-400">
+                <Paperclip size={12} />{c.attachments.length} {c.attachments.length === 1 ? 'file' : 'files'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

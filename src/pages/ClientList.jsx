@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Star, ChevronRight, Filter, X } from 'lucide-react';
+import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip } from 'lucide-react';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -119,6 +119,11 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
                   <p className="font-medium text-gray-900 text-sm truncate">{client.name || 'Unnamed Client'}</p>
                   <p className="text-xs text-gray-500 truncate">{client.company || client.email || 'No details'}</p>
                 </div>
+                {client.attachments?.length > 0 && (
+                  <span className="flex items-center gap-0.5 text-gray-400 text-xs flex-shrink-0">
+                    <Paperclip size={12} />{client.attachments.length}
+                  </span>
+                )}
                 {client.tags?.length > 0 && (
                   <span className="hidden sm:block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full truncate max-w-24">
                     {client.tags[0]}
