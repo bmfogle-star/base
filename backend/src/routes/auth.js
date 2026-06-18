@@ -45,6 +45,8 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({
     email: req.user.email,
     plan: req.user.plan,
+    org_id: req.user.org_id || null,
+    role: req.user.role || null,
     limits: { aiCallsPerMonth: plan.aiCallsPerMonth, maxClients: plan.maxClients },
     usage,
   });

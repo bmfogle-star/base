@@ -271,6 +271,30 @@ export default function Settings({ onKeysChange }) {
             {checkoutBusy ? 'Redirecting to checkout…' : 'Subscribe to Platinum — $11.99/month'}
           </button>
         )}
+
+        {/* Enterprise */}
+        <div className="mt-3 border-2 border-gray-900 rounded-xl p-4 bg-gray-900 text-white">
+          <div className="flex items-center justify-between mb-1">
+            <p className="font-bold text-sm">Enterprise</p>
+            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">For teams</span>
+          </div>
+          <p className="text-xs text-gray-300 mb-2">
+            Buy once for your whole company — central admin, per-seat licensing, shared
+            client data, custom fields, your branding, and SSO. Like Salesforce, tuned for sales rapport.
+          </p>
+          <ul className="text-xs text-gray-300 space-y-0.5 mb-3">
+            <li>• Unlimited clients & AI</li>
+            <li>• Admin console, roles & seats</li>
+            <li>• Custom fields + company branding</li>
+            <li>• SSO &amp; priority support</li>
+          </ul>
+          <a
+            href="mailto:sales@spark.app?subject=Spark%20Enterprise%20Inquiry"
+            className="block w-full text-center bg-white text-gray-900 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Contact Sales
+          </a>
+        </div>
         {checkoutError && <p className="text-xs text-red-600 mt-2">{checkoutError}</p>}
       </div>
 
