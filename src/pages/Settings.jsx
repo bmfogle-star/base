@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server } from 'lucide-react';
 import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
+import { isLoggedIn, startCheckout } from '../lib/api';
 
 function ApiKeyField({ label, value, onChange, placeholder, hint }) {
   const [show, setShow] = useState(false);
@@ -39,8 +40,28 @@ export default function Settings({ onKeysChange }) {
     plan: user.plan || 'premium',
   });
   const [saved, setSaved] = useState(false);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
 
   function set(field, val) { setForm(p => ({ ...p, [field]: val })); }
+
+  async function subscribe(plan) {
+    setCheckoutError('');
+    if (!isLoggedIn()) {
+      setCheckoutError('Create or sign into a Spark account above first.');
+      return;
+    }
+    setCheckoutBusy(true);
+    try {
+      const url = await startCheckout(plan);
+      window.location.href = url; // redirect to Stripe's hosted checkout
+    } catch (e) {
+      setCheckoutError(e.message.includes('not configured')
+        ? 'Billing isn’t set up on the backend yet (add your Stripe keys).'
+        : e.message);
+      setCheckoutBusy(false);
+    }
+  }
 
   function handleSave() {
     const updated = { ...user, ...form };
@@ -239,15 +260,18 @@ export default function Settings({ onKeysChange }) {
           </div>
         </div>
         {form.plan === 'premium' && (
-          <button className="mt-3 w-full bg-green-700 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors">
-            Subscribe to Premium — $4.99/month
+          <button onClick={() => subscribe('premium')} disabled={checkoutBusy}
+            className="mt-3 w-full bg-green-700 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors disabled:opacity-50">
+            {checkoutBusy ? 'Redirecting to checkout…' : 'Subscribe to Premium — $4.99/month'}
           </button>
         )}
         {form.plan === 'platinum' && (
-          <button className="mt-3 w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
-            Subscribe to Platinum — $11.99/month
+          <button onClick={() => subscribe('platinum')} disabled={checkoutBusy}
+            className="mt-3 w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50">
+            {checkoutBusy ? 'Redirecting to checkout…' : 'Subscribe to Platinum — $11.99/month'}
           </button>
         )}
+        {checkoutError && <p className="text-xs text-red-600 mt-2">{checkoutError}</p>}
       </div>
 
       <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 flex gap-3">

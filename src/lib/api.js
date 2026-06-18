@@ -61,6 +61,12 @@ export async function extractViaBackend(transcript) {
   return data.extracted;
 }
 
+// Start a Stripe Checkout session for a plan; returns a URL to redirect to.
+export async function startCheckout(plan) {
+  const data = await call('/billing/checkout', { method: 'POST', auth: true, body: { plan } });
+  return data.url;
+}
+
 export function isLoggedIn() {
   return hasBackend() && !!getToken();
 }
