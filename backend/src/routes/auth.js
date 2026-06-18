@@ -63,6 +63,7 @@ router.get('/me', requireAuth, (req, res) => {
     usage,
     customFields,
     branding,
+    token: issueToken(req.user), // roll the 90-day session on each use
   });
 });
 

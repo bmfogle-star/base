@@ -99,6 +99,7 @@ export function getCustomFields() {
 export async function fetchMe() {
   if (!getToken()) return null;
   const me = await call('/auth/me', { auth: true });
+  if (me.token) setToken(me.token); // roll the 90-day session
   cacheAccount(me);
   return me;
 }
