@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip } from 'lucide-react';
+import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip, ScanLine, Users } from 'lucide-react';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -11,7 +11,7 @@ function getAvatarColor(name) {
   return colors[idx];
 }
 
-export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
+export default function ClientList({ clients, onSelect, onAdd, onScan, onImport, onToggleStar }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
@@ -45,6 +45,16 @@ export default function ClientList({ clients, onSelect, onAdd, onToggleStar }) {
         >
           <Plus size={16} />
           Add Client
+        </button>
+      </div>
+
+      {/* Quick add options */}
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <button onClick={onScan} className="flex items-center justify-center gap-2 border border-gray-200 bg-white text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
+          <ScanLine size={16} /> Scan card
+        </button>
+        <button onClick={onImport} className="flex items-center justify-center gap-2 border border-gray-200 bg-white text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
+          <Users size={16} /> Import contacts
         </button>
       </div>
 

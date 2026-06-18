@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard';
 import ClientList from './pages/ClientList';
 import ClientProfile from './pages/ClientProfile';
 import AddClient from './pages/AddClient';
+import ScanCard from './pages/ScanCard';
+import ImportContacts from './pages/ImportContacts';
 import CallRecorder from './pages/CallRecorder';
 import Settings from './pages/Settings';
 import { useClients } from './hooks/useClients';
@@ -79,6 +81,27 @@ export default function App() {
     setPage('profile');
   }
 
+  // Merge scanned/imported details into an existing client (fill empty fields only).
+  function handleMergeIntoClient(clientId, data) {
+    const client = clients.find(c => c.id === clientId);
+    if (!client) return;
+    const merged = { ...client };
+    for (const key of ['name', 'phone', 'email', 'company', 'position']) {
+      if (!merged[key] && data[key]) merged[key] = data[key];
+    }
+    if (data.notes) merged.notes = [client.notes, data.notes].filter(Boolean).join('\n');
+    updateClient(merged);
+    setSelectedClientId(clientId);
+    setPage('profile');
+  }
+
+  // Bulk-import contacts as new clients.
+  function handleImportContacts(list) {
+    let last = null;
+    list.forEach(c => { last = addClient(c); });
+    setPage('clients');
+  }
+
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
@@ -101,7 +124,24 @@ export default function App() {
           clients={clients}
           onSelect={handleSelectClient}
           onAdd={() => setPage('add')}
+          onScan={() => setPage('scan')}
+          onImport={() => setPage('import')}
           onToggleStar={handleToggleStar}
+        />
+      )}
+      {page === 'scan' && (
+        <ScanCard
+          clients={clients}
+          onSaveNew={handleSaveNewClient}
+          onMerge={handleMergeIntoClient}
+          onBack={() => setPage('clients')}
+          apiKey={keys.apiKey}
+        />
+      )}
+      {page === 'import' && (
+        <ImportContacts
+          onImport={handleImportContacts}
+          onBack={() => setPage('clients')}
         />
       )}
       {page === 'profile' && selectedClient && (

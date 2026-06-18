@@ -1,0 +1,119 @@
+import { useState, useRef } from 'react';
+import { ArrowLeft, Users, Upload, Check, AlertCircle } from 'lucide-react';
+import { parseVCards, contactPickerSupported, pickDeviceContacts } from '../lib/vcard';
+
+export default function ImportContacts({ onImport, onBack }) {
+  const [contacts, setContacts] = useState([]);
+  const [selected, setSelected] = useState(new Set());
+  const [error, setError] = useState('');
+  const fileRef = useRef(null);
+
+  function load(list) {
+    setContacts(list);
+    setSelected(new Set(list.map((_, i) => i)));
+    setError(list.length ? '' : 'No contacts found in that file.');
+  }
+
+  async function fromDevice() {
+    setError('');
+    try {
+      load(await pickDeviceContacts());
+    } catch (e) {
+      setError('Could not access device contacts.');
+    }
+  }
+
+  async function fromFile(fileList) {
+    const file = fileList?.[0];
+    if (!file) return;
+    setError('');
+    try {
+      load(parseVCards(await file.text()));
+    } catch {
+      setError('Could not read that file. Make sure it’s a .vcf contacts file.');
+    }
+  }
+
+  function toggle(i) {
+    setSelected(s => {
+      const next = new Set(s);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  function handleImport() {
+    const chosen = contacts.filter((_, i) => selected.has(i));
+    onImport(chosen);
+  }
+
+  return (
+    <div className="pb-20 md:pb-6">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
+          <ArrowLeft size={20} className="text-gray-600" />
+        </button>
+        <h1 className="text-xl font-bold text-gray-900">Import from Contacts</h1>
+      </div>
+
+      <input ref={fileRef} type="file" accept=".vcf,text/vcard" onChange={e => { fromFile(e.target.files); e.target.value = ''; }} className="hidden" />
+
+      {contacts.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users size={28} className="text-green-700" />
+          </div>
+          <h3 className="font-semibold text-gray-900 mb-1">Add clients from your contacts</h3>
+          <p className="text-sm text-gray-500 mb-5">Pick from your device, or upload a contacts file exported from your phone.</p>
+          <div className="space-y-2 max-w-xs mx-auto">
+            {contactPickerSupported() && (
+              <button onClick={fromDevice} className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800">
+                <Users size={16} /> Choose from device
+              </button>
+            )}
+            <button onClick={() => fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-700 py-3 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700">
+              <Upload size={16} /> Upload .vcf file
+            </button>
+          </div>
+          {!contactPickerSupported() && (
+            <p className="text-xs text-gray-400 mt-4">
+              Tip: on iPhone, open a contact → Share Contact → Save to Files, then upload the .vcf here.
+            </p>
+          )}
+          {error && <p className="text-xs text-red-600 mt-3">{error}</p>}
+        </div>
+      ) : (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-600">{selected.size} of {contacts.length} selected</p>
+            <button
+              onClick={() => setSelected(selected.size === contacts.length ? new Set() : new Set(contacts.map((_, i) => i)))}
+              className="text-xs text-green-700 font-medium"
+            >
+              {selected.size === contacts.length ? 'Deselect all' : 'Select all'}
+            </button>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 max-h-96 overflow-y-auto">
+            {contacts.map((c, i) => (
+              <button key={i} onClick={() => toggle(i)} className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 text-left">
+                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${selected.has(i) ? 'bg-green-700' : 'border border-gray-300'}`}>
+                  {selected.has(i) && <Check size={13} className="text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{c.name || 'Unnamed'}</p>
+                  <p className="text-xs text-gray-500 truncate">{[c.phone, c.email].filter(Boolean).join(' · ') || 'No details'}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => { setContacts([]); setSelected(new Set()); }} className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50">Cancel</button>
+            <button onClick={handleImport} disabled={selected.size === 0} className="flex-1 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+              Import {selected.size > 0 ? selected.size : ''}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

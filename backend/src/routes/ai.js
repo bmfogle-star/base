@@ -10,6 +10,47 @@ const router = Router();
 const EXTRACTION_PROMPT = (transcript) =>
   `You are a sales assistant. Extract key personal details from this sales call transcript to help a salesperson build rapport.\n\nExtract and list:\n- Client name(s)\n- Hobbies and interests\n- Family members (names and relationships)\n- Upcoming personal events or milestones\n- Personal life details\n- Key business concerns or goals\n- Any other rapport-building details\n\nOnly include things actually mentioned. Skip categories with nothing to report.\n\nTranscript:\n${transcript}`;
 
+const CARD_PROMPT = `You are reading a business card. Extract the contact details and return ONLY a JSON object (no markdown, no commentary) with exactly these keys:
+{"name":"","phone":"","email":"","company":"","position":"","website":"","address":""}
+Use an empty string for anything not present on the card.`;
+
+router.post('/business-card', requireAuth, async (req, res) => {
+  const { image } = req.body || {};
+  if (!image) return res.status(400).json({ error: 'image is required' });
+  if (!canUseAI(req.user)) {
+    return res.status(429).json({ error: 'Monthly AI limit reached. Upgrade to Platinum for more.', usage: getUsage(req.user.id) });
+  }
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server is missing its AI key' });
+
+  const [meta, base64] = String(image).split(',');
+  const mediaType = (meta.match(/data:(.*?);/) || [])[1] || 'image/jpeg';
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
+        max_tokens: 512,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: CARD_PROMPT },
+        ] }],
+      }),
+    });
+    if (!r.ok) return res.status(502).json({ error: `AI provider error ${r.status}` });
+    const data = await r.json();
+    const text = data.content?.[0]?.text || '';
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return res.status(422).json({ error: 'Could not read the card' });
+    incrementAI(req.user.id);
+    res.json({ contact: JSON.parse(match[0]), usage: getUsage(req.user.id) });
+  } catch (e) {
+    res.status(502).json({ error: 'Failed to reach AI provider', detail: e.message });
+  }
+});
+
 router.post('/extract', requireAuth, async (req, res) => {
   const { transcript } = req.body || {};
   if (!transcript || !transcript.trim()) {

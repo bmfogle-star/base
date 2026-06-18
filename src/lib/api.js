@@ -61,6 +61,12 @@ export async function extractViaBackend(transcript) {
   return data.extracted;
 }
 
+// Extract contact details from a business card image (server-side vision).
+export async function extractCardViaBackend(imageDataUrl) {
+  const data = await call('/ai/business-card', { method: 'POST', auth: true, body: { image: imageDataUrl } });
+  return data.contact;
+}
+
 // Start a Stripe Checkout session for a plan; returns a URL to redirect to.
 export async function startCheckout(plan) {
   const data = await call('/billing/checkout', { method: 'POST', auth: true, body: { plan } });
