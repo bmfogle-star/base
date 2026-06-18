@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2 } from 'lucide-react';
 import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole, fetchMe } from '../lib/api';
 
@@ -32,6 +32,17 @@ export default function AdminConsole({ onBack }) {
   }
 
   useEffect(() => { load(); }, []);
+
+  // Auto-save branding + custom fields shortly after a change.
+  const settingsTimer = useRef(null);
+  const skipFirstSettings = useRef(true);
+  useEffect(() => {
+    if (loading || !data?.org) return;
+    if (skipFirstSettings.current) { skipFirstSettings.current = false; return; }
+    clearTimeout(settingsTimer.current);
+    settingsTimer.current = setTimeout(() => { saveSettings(); }, 700);
+    return () => clearTimeout(settingsTimer.current);
+  }, [branding, customFields]);
 
   function copyCode() {
     navigator.clipboard?.writeText(data.joinCode).then(() => {

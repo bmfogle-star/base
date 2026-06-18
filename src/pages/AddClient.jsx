@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { getCustomFields } from '../lib/api';
 
+const DRAFT_KEY = 'spark_addclient_draft';
+const EMPTY = { name: '', phone: '', email: '', company: '', position: '', notes: '', customFields: {} };
+
 export default function AddClient({ onBack, onSave }) {
   const customFields = getCustomFields();
-  const [form, setForm] = useState({
-    name: '', phone: '', email: '', company: '', position: '', notes: '', customFields: {},
+  const [form, setForm] = useState(() => {
+    try { return { ...EMPTY, ...(JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || {}) }; }
+    catch { return EMPTY; }
   });
   const [saving, setSaving] = useState(false);
+
+  // Auto-save the in-progress form so nothing is lost if they leave.
+  const draftTimer = useRef(null);
+  useEffect(() => {
+    clearTimeout(draftTimer.current);
+    draftTimer.current = setTimeout(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(form)), 400);
+    return () => clearTimeout(draftTimer.current);
+  }, [form]);
 
   function set(field, value) {
     setForm(p => ({ ...p, [field]: value }));
@@ -21,6 +33,7 @@ export default function AddClient({ onBack, onSave }) {
     e.preventDefault();
     if (!form.name.trim()) return;
     setSaving(true);
+    localStorage.removeItem(DRAFT_KEY); // draft consumed
     onSave(form);
   }
 

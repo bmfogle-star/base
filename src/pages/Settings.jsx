@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server } from 'lucide-react';
 import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
@@ -96,16 +96,30 @@ export default function Settings({ onKeysChange, onManageOrg }) {
     }
   }
 
-  function handleSave() {
+  function persist() {
     const updated = { ...user, ...form };
     saveUser(updated);
     if (onKeysChange) onKeysChange({
       apiKey: form.apiKey, openaiKey: form.openaiKey, recallKey: form.recallKey,
       botServerUrl: form.botServerUrl, botServerToken: form.botServerToken,
     });
+  }
+
+  function handleSave() {
+    persist();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
+
+  // Auto-save settings shortly after the user stops editing.
+  const settingsTimer = useRef(null);
+  const skipFirstSettings = useRef(true);
+  useEffect(() => {
+    if (skipFirstSettings.current) { skipFirstSettings.current = false; return; }
+    clearTimeout(settingsTimer.current);
+    settingsTimer.current = setTimeout(() => persist(), 600);
+    return () => clearTimeout(settingsTimer.current);
+  }, [form]);
 
   return (
     <div className="pb-20 md:pb-6">
