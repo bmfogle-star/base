@@ -53,6 +53,7 @@ export function createClient(data) {
     family: [],
     upcomingEvents: [],
     tags: [],
+    attachments: [],
     callHistory: [],
     ...data,
   };

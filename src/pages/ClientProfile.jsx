@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download } from 'lucide-react';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -40,6 +40,59 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
   const [newFamilyMember, setNewFamilyMember] = useState({ name: '', relation: '' });
   const [newEvent, setNewEvent] = useState({ title: '', date: '' });
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [attachError, setAttachError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3 MB per file (localStorage is limited)
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addAttachments(fileList) {
+    setAttachError('');
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    const tooBig = files.find(f => f.size > MAX_FILE_BYTES);
+    if (tooBig) {
+      setAttachError(`"${tooBig.name}" is too large. Max 3 MB per file.`);
+      return;
+    }
+
+    try {
+      const newAtts = await Promise.all(files.map(async (f) => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: f.name,
+        type: f.type || 'application/octet-stream',
+        size: f.size,
+        dataUrl: await readFileAsDataUrl(f),
+        addedAt: new Date().toISOString(),
+      })));
+      const updated = { ...client, attachments: [...(client.attachments || []), ...newAtts] };
+      onUpdate(updated);
+      setDraft(d => ({ ...d, attachments: updated.attachments }));
+    } catch {
+      setAttachError('Could not read that file. Please try another.');
+    }
+  }
+
+  function removeAttachment(id) {
+    const updated = { ...client, attachments: (client.attachments || []).filter(a => a.id !== id) };
+    onUpdate(updated);
+    setDraft(d => ({ ...d, attachments: updated.attachments }));
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
 
   const c = editing ? draft : client;
 
@@ -226,6 +279,60 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
             />
           ) : (
             <p className="text-sm text-gray-800 whitespace-pre-wrap">{c.notes || <span className="text-gray-400 italic">No notes yet</span>}</p>
+          )}
+        </div>
+
+        {/* Attachments */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs text-gray-500 font-medium">Files & Photos</label>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800"
+            >
+              <Paperclip size={13} /> Add
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx"
+              onChange={e => { addAttachments(e.target.files); e.target.value = ''; }}
+              className="hidden"
+            />
+          </div>
+
+          {attachError && <p className="text-xs text-red-600 mb-2">{attachError}</p>}
+
+          {!c.attachments?.length ? (
+            <p className="text-xs text-gray-400 italic">No files or photos yet. Tap “Add” to attach.</p>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {c.attachments.map((att) => {
+                const isImage = att.type?.startsWith('image/');
+                return (
+                  <div key={att.id} className="relative group border border-gray-200 rounded-lg overflow-hidden">
+                    <a href={att.dataUrl} target="_blank" rel="noopener noreferrer" download={att.name} className="block">
+                      {isImage ? (
+                        <img src={att.dataUrl} alt={att.name} className="w-full h-20 object-cover" />
+                      ) : (
+                        <div className="w-full h-20 flex flex-col items-center justify-center bg-gray-50 px-1">
+                          <FileText size={20} className="text-gray-400" />
+                          <span className="text-[10px] text-gray-500 truncate w-full text-center mt-1">{att.name}</span>
+                        </div>
+                      )}
+                    </a>
+                    <div className="flex items-center justify-between px-1.5 py-1 bg-white border-t border-gray-100">
+                      <span className="text-[10px] text-gray-400">{formatSize(att.size)}</span>
+                      <div className="flex items-center gap-1">
+                        <a href={att.dataUrl} download={att.name} className="text-gray-400 hover:text-green-700"><Download size={12} /></a>
+                        <button onClick={() => removeAttachment(att.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={12} /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </Section>
