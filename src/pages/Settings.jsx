@@ -26,7 +26,7 @@ function ApiKeyField({ label, value, onChange, placeholder, hint }) {
   );
 }
 
-export default function Settings({ onKeysChange }) {
+export default function Settings({ onKeysChange, onManageOrg }) {
   const user = getUser() || {};
   const [form, setForm] = useState({
     name: user.name || '',
@@ -132,7 +132,7 @@ export default function Settings({ onKeysChange }) {
       </div>
 
       {/* Account (shows when a backend is configured) */}
-      <AccountCard />
+      <AccountCard onManageOrg={onManageOrg} />
 
       {/* Backend connection */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">

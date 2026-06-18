@@ -1,0 +1,205 @@
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2 } from 'lucide-react';
+import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole } from '../lib/api';
+
+function monthlyPrice(seats) { return seats > 50 ? 1000 : 500; }
+
+export default function AdminConsole({ onBack }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [branding, setBranding] = useState({ companyName: '', accentColor: '#15803d' });
+  const [customFields, setCustomFields] = useState([]);
+  const [newField, setNewField] = useState({ label: '', type: 'text' });
+  const [savedMsg, setSavedMsg] = useState('');
+
+  const myRole = data?.members?.find?.(m => m.email === data?.me)?.role; // best-effort
+  const canManage = true; // route is only reachable by org members; server enforces real perms
+
+  async function load() {
+    setLoading(true); setError('');
+    try {
+      const org = await getOrg();
+      setData(org);
+      setBranding({ companyName: org.settings?.branding?.companyName || org.org?.name || '', accentColor: org.settings?.branding?.accentColor || '#15803d' });
+      setCustomFields(org.settings?.customFields || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  function copyCode() {
+    navigator.clipboard?.writeText(data.joinCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  async function saveSettings() {
+    setSavedMsg('');
+    try {
+      await updateOrgSettings({ branding, customFields });
+      setSavedMsg('Saved');
+      setTimeout(() => setSavedMsg(''), 1500);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function changeSeats(seats) {
+    try {
+      const res = await updateOrgSeats(seats);
+      setData(d => ({ ...d, org: { ...d.org, seats: res.seats } }));
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function changeRole(memberId, role) {
+    try {
+      await setMemberRole(memberId, role);
+      setData(d => ({ ...d, members: d.members.map(m => m.id === memberId ? { ...m, role } : m) }));
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  function addField() {
+    if (!newField.label.trim()) return;
+    const key = newField.label.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    setCustomFields(f => [...f, { key, label: newField.label.trim(), type: newField.type }]);
+    setNewField({ label: '', type: 'text' });
+  }
+
+  return (
+    <div className="pb-20 md:pb-6">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
+          <ArrowLeft size={20} className="text-gray-600" />
+        </button>
+        <h1 className="text-xl font-bold text-gray-900">Team & Admin</h1>
+      </div>
+
+      {loading ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <Loader size={32} className="text-green-700 mx-auto animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-center">
+          <p className="text-sm text-red-700 mb-3">{error}</p>
+          <button onClick={load} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Retry</button>
+        </div>
+      ) : !data?.org ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-sm text-gray-500">
+          You’re not part of an organization yet.
+        </div>
+      ) : (
+        <>
+          {/* Overview */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Building2 size={15} className="text-gray-500" />
+              <h3 className="text-sm font-semibold text-gray-700">{data.org.name}</h3>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3 mb-3">
+              <p className="text-xs text-green-700 mb-1">Invite code — share with employees</p>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold tracking-widest text-green-900">{data.joinCode}</span>
+                <button onClick={copyCode} className="text-green-700 hover:text-green-900">
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="border border-gray-200 rounded-lg p-3">
+                <p className="text-xs text-gray-500">Seats used</p>
+                <p className="text-lg font-bold text-gray-900">{data.seatsUsed} / {data.org.seats}</p>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-3">
+                <p className="text-xs text-gray-500">Monthly</p>
+                <p className="text-lg font-bold text-gray-900">${monthlyPrice(data.org.seats).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <label className="text-xs text-gray-500">Seats</label>
+              <input
+                type="number"
+                min={data.seatsUsed}
+                defaultValue={data.org.seats}
+                onBlur={e => changeSeats(parseInt(e.target.value, 10))}
+                className="w-20 border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+              />
+              <span className="text-xs text-gray-400">$500/mo ≤50, $1,000/mo for 51+</span>
+            </div>
+          </div>
+
+          {/* Members */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
+              <Users size={15} className="text-gray-500" />
+              <h3 className="text-sm font-semibold text-gray-700">Members ({data.members.length})</h3>
+            </div>
+            {data.members.map(m => (
+              <div key={m.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-50 last:border-0">
+                <span className="text-sm text-gray-800 truncate">{m.email}</span>
+                {m.role === 'owner' ? (
+                  <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full">Owner</span>
+                ) : (
+                  <select value={m.role} onChange={e => changeRole(m.id, e.target.value)}
+                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-green-600">
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Customization */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Cog size={15} className="text-gray-500" />
+              <h3 className="text-sm font-semibold text-gray-700">Customization</h3>
+            </div>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Company name (shown in-app)</label>
+            <input type="text" value={branding.companyName} onChange={e => setBranding(b => ({ ...b, companyName: e.target.value }))}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-green-600" />
+            <label className="text-xs text-gray-500 font-medium block mb-1">Accent color</label>
+            <input type="color" value={branding.accentColor} onChange={e => setBranding(b => ({ ...b, accentColor: e.target.value }))}
+              className="w-16 h-9 rounded border border-gray-200 mb-4" />
+
+            <label className="text-xs text-gray-500 font-medium block mb-2">Custom client fields</label>
+            {customFields.map((f, i) => (
+              <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
+                <span className="text-sm text-gray-800">{f.label} <span className="text-xs text-gray-400">({f.type})</span></span>
+                <button onClick={() => setCustomFields(cf => cf.filter((_, j) => j !== i))} className="text-red-400"><Trash2 size={14} /></button>
+              </div>
+            ))}
+            <div className="flex gap-2 mt-2">
+              <input type="text" placeholder="Field name (e.g. Region)" value={newField.label}
+                onChange={e => setNewField(n => ({ ...n, label: e.target.value }))}
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600" />
+              <select value={newField.type} onChange={e => setNewField(n => ({ ...n, type: e.target.value }))}
+                className="border border-gray-200 rounded-lg px-2 py-2 text-sm">
+                <option value="text">Text</option>
+                <option value="number">Number</option>
+                <option value="date">Date</option>
+              </select>
+              <button onClick={addField} className="bg-green-700 text-white px-3 rounded-lg"><Plus size={14} /></button>
+            </div>
+          </div>
+
+          <button onClick={saveSettings}
+            className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${savedMsg ? 'bg-green-600 text-white' : 'bg-green-700 text-white hover:bg-green-800'}`}>
+            {savedMsg ? '✓ Saved!' : 'Save customization'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}

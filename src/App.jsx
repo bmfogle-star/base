@@ -8,6 +8,7 @@ import ScanCard from './pages/ScanCard';
 import ImportContacts from './pages/ImportContacts';
 import CallRecorder from './pages/CallRecorder';
 import Settings from './pages/Settings';
+import AdminConsole from './pages/AdminConsole';
 import { useClients } from './hooks/useClients';
 import { getUser } from './data/store';
 import './index.css';
@@ -186,8 +187,11 @@ export default function App() {
           botServerToken={keys.botServerToken}
         />
       )}
+      {page === 'admin' && (
+        <AdminConsole onBack={() => setPage('settings')} />
+      )}
       {page === 'settings' && (
-        <Settings onKeysChange={setKeys} />
+        <Settings onKeysChange={setKeys} onManageOrg={() => setPage('admin')} />
       )}
     </Layout>
   );

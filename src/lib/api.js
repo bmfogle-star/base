@@ -137,6 +137,18 @@ export async function getOrg() {
   return call('/orgs/me', { auth: true });
 }
 
+export async function updateOrgSettings({ branding, customFields }) {
+  return call('/orgs/settings', { method: 'PATCH', auth: true, body: { branding, customFields } });
+}
+
+export async function updateOrgSeats(seats) {
+  return call('/orgs/seats', { method: 'PATCH', auth: true, body: { seats } });
+}
+
+export async function setMemberRole(memberId, role) {
+  return call(`/orgs/members/${memberId}/role`, { method: 'POST', auth: true, body: { role } });
+}
+
 // Start a Stripe Checkout session for a plan; returns a URL to redirect to.
 export async function startCheckout(plan) {
   const data = await call('/billing/checkout', { method: 'POST', auth: true, body: { plan } });

@@ -5,7 +5,7 @@ import { hasBackend } from '../lib/api';
 
 // Shown in Settings. Lets the user create / log into a Spark account when a
 // backend is configured. With an account, AI works with no personal API key.
-export default function AccountCard() {
+export default function AccountCard({ onManageOrg }) {
   const { account, loading, login, register, logout } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [email, setEmail] = useState('');
@@ -67,6 +67,11 @@ export default function AccountCard() {
             )}
             <p className="text-xs text-green-600 mt-1">✓ AI works without your own key</p>
           </div>
+          {account.org_id && onManageOrg && (
+            <button onClick={onManageOrg} className="w-full mb-3 bg-gray-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800">
+              Manage Team & Admin →
+            </button>
+          )}
           <button onClick={logout} className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
             <LogOut size={14} /> Sign out
           </button>
