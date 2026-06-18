@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
     id: randomUUID(),
     email: email.toLowerCase(),
     password_hash: await hashPassword(password),
-    plan: 'free',
+    plan: 'premium',
     created_at: new Date().toISOString(),
   };
   db.prepare('INSERT INTO users (id, email, password_hash, plan, created_at) VALUES (?, ?, ?, ?, ?)')

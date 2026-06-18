@@ -21,10 +21,11 @@ router.post('/register', requireAuth, (req, res) => {
   }
 
   const count = db.prepare('SELECT COUNT(*) n FROM devices WHERE user_id = ?').get(req.user.id).n;
-  const plan = PLANS[req.user.plan] || PLANS.free;
+  const plan = PLANS[req.user.plan] || PLANS.premium;
   if (count >= plan.maxDevices) {
+    const nextTier = req.user.plan === 'premium' ? 'Platinum' : 'Enterprise';
     return res.status(402).json({
-      error: `Your ${plan.label} plan allows ${plan.maxDevices} devices. Upgrade to Premium to use more.`,
+      error: `Your ${plan.label} plan allows ${plan.maxDevices} devices. Upgrade to ${nextTier} for more.`,
       upgrade: true,
       maxDevices: plan.maxDevices,
     });

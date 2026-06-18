@@ -9,6 +9,11 @@ const router = Router();
 
 const ROLE_RANK = { member: 0, admin: 1, owner: 2 };
 
+// Enterprise pricing: flat $500/mo up to 50 seats, $1,000/mo for 51+.
+export function enterpriseMonthlyPrice(seats) {
+  return seats > 50 ? 1000 : 500;
+}
+
 function memberCount(orgId) {
   return db.prepare('SELECT COUNT(*) n FROM users WHERE org_id = ?').get(orgId).n;
 }
@@ -96,7 +101,7 @@ router.patch('/seats', requireAuth, requireRole('owner'), (req, res) => {
   if (!Number.isInteger(seats) || seats < 1) return res.status(400).json({ error: 'Invalid seat count' });
   if (seats < memberCount(req.user.org_id)) return res.status(409).json({ error: 'Cannot set seats below current member count' });
   db.prepare('UPDATE organizations SET seats = ? WHERE id = ?').run(seats, req.user.org_id);
-  res.json({ ok: true, seats });
+  res.json({ ok: true, seats, monthlyPrice: enterpriseMonthlyPrice(seats) });
 });
 
 // Change a member's role.

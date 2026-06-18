@@ -246,7 +246,7 @@ export default function Settings({ onKeysChange }) {
               <p className="font-bold text-gray-900 text-sm">Premium</p>
               <span className="text-xs bg-green-700 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Up to 20 clients + AI + Bots</p>
+            <p className="text-xs text-gray-500 mt-1">Up to 20 clients · 4 devices</p>
             <p className="text-lg font-bold text-gray-900 mt-2">$4.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
           </div>
           <div onClick={() => set('plan', 'platinum')}
@@ -255,7 +255,7 @@ export default function Settings({ onKeysChange }) {
               <p className="font-bold text-gray-900 text-sm">Platinum</p>
               <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">Pro</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Unlimited clients (20+)</p>
+            <p className="text-xs text-gray-500 mt-1">Unlimited clients · 8 devices</p>
             <p className="text-lg font-bold text-gray-900 mt-2">$11.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
           </div>
         </div>
@@ -279,12 +279,23 @@ export default function Settings({ onKeysChange }) {
             <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">For teams</span>
           </div>
           <p className="text-xs text-gray-300 mb-2">
-            Buy once for your whole company — central admin, per-seat licensing, shared
-            client data, custom fields, your branding, and SSO. Like Salesforce, tuned for sales rapport.
+            Buy once for your whole company — central admin, shared client data,
+            custom fields, your branding, SSO, and unlimited devices. Like
+            Salesforce, tuned for sales rapport.
           </p>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="bg-white/10 rounded-lg p-2.5">
+              <p className="text-lg font-bold">$500<span className="text-xs font-normal text-gray-300">/mo</span></p>
+              <p className="text-xs text-gray-300">Up to 50 employees</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-2.5">
+              <p className="text-lg font-bold">$1,000<span className="text-xs font-normal text-gray-300">/mo</span></p>
+              <p className="text-xs text-gray-300">51+ employees</p>
+            </div>
+          </div>
           <ul className="text-xs text-gray-300 space-y-0.5 mb-3">
-            <li>• Unlimited clients & AI</li>
-            <li>• Admin console, roles & seats</li>
+            <li>• Unlimited clients, AI &amp; devices</li>
+            <li>• Admin console, roles &amp; seats</li>
             <li>• Custom fields + company branding</li>
             <li>• SSO &amp; priority support</li>
           </ul>

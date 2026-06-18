@@ -6,9 +6,10 @@ A sales CRM for individual salespeople / small teams. Track clients' personal
 details (hobbies, family, events) to feel more personable, with AI that extracts
 those details from recorded calls.
 
-**Pricing:**
-- **Premium — $4.99/mo:** up to 20 clients, full AI + bots.
-- **Platinum — $11.99/mo:** unlimited clients (for 20+).
+**Pricing (no free tier):**
+- **Premium — $4.99/mo:** up to 20 clients, 4 devices.
+- **Platinum — $11.99/mo:** unlimited clients, 8 devices.
+- **Enterprise:** $500/mo up to 50 employees, $1,000/mo for 51+. Unlimited devices, team sharing, SSO.
 
 **Live app:** https://bmfogle-star.github.io/base/
 **Branch:** `claude/stoic-babbage-y8jhtg`
@@ -48,9 +49,10 @@ those details from recorded calls.
   (org) accounts share clients across the team. Local storage stays the UI source.
 - **Enterprise scaffold** (see ENTERPRISE.md) — orgs, roles, seats, invites,
   custom fields/branding settings; `/orgs` routes.
-- **Device limit** — `/backend/src/routes/devices.js`: Free accounts capped at 4
-  devices; Premium+ higher. App registers each device on sync and shows an
-  upgrade banner if the limit is hit. New signups default to the Free plan.
+- **Device limit** — `/backend/src/routes/devices.js`: Premium 4 devices,
+  Platinum 8, Enterprise unlimited. App registers each device on sync and shows
+  an upgrade banner if the limit is hit. New signups default to Premium.
+  No Free tier.
 
 Local storage is the UI source of truth; the backend (when configured) adds
 identity, the AI key, limits, billing, cloud sync, org sharing, and device limits.

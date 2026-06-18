@@ -105,6 +105,7 @@ Azure AD). That's a Phase 3 add via SAML/OIDC — significant but well-trodden.
 
 ## Pricing
 
-- **Premium $4.99** / **Platinum $11.99** — individuals & small teams (existing).
-- **Enterprise — custom** — per-seat, annual contracts, SSO, custom fields,
-  shared data, priority support. "Contact sales" in-app.
+- **Premium $4.99/mo** — up to 20 clients, 4 devices.
+- **Platinum $11.99/mo** — unlimited clients, 8 devices.
+- **Enterprise** — flat **$500/mo up to 50 employees**, **$1,000/mo for 51+**.
+  Unlimited devices, shared data, custom fields, branding, SSO, priority support.
