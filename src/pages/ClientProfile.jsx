@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock } from 'lucide-react';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -40,6 +40,8 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
   const [newFamilyMember, setNewFamilyMember] = useState({ name: '', relation: '' });
   const [newEvent, setNewEvent] = useState({ title: '', date: '' });
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editingCallId, setEditingCallId] = useState(null);
+  const [callDateDraft, setCallDateDraft] = useState('');
   const [attachError, setAttachError] = useState('');
   const cameraInputRef = useRef(null);
   const photoInputRef = useRef(null);
@@ -183,6 +185,39 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
       setDraft(p => ({ ...p, upcomingEvents: [...(p.upcomingEvents || []), { ...newEvent, id: Date.now().toString() }] }));
       setNewEvent({ title: '', date: '' });
     }
+  }
+
+  // ── call date/time editing ──
+  function formatCallDateTime(iso) {
+    if (!iso) return 'No date';
+    return new Date(iso).toLocaleString([], {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
+  }
+
+  // ISO → value for <input type="datetime-local"> (in the user's local time).
+  function isoToLocalInput(iso) {
+    const d = iso ? new Date(iso) : new Date();
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+  }
+
+  function startEditCallDate(call) {
+    setEditingCallId(call.id);
+    setCallDateDraft(isoToLocalInput(call.date));
+  }
+
+  function saveCallDate(callId) {
+    if (!callDateDraft) { setEditingCallId(null); return; }
+    const iso = new Date(callDateDraft).toISOString();
+    const updated = {
+      ...client,
+      callHistory: (client.callHistory || []).map(c => c.id === callId ? { ...c, date: iso } : c),
+    };
+    onUpdate(updated);
+    setDraft(d => ({ ...d, callHistory: updated.callHistory }));
+    setEditingCallId(null);
   }
 
   return (
@@ -514,10 +549,32 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
         )}
         {client.callHistory?.map((call, i) => (
           <div key={call.id || i} className="border border-gray-100 rounded-lg p-3 mb-2">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-semibold text-gray-700">{new Date(call.date).toLocaleDateString()}</p>
-              <span className="text-xs text-gray-400">{call.duration || ''}</span>
+            <div className="flex items-center justify-between mb-1 gap-2">
+              {editingCallId === call.id ? (
+                <div className="flex items-center gap-1.5 flex-1">
+                  <input
+                    type="datetime-local"
+                    value={callDateDraft}
+                    onChange={e => setCallDateDraft(e.target.value)}
+                    className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-600"
+                  />
+                  <button onClick={() => saveCallDate(call.id)} className="text-green-700"><Save size={14} /></button>
+                  <button onClick={() => setEditingCallId(null)} className="text-gray-400"><X size={14} /></button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditCallDate(call)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-green-700 group"
+                  title="Edit call date & time"
+                >
+                  <Clock size={12} className="text-gray-400 group-hover:text-green-700" />
+                  {formatCallDateTime(call.date)}
+                  <Edit2 size={11} className="text-gray-300 group-hover:text-green-700" />
+                </button>
+              )}
+              {call.duration && <span className="text-xs text-gray-400 flex-shrink-0">{call.duration}</span>}
             </div>
+            {call.source && <p className="text-[11px] text-gray-400 mb-1">via {call.source}</p>}
             {call.summary && <p className="text-sm text-gray-700 mb-2">{call.summary}</p>}
             {call.extracted && (
               <div className="bg-gray-50 rounded-lg p-2.5 mt-2">
