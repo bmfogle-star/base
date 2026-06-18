@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon } from 'lucide-react';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -41,9 +41,12 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
   const [newEvent, setNewEvent] = useState({ title: '', date: '' });
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [attachError, setAttachError] = useState('');
+  const cameraInputRef = useRef(null);
+  const photoInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3 MB per file (localStorage is limited)
+  const MAX_FILE_BYTES = 8 * 1024 * 1024;       // 8 MB cap for non-image files
+  const MAX_IMAGE_SOURCE_BYTES = 30 * 1024 * 1024; // accept big photos; we compress them
 
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
@@ -54,31 +57,66 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
     });
   }
 
+  // Downscale + re-encode photos so phone images fit in local storage.
+  function compressImage(file, maxDim = 1600, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width >= height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+          else { width = Math.round((width * maxDim) / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image decode failed')); };
+      img.src = url;
+    });
+  }
+
+  function dataUrlBytes(dataUrl) {
+    const i = dataUrl.indexOf(',');
+    return Math.round((dataUrl.length - i - 1) * 0.75);
+  }
+
+  async function processFile(f) {
+    const isImage = f.type?.startsWith('image/');
+    if (isImage) {
+      if (f.size > MAX_IMAGE_SOURCE_BYTES) throw new Error(`"${f.name}" is too large.`);
+      const dataUrl = await compressImage(f);
+      const name = f.name?.replace(/\.[^.]+$/, '.jpg') || `photo-${Date.now()}.jpg`;
+      return { name, type: 'image/jpeg', size: dataUrlBytes(dataUrl), dataUrl };
+    }
+    if (f.size > MAX_FILE_BYTES) throw new Error(`"${f.name}" is too large. Max 8 MB per file.`);
+    const dataUrl = await readFileAsDataUrl(f);
+    return { name: f.name, type: f.type || 'application/octet-stream', size: f.size, dataUrl };
+  }
+
   async function addAttachments(fileList) {
     setAttachError('');
     const files = Array.from(fileList || []);
     if (!files.length) return;
-
-    const tooBig = files.find(f => f.size > MAX_FILE_BYTES);
-    if (tooBig) {
-      setAttachError(`"${tooBig.name}" is too large. Max 3 MB per file.`);
-      return;
-    }
-
     try {
-      const newAtts = await Promise.all(files.map(async (f) => ({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        name: f.name,
-        type: f.type || 'application/octet-stream',
-        size: f.size,
-        dataUrl: await readFileAsDataUrl(f),
-        addedAt: new Date().toISOString(),
-      })));
+      const newAtts = await Promise.all(files.map(async (f) => {
+        const meta = await processFile(f);
+        return { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, addedAt: new Date().toISOString(), ...meta };
+      }));
       const updated = { ...client, attachments: [...(client.attachments || []), ...newAtts] };
-      onUpdate(updated);
+      try {
+        onUpdate(updated);
+      } catch (e) {
+        // localStorage quota exceeded, etc.
+        setAttachError('Not enough local storage to save that. Try removing some attachments.');
+        return;
+      }
       setDraft(d => ({ ...d, attachments: updated.attachments }));
-    } catch {
-      setAttachError('Could not read that file. Please try another.');
+    } catch (e) {
+      setAttachError(e.message || 'Could not read that file. Please try another.');
     }
   }
 
@@ -284,23 +322,55 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
 
         {/* Attachments */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs text-gray-500 font-medium">Files & Photos</label>
+          <label className="text-xs text-gray-500 font-medium block mb-2">Files & Photos</label>
+
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
+            >
+              <Camera size={18} /> Take Photo
+            </button>
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
+            >
+              <ImageIcon size={18} /> Photo Library
+            </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800"
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
             >
-              <Paperclip size={13} /> Add
+              <Paperclip size={18} /> Attach File
             </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx"
-              onChange={e => { addAttachments(e.target.files); e.target.value = ''; }}
-              className="hidden"
-            />
           </div>
+
+          {/* Camera capture (opens the camera on phones) */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={e => { addAttachments(e.target.files); e.target.value = ''; }}
+            className="hidden"
+          />
+          {/* Photo library (existing images) */}
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={e => { addAttachments(e.target.files); e.target.value = ''; }}
+            className="hidden"
+          />
+          {/* Any file type */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={e => { addAttachments(e.target.files); e.target.value = ''; }}
+            className="hidden"
+          />
 
           {attachError && <p className="text-xs text-red-600 mb-2">{attachError}</p>}
 
