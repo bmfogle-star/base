@@ -1,6 +1,6 @@
 # Spark — Progress & Next Steps
 
-_Last updated: 2026-06-17_
+_Last updated: 2026-06-18 (paused for the night)_
 
 A sales CRM for individual salespeople / small teams. Track clients' personal
 details (hobbies, family, events) to feel more personable, with AI that extracts
@@ -53,9 +53,28 @@ those details from recorded calls.
   Platinum 8, Enterprise unlimited. App registers each device on sync and shows
   an upgrade banner if the limit is hit. New signups default to Premium.
   No Free tier.
+- **Enterprise join/create** — orgs get a 6-char shareable join code.
+  Settings → Subscription has "Join an Enterprise" (enter code) and
+  "Create an Enterprise" (name it → get code). `/orgs/join` route.
+- **Admin console** — `src/pages/AdminConsole.jsx`, opened via "Manage Team &
+  Admin" in the account card. Shows invite code (copy), seats used + monthly
+  price ($500 ≤50 / $1,000 51+), seat management, member role changes, and
+  customization (company name, accent color, custom client fields).
+- **Business card scan** (`ScanCard`) + **contacts import** (`ImportContacts`,
+  vCard/Contact Picker) on the Clients page.
+- **Client attachments** — photos (camera/library, auto-compressed) + any file
+  on each client; indicators on list + profile header.
+- **Call history** — title, full date+time (editable), pin-to-top, sort
+  (recent/oldest/custom with manual reorder).
+- **Clients page** = A–Z directory with a Favorites (starred) section on top.
+  Home page has an Add Client button.
 
 Local storage is the UI source of truth; the backend (when configured) adds
 identity, the AI key, limits, billing, cloud sync, org sharing, and device limits.
+
+Branding: green theme (#15803d), Spark logo (`public/favicon.svg`).
+Pricing (NO free tier): Premium $4.99 (4 devices) · Platinum $11.99 (8 devices) ·
+Enterprise $500/mo ≤50 employees, $1,000/mo 51+ (unlimited devices, team sharing).
 
 ---
 
@@ -76,7 +95,24 @@ cd server && ./deploy-fly.sh
 ```
 Then paste the printed URL + token into Settings → Meeting bot.
 
+### Part 3 — Deploy the SaaS backend (to make accounts/sync/orgs/billing live)
+Everything backend-related (accounts, cloud sync, device limits, enterprise
+orgs, admin console, Stripe) is BUILT but only activates once the backend is
+deployed and its URL is set in Settings → Spark Backend URL.
+1. Deploy `/backend` (Fly.io/Railway) with `ANTHROPIC_API_KEY` + `JWT_SECRET`.
+2. For billing: add Stripe keys + Premium/Platinum price IDs to `/backend/.env`.
+3. Paste the backend URL into the app's Settings.
+
 ---
+
+## 🔜 RESUME HERE (next session)
+Paused 2026-06-18 for the night. Last thing built: enterprise admin console.
+Open thread we stopped on:
+- **Make custom fields actually render** on the client profile + Add Client
+  forms (admin defines them in the console; they're stored but not yet shown
+  on client forms). This was the proposed next task.
+Other good candidates: apply org branding (company name/accent) in the app;
+build the launch checklist doc; wire Stripe price→plan mapping robustly.
 
 ## 💡 Ideas / open questions for tomorrow
 
