@@ -1,5 +1,6 @@
 import { Users, Mic, Settings, Home, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { getBranding } from '../lib/api';
 
 const navItems = [
   { id: 'dashboard', label: 'Home', icon: Home },
@@ -10,14 +11,20 @@ const navItems = [
 
 export default function Layout({ page, onNav, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const branding = getBranding();
+  const accent = branding.accentColor || null;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Brand accent strip (org primary color) */}
+      {accent && <div className="h-1 w-full" style={{ backgroundColor: accent }} />}
       {/* Top bar */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Spark" className="w-8 h-8 rounded-lg" />
-          <span className="font-bold text-gray-900 text-lg">Spark</span>
+          {branding.logo
+            ? <img src={branding.logo} alt={branding.companyName || 'Logo'} className="w-8 h-8 rounded-lg object-contain" />
+            : <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Spark" className="w-8 h-8 rounded-lg" />}
+          <span className="font-bold text-gray-900 text-lg">{branding.companyName || 'Spark'}</span>
         </div>
         <button
           className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"

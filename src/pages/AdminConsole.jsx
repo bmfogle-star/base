@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2 } from 'lucide-react';
+import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2, Upload } from 'lucide-react';
 import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole, fetchMe } from '../lib/api';
+import { compressImageFile } from '../lib/image';
 
 function monthlyPrice(seats) { return seats > 50 ? 1000 : 500; }
 
@@ -9,7 +10,17 @@ export default function AdminConsole({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [branding, setBranding] = useState({ companyName: '', accentColor: '#15803d' });
+  const [branding, setBranding] = useState({ companyName: '', accentColor: '#15803d', logo: '' });
+  const logoInputRef = useRef(null);
+
+  async function handleLogo(fileList) {
+    const file = fileList?.[0];
+    if (!file) return;
+    try {
+      const logo = await compressImageFile(file, 256, 0.85); // small logo
+      setBranding(b => ({ ...b, logo }));
+    } catch { /* ignore */ }
+  }
   const [customFields, setCustomFields] = useState([]);
   const [newField, setNewField] = useState({ label: '', type: 'text' });
   const [savedMsg, setSavedMsg] = useState('');
@@ -22,7 +33,11 @@ export default function AdminConsole({ onBack }) {
     try {
       const org = await getOrg();
       setData(org);
-      setBranding({ companyName: org.settings?.branding?.companyName || org.org?.name || '', accentColor: org.settings?.branding?.accentColor || '#15803d' });
+      setBranding({
+        companyName: org.settings?.branding?.companyName || org.org?.name || '',
+        accentColor: org.settings?.branding?.accentColor || '#15803d',
+        logo: org.settings?.branding?.logo || '',
+      });
       setCustomFields(org.settings?.customFields || []);
     } catch (e) {
       setError(e.message);
@@ -181,7 +196,23 @@ export default function AdminConsole({ onBack }) {
             <label className="text-xs text-gray-500 font-medium block mb-1">Company name (shown in-app)</label>
             <input type="text" value={branding.companyName} onChange={e => setBranding(b => ({ ...b, companyName: e.target.value }))}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-green-600" />
-            <label className="text-xs text-gray-500 font-medium block mb-1">Accent color</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Company logo</label>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+                {branding.logo
+                  ? <img src={branding.logo} alt="logo" className="w-full h-full object-contain" />
+                  : <Building2 size={18} className="text-gray-300" />}
+              </div>
+              <button onClick={() => logoInputRef.current?.click()} className="flex items-center gap-1.5 text-sm text-green-700 font-medium hover:text-green-800">
+                <Upload size={14} /> {branding.logo ? 'Replace' : 'Upload'}
+              </button>
+              {branding.logo && (
+                <button onClick={() => setBranding(b => ({ ...b, logo: '' }))} className="text-xs text-red-500 hover:underline">Remove</button>
+              )}
+              <input ref={logoInputRef} type="file" accept="image/*" onChange={e => { handleLogo(e.target.files); e.target.value = ''; }} className="hidden" />
+            </div>
+
+            <label className="text-xs text-gray-500 font-medium block mb-1">Primary color</label>
             <input type="color" value={branding.accentColor} onChange={e => setBranding(b => ({ ...b, accentColor: e.target.value }))}
               className="w-16 h-9 rounded border border-gray-200 mb-4" />
 

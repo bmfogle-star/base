@@ -72,18 +72,22 @@ export function logout() {
   setToken('');
   localStorage.removeItem(ACCOUNT_KEY);
   localStorage.removeItem(CUSTOM_FIELDS_KEY);
+  localStorage.removeItem(BRANDING_KEY);
 }
 
 const ACCOUNT_KEY = 'spark_account';
 const CUSTOM_FIELDS_KEY = 'spark_custom_fields';
+const BRANDING_KEY = 'spark_branding';
 
 function cacheAccount(a) {
   if (a) {
     localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ plan: a.plan, org_id: a.org_id || null }));
     localStorage.setItem(CUSTOM_FIELDS_KEY, JSON.stringify(a.customFields || []));
+    localStorage.setItem(BRANDING_KEY, JSON.stringify(a.branding || {}));
   } else {
     localStorage.removeItem(ACCOUNT_KEY);
     localStorage.removeItem(CUSTOM_FIELDS_KEY);
+    localStorage.removeItem(BRANDING_KEY);
   }
 }
 
@@ -93,6 +97,15 @@ export function getCustomFields() {
     return JSON.parse(localStorage.getItem(CUSTOM_FIELDS_KEY) || '[]');
   } catch {
     return [];
+  }
+}
+
+// Org branding: { companyName, accentColor, logo } — empty for personal accounts.
+export function getBranding() {
+  try {
+    return JSON.parse(localStorage.getItem(BRANDING_KEY) || '{}');
+  } catch {
+    return {};
   }
 }
 
