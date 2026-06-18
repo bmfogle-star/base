@@ -117,6 +117,7 @@ export default function App() {
           clients={clients}
           onNav={handleNav}
           onSelectClient={handleSelectClient}
+          onAdd={() => setPage('add')}
         />
       )}
       {page === 'clients' && (

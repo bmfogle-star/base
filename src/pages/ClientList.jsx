@@ -13,24 +13,63 @@ function getAvatarColor(name) {
 
 export default function ClientList({ clients, onSelect, onAdd, onScan, onImport, onToggleStar }) {
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
 
+  const q = search.trim().toLowerCase();
   const filtered = clients.filter(c => {
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      c.name?.toLowerCase().includes(q) ||
+    if (!q) return true;
+    return c.name?.toLowerCase().includes(q) ||
       c.company?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) ||
       c.tags?.some(t => t.toLowerCase().includes(q));
-    const matchFilter = filter === 'all' || (filter === 'starred' && c.starred);
-    return matchSearch && matchFilter;
   });
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (a.starred && !b.starred) return -1;
-    if (!a.starred && b.starred) return 1;
-    return a.name?.localeCompare(b.name || '') || 0;
-  });
+  const alpha = [...filtered].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const favorites = alpha.filter(c => c.starred);
+  const others = alpha.filter(c => !c.starred);
+
+  // Group non-favorites into A–Z sections (anything non-letter goes under '#').
+  const groups = [];
+  for (const c of others) {
+    const ch = (c.name || '#').trim().charAt(0).toUpperCase();
+    const letter = /[A-Z]/.test(ch) ? ch : '#';
+    const last = groups[groups.length - 1];
+    if (!last || last.letter !== letter) groups.push({ letter, items: [c] });
+    else last.items.push(c);
+  }
+
+  function ClientRow(client) {
+    return (
+      <div key={client.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+        <button
+          onClick={() => onToggleStar(client.id)}
+          className={`flex-shrink-0 ${client.starred ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`}
+          title={client.starred ? 'Unfavorite' : 'Add to favorites'}
+        >
+          <Star size={16} fill={client.starred ? 'currentColor' : 'none'} />
+        </button>
+        <button onClick={() => onSelect(client.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+          <div className={`w-10 h-10 rounded-full ${getAvatarColor(client.name)} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+            {getInitials(client.name)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-gray-900 text-sm truncate">{client.name || 'Unnamed Client'}</p>
+            <p className="text-xs text-gray-500 truncate">{client.company || client.email || 'No details'}</p>
+          </div>
+          {client.attachments?.length > 0 && (
+            <span className="flex items-center gap-0.5 text-gray-400 text-xs flex-shrink-0">
+              <Paperclip size={12} />{client.attachments.length}
+            </span>
+          )}
+          {client.tags?.length > 0 && (
+            <span className="hidden sm:block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full truncate max-w-24">
+              {client.tags[0]}
+            </span>
+          )}
+          <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-20 md:pb-6">
@@ -75,23 +114,8 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
         )}
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 mb-4">
-        {['all', 'starred'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
-              filter === f ? 'bg-green-700 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            {f === 'starred' ? '⭐ Starred' : 'All Clients'}
-          </button>
-        ))}
-      </div>
-
-      {/* List */}
-      {sorted.length === 0 ? (
+      {/* Directory */}
+      {alpha.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
           <div className="text-4xl mb-3">👤</div>
           <p className="text-gray-500 text-sm">
@@ -103,47 +127,33 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
             </button>
           )}
         </div>
-      ) : (
+      ) : q ? (
+        // Flat results while searching
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {sorted.map((client, i) => (
-            <div
-              key={client.id}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${
-                i < sorted.length - 1 ? 'border-b border-gray-100' : ''
-              }`}
-            >
-              <button
-                onClick={() => onToggleStar(client.id)}
-                className={`flex-shrink-0 ${client.starred ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`}
-              >
-                <Star size={16} fill={client.starred ? 'currentColor' : 'none'} />
-              </button>
-              <button
-                onClick={() => onSelect(client.id)}
-                className="flex items-center gap-3 flex-1 min-w-0 text-left"
-              >
-                <div className={`w-10 h-10 rounded-full ${getAvatarColor(client.name)} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
-                  {getInitials(client.name)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 text-sm truncate">{client.name || 'Unnamed Client'}</p>
-                  <p className="text-xs text-gray-500 truncate">{client.company || client.email || 'No details'}</p>
-                </div>
-                {client.attachments?.length > 0 && (
-                  <span className="flex items-center gap-0.5 text-gray-400 text-xs flex-shrink-0">
-                    <Paperclip size={12} />{client.attachments.length}
-                  </span>
-                )}
-                {client.tags?.length > 0 && (
-                  <span className="hidden sm:block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full truncate max-w-24">
-                    {client.tags[0]}
-                  </span>
-                )}
-                <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
-              </button>
+          {alpha.map(ClientRow)}
+        </div>
+      ) : (
+        <>
+          {favorites.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-1.5 px-1 mb-1.5">
+                <Star size={13} className="text-yellow-400" fill="currentColor" />
+                <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Favorites</h2>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                {favorites.map(ClientRow)}
+              </div>
+            </div>
+          )}
+          {groups.map(group => (
+            <div key={group.letter} className="mb-4">
+              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wide px-1 mb-1.5">{group.letter}</h2>
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                {group.items.map(ClientRow)}
+              </div>
             </div>
           ))}
-        </div>
+        </>
       )}
     </div>
   );

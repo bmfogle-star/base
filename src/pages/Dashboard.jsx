@@ -1,6 +1,6 @@
-import { Users, Phone, Star, TrendingUp, ChevronRight } from 'lucide-react';
+import { Users, Phone, Star, TrendingUp, ChevronRight, Plus } from 'lucide-react';
 
-export default function Dashboard({ clients, onNav, onSelectClient }) {
+export default function Dashboard({ clients, onNav, onSelectClient, onAdd }) {
   const recentClients = [...clients]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 5);
@@ -24,6 +24,15 @@ export default function Dashboard({ clients, onNav, onSelectClient }) {
         <h1 className="text-2xl font-bold text-gray-900">Welcome back 👋</h1>
         <p className="text-gray-500 text-sm mt-1">Here's your sales overview</p>
       </div>
+
+      {/* Add client */}
+      <button
+        onClick={onAdd}
+        className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-green-800 transition-colors mb-6"
+      >
+        <Plus size={18} />
+        Add Client
+      </button>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
