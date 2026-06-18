@@ -45,6 +45,26 @@ db.exec(`
     token       TEXT NOT NULL,
     created_at  TEXT NOT NULL
   );
+
+  -- Synced client records. Scoped to an org (shared) or a personal owner.
+  CREATE TABLE IF NOT EXISTS clients (
+    id          TEXT PRIMARY KEY,
+    owner_id    TEXT,
+    org_id      TEXT,
+    data_json   TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    deleted     INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE INDEX IF NOT EXISTS idx_clients_scope ON clients (org_id, owner_id, updated_at);
+
+  -- Devices signed into an account (for the per-plan device limit).
+  CREATE TABLE IF NOT EXISTS devices (
+    user_id    TEXT NOT NULL,
+    device_id  TEXT NOT NULL,
+    name       TEXT,
+    last_seen  TEXT NOT NULL,
+    PRIMARY KEY (user_id, device_id)
+  );
 `);
 
 // Add org membership columns to users if they don't exist yet (simple migration).

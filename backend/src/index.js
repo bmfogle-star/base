@@ -9,6 +9,8 @@ import authRoutes from './routes/auth.js';
 import aiRoutes from './routes/ai.js';
 import billingRoutes from './routes/billing.js';
 import orgRoutes from './routes/org.js';
+import clientRoutes from './routes/clients.js';
+import deviceRoutes from './routes/devices.js';
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL ? [process.env.APP_URL, /github\.io$/] : true }));
@@ -22,6 +24,8 @@ app.use('/auth', authRoutes);
 app.use('/ai', aiRoutes);
 app.use('/billing', billingRoutes);
 app.use('/orgs', orgRoutes);
+app.use('/clients', clientRoutes);
+app.use('/devices', deviceRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Spark backend listening on :${PORT}`));

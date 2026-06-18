@@ -2,9 +2,10 @@
 import db from './db.js';
 
 export const PLANS = {
-  premium:    { label: 'Premium',    maxClients: 20,       aiCallsPerMonth: 200 },
-  platinum:   { label: 'Platinum',   maxClients: Infinity, aiCallsPerMonth: 2000 },
-  enterprise: { label: 'Enterprise', maxClients: Infinity, aiCallsPerMonth: 100000 },
+  free:       { label: 'Free',       maxClients: 10,       aiCallsPerMonth: 25,     maxDevices: 4 },
+  premium:    { label: 'Premium',    maxClients: 20,       aiCallsPerMonth: 200,    maxDevices: 25 },
+  platinum:   { label: 'Platinum',   maxClients: Infinity, aiCallsPerMonth: 2000,   maxDevices: 100 },
+  enterprise: { label: 'Enterprise', maxClients: Infinity, aiCallsPerMonth: 100000, maxDevices: 100000 },
 };
 
 function currentMonth() {

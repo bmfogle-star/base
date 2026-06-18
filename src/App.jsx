@@ -17,6 +17,7 @@ export default function App() {
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [recordForClientId, setRecordForClientId] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
+  const [deviceLimit, setDeviceLimit] = useState('');
   const [keys, setKeys] = useState(() => {
     const u = getUser() || {};
     return {
@@ -36,6 +37,9 @@ export default function App() {
       const qs = params.toString();
       window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
     }
+    const onLimit = (e) => setDeviceLimit(e.detail || 'Device limit reached.');
+    window.addEventListener('spark:device-limit', onLimit);
+    return () => window.removeEventListener('spark:device-limit', onLimit);
   }, []);
 
   function handleNav(newPage) {
@@ -110,6 +114,15 @@ export default function App() {
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
           <p className="text-sm font-medium text-green-800">🎉 Subscription active — thanks! Your plan is now upgraded.</p>
           <button onClick={() => setUpgraded(false)} className="text-green-700 text-xs font-medium hover:underline">Dismiss</button>
+        </div>
+      )}
+      {deviceLimit && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-amber-800">{deviceLimit}</p>
+            <button onClick={() => setPage('settings')} className="text-amber-900 text-xs font-bold underline">Upgrade</button>
+          </div>
+          <button onClick={() => setDeviceLimit('')} className="text-amber-700 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
       {page === 'dashboard' && (

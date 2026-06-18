@@ -42,8 +42,18 @@ those details from recorded calls.
   CallRecorder routes extraction through the backend when signed in, else uses
   the personal key (BYOK). Backend is OPTIONAL — app still works without it.
 
-Client records are stored locally on the device (localStorage). The backend (when
-configured) handles identity, the AI key, limits, and billing — not client data yet.
+- **Client cloud sync** — `/backend/src/routes/clients.js` stores client records
+  server-side; `src/lib/sync.js` does two-way last-write-wins sync. Runs whenever
+  signed in: personal accounts sync across their own devices/logins; enterprise
+  (org) accounts share clients across the team. Local storage stays the UI source.
+- **Enterprise scaffold** (see ENTERPRISE.md) — orgs, roles, seats, invites,
+  custom fields/branding settings; `/orgs` routes.
+- **Device limit** — `/backend/src/routes/devices.js`: Free accounts capped at 4
+  devices; Premium+ higher. App registers each device on sync and shows an
+  upgrade banner if the limit is hit. New signups default to the Free plan.
+
+Local storage is the UI source of truth; the backend (when configured) adds
+identity, the AI key, limits, billing, cloud sync, org sharing, and device limits.
 
 ---
 

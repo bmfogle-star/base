@@ -30,8 +30,30 @@ async function call(path, { method = 'GET', body, auth = false } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    err.payload = data;
+    throw err;
+  }
   return data;
+}
+
+// A stable per-device id, stored locally.
+export function getDeviceId() {
+  let id = localStorage.getItem('spark_device_id');
+  if (!id) {
+    id = (crypto.randomUUID?.() || `dev-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem('spark_device_id', id);
+  }
+  return id;
+}
+
+// Register this device against the account; throws (with .payload.upgrade) if
+// the plan's device limit is exceeded.
+export async function registerDevice() {
+  const name = navigator.platform || navigator.userAgent?.slice(0, 40) || 'Device';
+  return call('/devices/register', { method: 'POST', auth: true, body: { deviceId: getDeviceId(), name } });
 }
 
 export async function register(email, password) {
@@ -48,17 +70,52 @@ export async function login(email, password) {
 
 export function logout() {
   setToken('');
+  localStorage.removeItem(ACCOUNT_KEY);
+}
+
+const ACCOUNT_KEY = 'spark_account';
+
+function cacheAccount(a) {
+  if (a) localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ plan: a.plan, org_id: a.org_id || null }));
+  else localStorage.removeItem(ACCOUNT_KEY);
 }
 
 export async function fetchMe() {
   if (!getToken()) return null;
-  return call('/auth/me', { auth: true });
+  const me = await call('/auth/me', { auth: true });
+  cacheAccount(me);
+  return me;
+}
+
+// True only for an enterprise account (org member). Gates cloud sync.
+export function isEnterprise() {
+  if (!isLoggedIn()) return false;
+  try {
+    const a = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null');
+    return !!a && (a.plan === 'enterprise' || !!a.org_id);
+  } catch {
+    return false;
+  }
 }
 
 // The key call: extract client details server-side (no user API key needed).
 export async function extractViaBackend(transcript) {
   const data = await call('/ai/extract', { method: 'POST', auth: true, body: { transcript } });
   return data.extracted;
+}
+
+// ── Client sync ──
+export async function listClientsRemote(since) {
+  const qs = since ? `?since=${encodeURIComponent(since)}` : '';
+  return call(`/clients${qs}`, { auth: true });
+}
+
+export async function upsertClientRemote(client) {
+  return call(`/clients/${client.id}`, { method: 'PUT', auth: true, body: { data: client, updatedAt: client.updatedAt } });
+}
+
+export async function deleteClientRemote(id) {
+  return call(`/clients/${id}`, { method: 'DELETE', auth: true });
 }
 
 // Extract contact details from a business card image (server-side vision).
