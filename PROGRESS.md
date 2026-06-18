@@ -34,8 +34,16 @@ those details from recorded calls.
 - **Self-hostable bot server** in `/server` — Express + Puppeteer Google Meet
   bot. Dockerfile (Chrome + Xvfb + PulseAudio), Fly.io config (`fly.toml`),
   one-shot deploy script (`deploy-fly.sh`). Replaces paid Recall.ai.
+- **SaaS backend scaffold** in `/backend` (see BACKEND.md) — Express + SQLite:
+  JWT auth (register/login/me), `/ai/extract` proxy that holds the server-side
+  Claude key and enforces per-plan monthly limits, Stripe checkout/webhook stubs.
+- **Frontend ↔ backend wiring** — `src/lib/api.js`, `useAuth` hook, `AccountCard`
+  (login/signup + plan/usage) in Settings, plus a "Spark Backend URL" field.
+  CallRecorder routes extraction through the backend when signed in, else uses
+  the personal key (BYOK). Backend is OPTIONAL — app still works without it.
 
-All data is stored locally on the device (localStorage). No backend for the app itself.
+Client records are stored locally on the device (localStorage). The backend (when
+configured) handles identity, the AI key, limits, and billing — not client data yet.
 
 ---
 
@@ -62,8 +70,12 @@ Then paste the printed URL + token into Settings → Meeting bot.
 
 - Pre-fill a sample client so a finished profile is visible before real data entry.
 - Tighten Zoom/Teams join logic (currently Meet-first; Zoom/Teams are best-effort).
-- Real Stripe payments for the Premium/Platinum plans (currently UI only).
+- Deploy the `/backend` (Fly.io/Railway), set ANTHROPIC_API_KEY + JWT_SECRET,
+  then put its URL in the app's Settings → Spark Backend URL.
+- Wire real Stripe payments (account + Premium/Platinum price IDs) into
+  `/backend/src/routes/billing.js`; connect the plan buttons to /billing/checkout.
 - Enforce the 20-client limit on Premium + auto-nudge to Platinum past 20.
+- Backend hardening: email verification, password reset, auth rate limiting.
 - Optional cloud sync / multi-device (currently local-only).
 - Auto-merge AI-extracted details into structured profile fields (currently saved
   as a text block in call history; could parse into hobbies/family/events arrays).

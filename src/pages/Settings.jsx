@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic } from 'lucide-react';
+import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server } from 'lucide-react';
 import { getUser, saveUser } from '../data/store';
+import AccountCard from '../components/AccountCard';
 
 function ApiKeyField({ label, value, onChange, placeholder, hint }) {
   const [show, setShow] = useState(false);
@@ -34,6 +35,7 @@ export default function Settings({ onKeysChange }) {
     recallKey: user.recallKey || '',
     botServerUrl: user.botServerUrl || '',
     botServerToken: user.botServerToken || '',
+    backendUrl: user.backendUrl || '',
     plan: user.plan || 'premium',
   });
   const [saved, setSaved] = useState(false);
@@ -75,11 +77,34 @@ export default function Settings({ onKeysChange }) {
         </div>
       </div>
 
+      {/* Account (shows when a backend is configured) */}
+      <AccountCard />
+
+      {/* Backend connection */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Server size={15} className="text-gray-500" />
+          <h3 className="text-sm font-semibold text-gray-700">Spark Backend (optional)</h3>
+        </div>
+        <p className="text-xs text-gray-500 mb-2">
+          Connect your deployed Spark backend so you can sign in and use AI without
+          entering your own keys. Leave blank to use the personal keys below.
+        </p>
+        <input
+          type="url"
+          value={form.backendUrl}
+          onChange={e => set('backendUrl', e.target.value)}
+          placeholder="https://your-spark-backend.fly.dev"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+        />
+        <p className="text-xs text-gray-400 mt-1">After changing this, tap Save, then sign in above.</p>
+      </div>
+
       {/* AI Keys */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <Key size={15} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700">AI & Integrations</h3>
+          <h3 className="text-sm font-semibold text-gray-700">Personal API Keys (no account)</h3>
         </div>
         <p className="text-xs text-gray-500 mb-3">These keys power call transcription and AI extraction. All stored locally on your device.</p>
 

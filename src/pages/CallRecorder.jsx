@@ -4,6 +4,7 @@ import {
   Upload, Video, FileAudio, RefreshCw, X, Clock, Zap, Lock
 } from 'lucide-react';
 import { decodeAudio, transcribeInBrowser, transcribeWithOpenAI } from '../lib/transcribe';
+import { isLoggedIn, extractViaBackend } from '../lib/api';
 
 const MODES = { PICK: 'pick', MIC: 'mic', UPLOAD: 'upload', ZOOM: 'zoom' };
 const S = { IDLE: 'idle', RECORDING: 'recording', PROCESSING: 'processing', WAITING: 'waiting', DONE: 'done', ERROR: 'error' };
@@ -172,7 +173,10 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
   async function runExtraction(text) {
     setStatus(S.PROCESSING);
     try {
-      const result = await extractWithClaude(text, apiKey);
+      // Prefer the backend (no personal key needed) when signed in; else BYOK.
+      const result = isLoggedIn()
+        ? await extractViaBackend(text)
+        : await extractWithClaude(text, apiKey);
       setTranscript(text);
       setExtracted(result);
       setStatus(S.DONE);
