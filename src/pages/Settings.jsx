@@ -124,7 +124,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
   return (
     <div className="pb-20 md:pb-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <h1 className="text-2xl text-gray-900">Settings</h1>
         <p className="text-gray-500 text-sm mt-1">Manage your account and preferences</p>
       </div>
 
@@ -291,7 +291,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
             className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
               <p className="font-bold text-gray-900 text-sm">Premium</p>
-              <span className="text-xs bg-green-700 text-white px-2 py-0.5 rounded-full">Popular</span>
+              <span className="text-xs bg-green-800 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">Up to 20 clients · 4 devices</p>
             <p className="text-lg font-bold text-gray-900 mt-2">$4.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
@@ -308,7 +308,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
         </div>
         {form.plan === 'premium' && (
           <button onClick={() => subscribe('premium')} disabled={checkoutBusy}
-            className="mt-3 w-full bg-green-700 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors disabled:opacity-50">
+            className="mt-3 w-full bg-green-800 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-green-900 transition-colors disabled:opacity-50">
             {checkoutBusy ? 'Redirecting to checkout…' : 'Subscribe to Premium — $4.99/month'}
           </button>
         )}
@@ -429,7 +429,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       </div>
 
       <button onClick={handleSave}
-        className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-green-700 text-white hover:bg-green-800'}`}>
+        className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-green-800 text-white hover:bg-green-900'}`}>
         <Save size={16} />
         {saved ? '✓ Saved!' : 'Save Settings'}
       </button>

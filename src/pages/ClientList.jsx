@@ -122,7 +122,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
             {search ? 'No clients match your search.' : 'No clients yet. Add your first one!'}
           </p>
           {!search && (
-            <button onClick={onAdd} className="mt-4 bg-green-700 text-white px-5 py-2 rounded-xl text-sm font-medium">
+            <button onClick={onAdd} className="mt-4 bg-green-800 text-white px-5 py-2 rounded-xl text-sm font-medium">
               Add Client
             </button>
           )}

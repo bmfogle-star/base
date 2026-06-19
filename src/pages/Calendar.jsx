@@ -83,8 +83,8 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
   return (
     <div className="pb-20 md:pb-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-        <button onClick={openNew} className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-800">
+        <h1 className="text-2xl text-gray-900">Calendar</h1>
+        <button onClick={openNew} className="flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-900">
           <Plus size={16} /> New event
         </button>
       </div>
@@ -107,7 +107,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
             const has = eventsOn(day).length;
             return (
               <button key={i} onClick={() => setSelected(day)}
-                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative ${isSel ? 'bg-green-700 text-white' : isToday ? 'bg-green-50 text-green-800' : 'hover:bg-gray-100 text-gray-700'}`}>
+                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative ${isSel ? 'bg-green-800 text-white' : isToday ? 'ring-1 ring-gold text-green-800 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}>
                 {day.getDate()}
                 {has > 0 && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSel ? 'bg-white' : 'bg-green-600'}`} />}
               </button>
@@ -205,7 +205,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
                           <button key={m.id} type="button"
                             onClick={() => setEditing(s => ({ ...s, members: on ? s.members.filter(x => x !== m.id) : [...(s.members || []), m.id] }))}
                             className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 text-sm">
-                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-700 text-white' : 'border border-gray-300'}`}>{on ? '✓' : ''}</span>
+                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-800 text-white' : 'border border-gray-300'}`}>{on ? '✓' : ''}</span>
                             {m.email}
                           </button>
                         );
@@ -219,7 +219,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
             <div className="flex gap-2 mt-4">
               {editing.id && <button onClick={() => { removeEvent(editing.id); setEditing(null); }} className="px-4 py-2.5 text-red-500 text-sm">Delete</button>}
               <button onClick={saveEditing} disabled={!editing.title.trim()}
-                className="flex-1 flex items-center justify-center gap-2 bg-green-700 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+                className="flex-1 flex items-center justify-center gap-2 bg-green-800 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-900 disabled:opacity-50">
                 <Save size={15} /> {editing.id ? 'Save' : 'Create event'}
               </button>
             </div>

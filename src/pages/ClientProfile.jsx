@@ -32,10 +32,10 @@ function getAvatarColor(name) {
 
 function Section({ title, icon: Icon, children }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-3">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
-        <Icon size={15} className="text-gray-500" />
-        <h3 className="font-semibold text-gray-700 text-sm">{title}</h3>
+    <div className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden mb-3">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+        <Icon size={15} className="text-gold" />
+        <h3 className="text-gray-900 text-base">{title}</h3>
       </div>
       <div className="p-4">{children}</div>
     </div>
@@ -371,7 +371,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
             </button>
             <button
               onClick={() => { setDraft(client); setEditing(true); }}
-              className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium"
+              className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium"
             >
               <Edit2 size={14} />
               Edit
@@ -381,7 +381,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         {editing && (
           <>
             <span className="text-xs text-gray-400 mr-1">{autoSaved ? '✓ Saved' : 'Auto-saving…'}</span>
-            <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium">
+            <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium">
               <Save size={14} />
               Done
             </button>
@@ -401,10 +401,10 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               value={draft.name || ''}
               onChange={e => setDraft(p => ({ ...p, name: e.target.value }))}
               placeholder="Full Name"
-              className="text-xl font-bold text-gray-900 w-full border-b border-gray-300 focus:outline-none focus:border-green-600 pb-1"
+              className="text-xl text-gray-900 w-full border-b border-gray-300 focus:outline-none focus:border-green-600 pb-1"
             />
           ) : (
-            <h2 className="text-xl font-bold text-gray-900">{c.name || 'Unnamed Client'}</h2>
+            <h2 className="text-xl text-gray-900">{c.name || 'Unnamed Client'}</h2>
           )}
           <p className="text-sm text-gray-500 mt-1">{c.company || ''} {c.position ? `· ${c.position}` : ''}</p>
           {c.attachments?.length > 0 && (
@@ -662,7 +662,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               onChange={e => setNewFamilyMember(p => ({ ...p, relation: e.target.value }))}
               className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
-            <button onClick={addFamily} className="bg-green-700 text-white px-3 py-2 rounded-lg">
+            <button onClick={addFamily} className="bg-green-800 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
             </button>
           </div>
@@ -702,7 +702,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               onChange={e => setNewEvent(p => ({ ...p, date: e.target.value }))}
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
-            <button onClick={addEvent} className="bg-green-700 text-white px-3 py-2 rounded-lg">
+            <button onClick={addEvent} className="bg-green-800 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
             </button>
           </div>
@@ -739,7 +739,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
             />
             <div className="flex gap-2">
               <button onClick={() => { setQuickOpen(false); setQuickText(''); }} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
-              <button onClick={saveQuickLog} disabled={!quickText.trim()} className="flex-1 bg-green-700 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">Save note</button>
+              <button onClick={saveQuickLog} disabled={!quickText.trim()} className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">Save note</button>
             </div>
           </div>
         )}
@@ -765,7 +765,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
             <div className="flex gap-2">
               <button onClick={() => navigator.clipboard?.writeText(`${emailDraft.subject}\n\n${emailDraft.body}`)}
                 className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-xs font-medium hover:bg-gray-100">Copy</button>
-              <a href={mailtoLink()} className="flex-1 text-center bg-green-700 text-white py-2 rounded-lg text-xs font-semibold hover:bg-green-800">Open in email</a>
+              <a href={mailtoLink()} className="flex-1 text-center bg-green-800 text-white py-2 rounded-lg text-xs font-semibold hover:bg-green-900">Open in email</a>
               <button onClick={() => setEmailDraft(null)} className="px-3 text-gray-400 text-xs">Close</button>
             </div>
           </div>
@@ -783,7 +783,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                 key={key}
                 onClick={() => setCallSort(key)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  callSort === key ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  callSort === key ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {label}

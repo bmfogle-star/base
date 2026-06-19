@@ -54,7 +54,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
         <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Scan Business Card</h1>
+        <h1 className="text-xl text-gray-900">Scan Business Card</h1>
       </div>
 
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={e => { handleFile(e.target.files); e.target.value = ''; }} className="hidden" />
@@ -138,7 +138,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
 
           <div className="flex gap-3">
             <button onClick={() => setStatus('idle')} className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50">Rescan</button>
-            <button onClick={handleSave} disabled={!fields.name?.trim()} className="flex-1 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+            <button onClick={handleSave} disabled={!fields.name?.trim()} className="flex-1 bg-green-800 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900 disabled:opacity-50">
               {target === 'new' ? 'Create Client' : 'Add to Client'}
             </button>
           </div>

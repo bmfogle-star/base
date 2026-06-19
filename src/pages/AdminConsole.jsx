@@ -109,7 +109,7 @@ export default function AdminConsole({ onBack }) {
         <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Team & Admin</h1>
+        <h1 className="text-xl text-gray-900">Team & Admin</h1>
       </div>
 
       {loading ? (
@@ -233,12 +233,12 @@ export default function AdminConsole({ onBack }) {
                 <option value="number">Number</option>
                 <option value="date">Date</option>
               </select>
-              <button onClick={addField} className="bg-green-700 text-white px-3 rounded-lg"><Plus size={14} /></button>
+              <button onClick={addField} className="bg-green-800 text-white px-3 rounded-lg"><Plus size={14} /></button>
             </div>
           </div>
 
           <button onClick={saveSettings}
-            className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${savedMsg ? 'bg-green-600 text-white' : 'bg-green-700 text-white hover:bg-green-800'}`}>
+            className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${savedMsg ? 'bg-green-600 text-white' : 'bg-green-800 text-white hover:bg-green-900'}`}>
             {savedMsg ? '✓ Saved!' : 'Save customization'}
           </button>
         </>

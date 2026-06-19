@@ -43,7 +43,7 @@ export default function AddClient({ onBack, onSave }) {
         <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">New Client</h1>
+        <h1 className="text-xl text-gray-900">New Client</h1>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -137,7 +137,7 @@ export default function AddClient({ onBack, onSave }) {
         <button
           type="submit"
           disabled={!form.name.trim() || saving}
-          className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-green-800 text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-green-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <UserPlus size={16} />
           Create Client

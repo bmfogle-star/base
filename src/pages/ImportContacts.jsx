@@ -53,7 +53,7 @@ export default function ImportContacts({ onImport, onBack }) {
         <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Import from Contacts</h1>
+        <h1 className="text-xl text-gray-900">Import from Contacts</h1>
       </div>
 
       <input ref={fileRef} type="file" accept=".vcf,text/vcard" onChange={e => { fromFile(e.target.files); e.target.value = ''; }} className="hidden" />
@@ -67,7 +67,7 @@ export default function ImportContacts({ onImport, onBack }) {
           <p className="text-sm text-gray-500 mb-5">Pick from your device, or upload a contacts file exported from your phone.</p>
           <div className="space-y-2 max-w-xs mx-auto">
             {contactPickerSupported() && (
-              <button onClick={fromDevice} className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800">
+              <button onClick={fromDevice} className="w-full flex items-center justify-center gap-2 bg-green-800 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900">
                 <Users size={16} /> Choose from device
               </button>
             )}
@@ -96,7 +96,7 @@ export default function ImportContacts({ onImport, onBack }) {
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 max-h-96 overflow-y-auto">
             {contacts.map((c, i) => (
               <button key={i} onClick={() => toggle(i)} className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 text-left">
-                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${selected.has(i) ? 'bg-green-700' : 'border border-gray-300'}`}>
+                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${selected.has(i) ? 'bg-green-800' : 'border border-gray-300'}`}>
                   {selected.has(i) && <Check size={13} className="text-white" />}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -108,7 +108,7 @@ export default function ImportContacts({ onImport, onBack }) {
           </div>
           <div className="flex gap-3">
             <button onClick={() => { setContacts([]); setSelected(new Set()); }} className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50">Cancel</button>
-            <button onClick={handleImport} disabled={selected.size === 0} className="flex-1 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+            <button onClick={handleImport} disabled={selected.size === 0} className="flex-1 bg-green-800 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900 disabled:opacity-50">
               Import {selected.size > 0 ? selected.size : ''}
             </button>
           </div>

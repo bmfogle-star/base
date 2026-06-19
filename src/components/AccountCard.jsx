@@ -80,11 +80,11 @@ export default function AccountCard({ onManageOrg }) {
         <form onSubmit={submit}>
           <div className="flex gap-2 mb-3">
             <button type="button" onClick={() => setMode('login')}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'login' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'login' ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600'}`}>
               Log in
             </button>
             <button type="button" onClick={() => setMode('register')}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'register' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'register' ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600'}`}>
               Sign up
             </button>
           </div>
@@ -94,7 +94,7 @@ export default function AccountCard({ onManageOrg }) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-green-600" />
           {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
           <button type="submit" disabled={busy}
-            className="w-full bg-green-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+            className="w-full bg-green-800 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-green-900 disabled:opacity-50">
             {busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Log in'}
           </button>
         </form>

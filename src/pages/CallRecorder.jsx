@@ -333,7 +333,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
         <button onClick={mode === MODES.PICK ? onBack : reset} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Call Recorder</h1>
+        <h1 className="text-2xl text-gray-900">Call Recorder</h1>
       </div>
 
       {/* Client selector — always visible */}
@@ -372,7 +372,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
           <h3 className="font-semibold text-gray-900 mb-1">Ready to record</h3>
           <p className="text-sm text-gray-500 mb-5">Uses your browser mic. Put the call on speaker for both sides.</p>
           <button onClick={startMic} disabled={!selectedClientId}
-            className="bg-green-700 text-white px-8 py-3 rounded-xl font-medium hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="bg-green-800 text-white px-8 py-3 rounded-xl font-medium hover:bg-green-900 disabled:opacity-50 disabled:cursor-not-allowed">
             Start Recording
           </button>
           {!selectedClientId && <p className="text-xs text-gray-400 mt-2">Select a client first</p>}
@@ -479,7 +479,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
           </div>
 
           <button onClick={sendBot} disabled={!meetingUrl.trim() || !selectedClientId}
-            className="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900 disabled:opacity-50 disabled:cursor-not-allowed">
             Send Bot to Meeting
           </button>
           {useSelfHosted
@@ -557,7 +557,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
               Record Another
             </button>
             <button onClick={handleSave} disabled={!selectedClientId}
-              className="flex-1 bg-green-700 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-800 disabled:opacity-50">
+              className="flex-1 bg-green-800 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900 disabled:opacity-50">
               Save to {client?.name?.split(' ')[0] || 'Client'}
             </button>
           </div>
