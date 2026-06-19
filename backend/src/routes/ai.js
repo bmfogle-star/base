@@ -51,6 +51,29 @@ router.post('/business-card', requireAuth, async (req, res) => {
   }
 });
 
+router.post('/talking-points', requireAuth, async (req, res) => {
+  const { profile } = req.body || {};
+  if (!profile?.trim()) return res.status(400).json({ error: 'profile is required' });
+  if (!canUseAI(req.user)) return res.status(429).json({ error: 'Monthly AI limit reached.' });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server is missing its AI key' });
+
+  const p = `You are prepping a salesperson before they contact this client. From the profile below, write a short, scannable cheat sheet of rapport-building talking points and reminders (personal details to mention, follow-ups from last call, things to ask about). Use 4-7 short bullet points starting with "- ". Be specific; only use what's in the profile.\n\nProfile:\n${profile}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 500, messages: [{ role: 'user', content: p }] }),
+    });
+    if (!r.ok) return res.status(502).json({ error: `AI provider error ${r.status}` });
+    const data = await r.json();
+    incrementAI(req.user.id);
+    res.json({ points: data.content?.[0]?.text || '' });
+  } catch (e) {
+    res.status(502).json({ error: 'Failed to reach AI provider', detail: e.message });
+  }
+});
+
 router.post('/followup-email', requireAuth, async (req, res) => {
   const { transcript, clientName, senderName } = req.body || {};
   if (!transcript?.trim()) return res.status(400).json({ error: 'transcript is required' });

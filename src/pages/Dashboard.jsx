@@ -20,6 +20,29 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
     ? `Today you have ${briefingParts.join(' and ')}.`
     : 'Nothing scheduled today — a good time to reach out to a client.';
 
+  // Upcoming birthdays + client key dates within the next 30 days.
+  function daysUntilNextBirthday(birthday) {
+    if (!birthday) return null;
+    const b = new Date(birthday);
+    if (isNaN(b)) return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const next = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+    if (next < today) next.setFullYear(today.getFullYear() + 1);
+    return Math.round((next - today) / 86400000);
+  }
+  const keyDates = [];
+  for (const c of clients) {
+    const d = daysUntilNextBirthday(c.birthday);
+    if (d !== null && d <= 30) keyDates.push({ id: c.id, clientId: c.id, label: `${c.name || 'Client'}'s birthday`, days: d, kind: 'birthday' });
+    for (const ev of c.upcomingEvents || []) {
+      if (!ev.date) continue;
+      const diff = Math.round((new Date(new Date(ev.date).setHours(0, 0, 0, 0)) - new Date(new Date().setHours(0, 0, 0, 0))) / 86400000);
+      if (diff >= 0 && diff <= 30) keyDates.push({ id: `${c.id}-${ev.id || ev.title}`, clientId: c.id, label: `${c.name || 'Client'}: ${ev.title}`, days: diff, kind: 'event' });
+    }
+  }
+  keyDates.sort((a, b) => a.days - b.days);
+  function inDays(d) { return d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : `in ${d}d`; }
+
   function dueLabel(iso) {
     const d = new Date(iso);
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -86,6 +109,22 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
           )}
         </div>
       </div>
+
+      {/* Birthdays & key dates */}
+      {keyDates.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-pink-50">
+            <span className="text-base">🎂</span>
+            <h2 className="font-semibold text-pink-900 text-sm">Birthdays & key dates</h2>
+          </div>
+          {keyDates.slice(0, 6).map(k => (
+            <button key={k.id} onClick={() => onSelectClient(k.clientId)} className="w-full flex items-center justify-between gap-2 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 text-left">
+              <span className="text-sm text-gray-900 truncate">{k.kind === 'birthday' ? '🎂' : '📌'} {k.label}</span>
+              <span className={`text-xs flex-shrink-0 ${k.days <= 2 ? 'text-pink-600 font-medium' : 'text-gray-400'}`}>{inDays(k.days)}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Follow-ups due */}
       {dueFollowups.length > 0 && (

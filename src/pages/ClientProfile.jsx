@@ -3,6 +3,7 @@ import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, 
 // (Mail icon already imported above)
 import { getCustomFields } from '../lib/api';
 import { draftFollowupEmail } from '../lib/followup';
+import { generateTalkingPoints } from '../lib/talkingPoints';
 import { getUser } from '../data/store';
 
 // Order calls: pinned always float to top, then by the chosen sort.
@@ -307,6 +308,21 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
     return `mailto:${to}?subject=${encodeURIComponent(emailDraft.subject)}&body=${encodeURIComponent(emailDraft.body)}`;
   }
 
+  // AI talking points (pre-call cheat sheet).
+  const [points, setPoints] = useState('');
+  const [pointsBusy, setPointsBusy] = useState(false);
+  const [pointsError, setPointsError] = useState('');
+  async function generatePoints() {
+    setPointsError(''); setPointsBusy(true); setPoints('');
+    try {
+      setPoints(await generateTalkingPoints(client, apiKey));
+    } catch (e) {
+      setPointsError(e.message);
+    } finally {
+      setPointsBusy(false);
+    }
+  }
+
   // Quick log — capture a fast note as a call entry (also schedules follow-ups).
   const [quickOpen, setQuickOpen] = useState(false);
   const [quickText, setQuickText] = useState('');
@@ -428,6 +444,29 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
           )}
           {!c.tags?.length && !editing && <span className="text-xs text-gray-400 italic">No tags</span>}
         </div>
+      </div>
+
+      {/* Prep for a call (AI cheat sheet) */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3">
+        {!points && !pointsBusy ? (
+          <button onClick={generatePoints} className="w-full flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors">
+            <Heart size={15} /> Prep for a call (AI cheat sheet)
+          </button>
+        ) : pointsBusy ? (
+          <p className="text-sm text-gray-500 text-center py-2">Building your cheat sheet…</p>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-700">Talking points</h3>
+              <div className="flex gap-2">
+                <button onClick={generatePoints} className="text-xs text-green-700 hover:underline">Refresh</button>
+                <button onClick={() => setPoints('')} className="text-xs text-gray-400 hover:underline">Hide</button>
+              </div>
+            </div>
+            <p className="text-sm text-gray-800 whitespace-pre-wrap">{points}</p>
+          </div>
+        )}
+        {pointsError && <p className="text-xs text-red-600 mt-2">{pointsError}</p>}
       </div>
 
       {/* Contact info */}

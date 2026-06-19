@@ -190,6 +190,11 @@ export async function followupEmailViaBackend(transcript, clientName, senderName
   return data.email || '';
 }
 
+export async function talkingPointsViaBackend(profile) {
+  const data = await call('/ai/talking-points', { method: 'POST', auth: true, body: { profile } });
+  return data.points || '';
+}
+
 // Extract contact details from a business card image (server-side vision).
 export async function extractCardViaBackend(imageDataUrl) {
   const data = await call('/ai/business-card', { method: 'POST', auth: true, body: { image: imageDataUrl } });
