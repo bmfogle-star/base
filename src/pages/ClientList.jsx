@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip, ScanLine, Users } from 'lucide-react';
+import Emoji from '../components/Emoji';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -117,7 +118,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
       {/* Directory */}
       {alpha.length === 0 ? (
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-10 text-center">
-          <div className="text-4xl mb-3">👤</div>
+          <div className="mb-3 flex justify-center"><Emoji e="👤" size="2.75rem" /></div>
           <p className="text-gray-500 dark:text-neutral-400 text-sm">
             {search ? 'No clients match your search.' : 'No clients yet. Add your first one!'}
           </p>

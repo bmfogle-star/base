@@ -4,6 +4,7 @@ import {
   Upload, Video, FileAudio, RefreshCw, X, Clock, Zap, Lock
 } from 'lucide-react';
 import { decodeAudio, transcribeInBrowser, transcribeWithOpenAI } from '../lib/transcribe';
+import Emoji from '../components/Emoji';
 import { isLoggedIn, extractViaBackend } from '../lib/api';
 
 const MODES = { PICK: 'pick', MIC: 'mic', UPLOAD: 'upload', ZOOM: 'zoom' };
@@ -448,7 +449,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
           </div>
 
           <div className="mt-3 bg-purple-50 border border-purple-100 rounded-lg p-3">
-            <p className="text-xs text-purple-700 font-medium mb-1">📱 From your iPhone</p>
+            <p className="text-xs text-purple-700 font-medium mb-1"><Emoji e="📱" className="mr-1" />From your iPhone</p>
             <p className="text-xs text-purple-600">After a call: Open <strong>Voice Memos</strong> → tap the recording → share icon → "Save to Files" → upload here. Or use any call recording app and export the file.</p>
           </div>
 

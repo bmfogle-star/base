@@ -17,6 +17,7 @@ import { useReminders } from './hooks/useReminders';
 import { getUser } from './data/store';
 import { extractCallEvents } from './lib/callEvents';
 import { getAccountInfo } from './lib/api';
+import Emoji from './components/Emoji';
 
 const FOLLOWUP_DAYS = [1, 3, 5, 7, 14];
 import './index.css';
@@ -121,7 +122,7 @@ export default function App() {
           clientId: updatedClient.id,
           createdBy: getAccountInfo().id || null,
         })));
-        setCalendarMsg(`📅 Added ${found.length} event${found.length > 1 ? 's' : ''} from the call to your calendar.`);
+        setCalendarMsg(`Added ${found.length} event${found.length > 1 ? 's' : ''} from the call to your calendar.`);
       }
     }
   }
@@ -153,7 +154,7 @@ export default function App() {
     <Layout page={page} onNav={handleNav}>
       {upgraded && (
         <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
-          <p className="text-sm font-medium text-green-800 dark:text-green-300">🎉 Subscription active — thanks! Your plan is now upgraded.</p>
+          <p className="text-sm font-medium text-green-800 dark:text-green-300"><Emoji e="🎉" className="mr-1.5" />Subscription active — thanks! Your plan is now upgraded.</p>
           <button onClick={() => setUpgraded(false)} className="text-green-700 dark:text-green-400 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
@@ -168,7 +169,7 @@ export default function App() {
       )}
       {calendarMsg && (
         <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
-          <button onClick={() => { setCalendarMsg(''); setPage('calendar'); }} className="text-sm font-medium text-green-800 dark:text-green-300 text-left">{calendarMsg} <span className="underline">View</span></button>
+          <button onClick={() => { setCalendarMsg(''); setPage('calendar'); }} className="text-sm font-medium text-green-800 dark:text-green-300 text-left"><Emoji e="📅" className="mr-1.5" />{calendarMsg} <span className="underline">View</span></button>
           <button onClick={() => setCalendarMsg('')} className="text-green-700 dark:text-green-400 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}

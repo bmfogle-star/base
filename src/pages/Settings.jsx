@@ -4,6 +4,7 @@ import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
 import { isLoggedIn, startCheckout, createOrg, joinOrg } from '../lib/api';
 import { getTheme, setTheme } from '../lib/theme';
+import Emoji from '../components/Emoji';
 
 function ThemeCard() {
   const [theme, setThemeState] = useState(getTheme());
@@ -223,7 +224,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
               <li>Tip: under <span className="font-semibold">Billing → Limits</span>, set a low monthly cap (e.g. $5) so there are no surprises. Each call costs only a fraction of a cent.</li>
             </ol>
             <p className="pt-1">The other keys below are <span className="font-semibold">optional</span> — file transcription already works for free on your device, and the meeting-bot keys are only needed if you want a bot to auto-join Zoom/Meet calls.</p>
-            <p className="text-green-600 dark:text-green-400">🔒 Your key is stored only on this device and is never sent to Spark’s servers.</p>
+            <p className="text-green-600 dark:text-green-400"><Emoji e="🔒" className="mr-1" />Your key is stored only on this device and is never sent to Spark’s servers.</p>
           </div>
         </details>
 
