@@ -17,7 +17,8 @@
 
 body {
   margin: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   background: #f5f6f4;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -40,14 +41,14 @@ body {
 
 /* Premium serif display headings */
 h1, h2, h3 {
-  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 /* Brand wordmark + opt-in serif display */
 .font-display {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
 .text-gold { color: var(--gold); }
 .bg-gold { background-color: var(--gold); }
