@@ -334,7 +334,10 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
         <button onClick={mode === MODES.PICK ? onBack : reset} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 -ml-1">
           <ArrowLeft size={20} className="text-gray-600 dark:text-neutral-300" />
         </button>
-        <h1 className="text-2xl text-gray-900 dark:text-neutral-100">Call Recorder</h1>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">Capture</p>
+          <h1 className="text-2xl text-gray-900 dark:text-neutral-100 leading-tight">Call Recorder</h1>
+        </div>
       </div>
 
       {/* Client selector — always visible */}
@@ -457,7 +460,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             className="mt-4 w-full bg-purple-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
             Transcribe & Extract Info
           </button>
-          {engine === 'openai' && !openaiKey && <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 text-center">⚠ OpenAI key not set — add it in Settings, or switch to Free</p>}
+          {engine === 'openai' && !openaiKey && <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 text-center"><Emoji e="⚠️" size="0.8em" className="mr-1" />OpenAI key not set — add it in Settings, or switch to Free</p>}
           {!selectedClientId && <p className="text-xs text-gray-400 dark:text-neutral-500 mt-1 text-center">Select a client first</p>}
         </div>
       )}
@@ -475,7 +478,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
           <div className="bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900 rounded-lg p-3 mb-4">
             <p className="text-xs text-green-700 dark:text-green-400 font-medium mb-1">Supported platforms</p>
-            <p className="text-xs text-green-600 dark:text-green-400">✓ Zoom &nbsp; ✓ Google Meet &nbsp; ✓ Microsoft Teams &nbsp; ✓ Webex</p>
+            <p className="text-xs text-green-600 dark:text-green-400"><Emoji e="✅" size="0.8em" className="mr-1" />Zoom &nbsp; <Emoji e="✅" size="0.8em" className="mr-1" />Google Meet &nbsp; <Emoji e="✅" size="0.8em" className="mr-1" />Microsoft Teams &nbsp; <Emoji e="✅" size="0.8em" className="mr-1" />Webex</p>
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">The bot appears as "Spark Recorder" in your meeting. You can remove it at any time.</p>
           </div>
 
@@ -484,8 +487,8 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             Send Bot to Meeting
           </button>
           {useSelfHosted
-            ? <p className="text-xs text-green-600 dark:text-green-400 mt-2 text-center">✓ Using your self-hosted bot server (free)</p>
-            : !recallKey && <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 text-center">⚠ No bot configured — add your free bot server URL (or Recall.ai key) in Settings</p>}
+            ? <p className="text-xs text-green-600 dark:text-green-400 mt-2 text-center"><Emoji e="✅" size="0.8em" className="mr-1" />Using your self-hosted bot server (free)</p>
+            : !recallKey && <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 text-center"><Emoji e="⚠️" size="0.8em" className="mr-1" />No bot configured — add your free bot server URL (or Recall.ai key) in Settings</p>}
           {!selectedClientId && <p className="text-xs text-gray-400 dark:text-neutral-500 mt-1 text-center">Select a client first</p>}
         </div>
       )}

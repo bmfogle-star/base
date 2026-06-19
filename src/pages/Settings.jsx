@@ -463,7 +463,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       <button onClick={handleSave}
         className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-green-800 text-white hover:bg-green-900'}`}>
         <Save size={16} />
-        {saved ? '✓ Saved!' : 'Save Settings'}
+        {saved ? <><Emoji e="✅" size="0.85em" className="mr-1" />Saved!</> : 'Save Settings'}
       </button>
     </div>
   );

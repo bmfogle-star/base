@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { User, LogOut, Loader, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { hasBackend } from '../lib/api';
+import Emoji from './Emoji';
 
 // Shown in Settings. Lets the user create / log into a Spark account when a
 // backend is configured. With an account, AI works with no personal API key.
@@ -65,7 +66,7 @@ export default function AccountCard({ onManageOrg }) {
                 AI calls this month: {account.usage.aiCalls} / {account.limits.aiCallsPerMonth}
               </p>
             )}
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ AI works without your own key</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1"><Emoji e="✅" size="0.85em" className="mr-1" />AI works without your own key</p>
           </div>
           {account.org_id && onManageOrg && (
             <button onClick={onManageOrg} className="w-full mb-3 bg-gray-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800">

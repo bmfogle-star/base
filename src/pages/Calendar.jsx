@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, X, Trash2, Save, CalendarDays, Apple, ExternalLink, Users } from 'lucide-react';
 import { getAccountInfo, isEnterprise, getOrg } from '../lib/api';
 import { downloadICS, googleCalUrl } from '../lib/ics';
+import Emoji from '../components/Emoji';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['S','M','T','W','T','F','S'];
@@ -96,7 +97,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
           <p className="font-semibold text-gray-900 dark:text-neutral-100 text-sm">{MONTHS[month]} {year}</p>
           <button onClick={() => setCursor(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"><ChevronRight size={18} /></button>
         </div>
-        <div className="grid grid-cols-7 text-center text-xs text-gray-400 dark:text-neutral-500 mb-1">
+        <div className="grid grid-cols-7 text-center text-xs text-gold/80 font-semibold mb-1">
           {DOW.map((d, i) => <div key={i}>{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -205,7 +206,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
                           <button key={m.id} type="button"
                             onClick={() => setEditing(s => ({ ...s, members: on ? s.members.filter(x => x !== m.id) : [...(s.members || []), m.id] }))}
                             className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm">
-                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-800 text-white' : 'border border-gray-300 dark:border-neutral-700'}`}>{on ? '✓' : ''}</span>
+                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-800 text-white' : 'border border-gray-300 dark:border-neutral-700'}`}>{on ? <Emoji e="✅" size="0.8em" /> : ''}</span>
                             {m.email}
                           </button>
                         );

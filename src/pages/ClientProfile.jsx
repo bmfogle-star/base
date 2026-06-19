@@ -5,6 +5,7 @@ import { getCustomFields } from '../lib/api';
 import { draftFollowupEmail } from '../lib/followup';
 import { generateTalkingPoints } from '../lib/talkingPoints';
 import { getUser } from '../data/store';
+import Emoji from '../components/Emoji';
 
 // Order calls: pinned always float to top, then by the chosen sort.
 function orderCalls(calls, sort) {
@@ -380,7 +381,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         )}
         {editing && (
           <>
-            <span className="text-xs text-gray-400 dark:text-neutral-500 mr-1">{autoSaved ? '✓ Saved' : 'Auto-saving…'}</span>
+            <span className="text-xs text-gray-400 dark:text-neutral-500 mr-1">{autoSaved ? <><Emoji e="✅" size="0.8em" className="mr-1" />Saved</> : 'Auto-saving…'}</span>
             <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium">
               <Save size={14} />
               Done

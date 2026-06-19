@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2, Upload } from 'lucide-react';
 import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole, fetchMe } from '../lib/api';
 import { compressImageFile } from '../lib/image';
+import Emoji from '../components/Emoji';
 
 function monthlyPrice(seats) { return seats > 50 ? 1000 : 500; }
 
@@ -239,7 +240,7 @@ export default function AdminConsole({ onBack }) {
 
           <button onClick={saveSettings}
             className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${savedMsg ? 'bg-green-600 text-white' : 'bg-green-800 text-white hover:bg-green-900'}`}>
-            {savedMsg ? '✓ Saved!' : 'Save customization'}
+            {savedMsg ? <><Emoji e="✅" size="0.85em" className="mr-1" />Saved!</> : 'Save customization'}
           </button>
         </>
       )}

@@ -49,7 +49,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
           <Star size={16} fill={client.starred ? 'currentColor' : 'none'} />
         </button>
         <button onClick={() => onSelect(client.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-          <div className={`w-10 h-10 rounded-full ${getAvatarColor(client.name)} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+          <div className={`w-10 h-10 rounded-full ${getAvatarColor(client.name)} ${client.starred ? 'ring-2 ring-gold ring-offset-1 dark:ring-offset-neutral-900 ' : ''}flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
             {getInitials(client.name)}
           </div>
           <div className="flex-1 min-w-0">
