@@ -83,20 +83,20 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
   return (
     <div className="pb-20 md:pb-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl text-gray-900">Calendar</h1>
+        <h1 className="text-2xl text-gray-900 dark:text-neutral-100">Calendar</h1>
         <button onClick={openNew} className="flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-900">
           <Plus size={16} /> New event
         </button>
       </div>
 
       {/* Month nav */}
-      <div className="bg-white rounded-xl border border-gray-200 p-3 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-3 mb-3">
         <div className="flex items-center justify-between mb-2">
-          <button onClick={() => setCursor(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100"><ChevronLeft size={18} /></button>
-          <p className="font-semibold text-gray-900 text-sm">{MONTHS[month]} {year}</p>
-          <button onClick={() => setCursor(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100"><ChevronRight size={18} /></button>
+          <button onClick={() => setCursor(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"><ChevronLeft size={18} /></button>
+          <p className="font-semibold text-gray-900 dark:text-neutral-100 text-sm">{MONTHS[month]} {year}</p>
+          <button onClick={() => setCursor(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"><ChevronRight size={18} /></button>
         </div>
-        <div className="grid grid-cols-7 text-center text-xs text-gray-400 mb-1">
+        <div className="grid grid-cols-7 text-center text-xs text-gray-400 dark:text-neutral-500 mb-1">
           {DOW.map((d, i) => <div key={i}>{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -107,9 +107,9 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
             const has = eventsOn(day).length;
             return (
               <button key={i} onClick={() => setSelected(day)}
-                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative ${isSel ? 'bg-green-800 text-white' : isToday ? 'ring-1 ring-gold text-green-800 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}>
+                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative ${isSel ? 'bg-green-800 text-white' : isToday ? 'ring-1 ring-gold text-green-800 dark:text-green-300 font-semibold' : 'hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-neutral-300'}`}>
                 {day.getDate()}
-                {has > 0 && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSel ? 'bg-white' : 'bg-green-600'}`} />}
+                {has > 0 && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSel ? 'bg-white dark:bg-neutral-900' : 'bg-green-600'}`} />}
               </button>
             );
           })}
@@ -117,14 +117,14 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
       </div>
 
       {/* Selected day events */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900 text-sm">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
+          <h2 className="font-semibold text-gray-900 dark:text-neutral-100 text-sm">
             {selected.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
           </h2>
         </div>
         {dayEvents.length === 0 ? (
-          <div className="px-4 py-8 text-center text-gray-400">
+          <div className="px-4 py-8 text-center text-gray-400 dark:text-neutral-500">
             <CalendarDays size={28} className="mx-auto mb-2 opacity-40" />
             <p className="text-sm">No events this day.</p>
           </div>
@@ -132,20 +132,20 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
           <div key={ev.id} className="px-4 py-3 border-b border-gray-50 last:border-0">
             <div className="flex items-start justify-between gap-2">
               <button onClick={() => openEdit(ev)} className="text-left flex-1 min-w-0">
-                <p className="font-medium text-gray-900 text-sm">{ev.title}</p>
-                <p className="text-xs text-gray-500">
+                <p className="font-medium text-gray-900 dark:text-neutral-100 text-sm">{ev.title}</p>
+                <p className="text-xs text-gray-500 dark:text-neutral-400">
                   {new Date(ev.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                   {ev.location ? ` · ${ev.location}` : ''}
                   {ev.source === 'call' ? ' · from a call' : ''}
                 </p>
-                {enterprise && <p className="text-xs text-gray-400 mt-0.5">For: {audienceLabel(ev.audience)}</p>}
+                {enterprise && <p className="text-xs text-gray-400 dark:text-neutral-500 mt-0.5">For: {audienceLabel(ev.audience)}</p>}
               </button>
             </div>
             <div className="flex items-center gap-3 mt-2">
-              <a href={googleCalUrl(ev)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-green-700 hover:underline">
+              <a href={googleCalUrl(ev)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 hover:underline">
                 <ExternalLink size={12} /> Google
               </a>
-              <button onClick={() => downloadICS(ev)} className="flex items-center gap-1 text-xs text-green-700 hover:underline">
+              <button onClick={() => downloadICS(ev)} className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 hover:underline">
                 <Apple size={12} /> Apple / .ics
               </button>
               <button onClick={() => removeEvent(ev.id)} className="flex items-center gap-1 text-xs text-red-500 hover:underline ml-auto">
@@ -156,61 +156,61 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
         ))}
       </div>
 
-      <p className="text-xs text-gray-400 text-center mt-3">
+      <p className="text-xs text-gray-400 dark:text-neutral-500 text-center mt-3">
         Tip: “Google” / “Apple” add an event to your phone’s calendar. Events mentioned on calls are added here automatically.
       </p>
 
       {/* Editor modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-0 md:p-4" onClick={() => setEditing(null)}>
-          <div className="bg-white w-full md:max-w-md rounded-t-2xl md:rounded-2xl p-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-neutral-900 w-full md:max-w-md rounded-t-2xl md:rounded-2xl p-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900">{editing.id ? 'Edit event' : 'New event'}</h3>
-              <button onClick={() => setEditing(null)} className="text-gray-400"><X size={20} /></button>
+              <h3 className="font-bold text-gray-900 dark:text-neutral-100">{editing.id ? 'Edit event' : 'New event'}</h3>
+              <button onClick={() => setEditing(null)} className="text-gray-400 dark:text-neutral-500"><X size={20} /></button>
             </div>
             <div className="space-y-3">
               <input type="text" placeholder="Title" value={editing.title} onChange={e => setEditing(s => ({ ...s, title: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
               <div>
-                <label className="text-xs text-gray-500 font-medium block mb-1">Starts</label>
+                <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Starts</label>
                 <input type="datetime-local" value={editing.start} onChange={e => setEditing(s => ({ ...s, start: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+                  className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
               </div>
               <div>
-                <label className="text-xs text-gray-500 font-medium block mb-1">Ends (optional)</label>
+                <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Ends (optional)</label>
                 <input type="datetime-local" value={editing.end} onChange={e => setEditing(s => ({ ...s, end: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+                  className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
               </div>
               <input type="text" placeholder="Location (optional)" value={editing.location} onChange={e => setEditing(s => ({ ...s, location: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
               <textarea placeholder="Notes (optional)" value={editing.notes} onChange={e => setEditing(s => ({ ...s, notes: e.target.value }))} rows={2}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none" />
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none" />
 
               {/* Enterprise audience */}
               {isAdmin && (
-                <div className="border-t border-gray-100 pt-3">
-                  <label className="text-xs text-gray-500 font-medium flex items-center gap-1 mb-1"><Users size={12} /> Who's this for?</label>
+                <div className="border-t border-gray-100 dark:border-neutral-800 pt-3">
+                  <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium flex items-center gap-1 mb-1"><Users size={12} /> Who's this for?</label>
                   <select value={editing.audience === 'org' || editing.audience === 'me' ? editing.audience : 'specific'}
                     onChange={e => setEditing(s => ({ ...s, audience: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-600">
+                    className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-green-600">
                     <option value="me">Just me</option>
                     <option value="org">Everyone in the company</option>
                     <option value="specific">Specific people…</option>
                   </select>
                   {editing.audience !== 'org' && editing.audience !== 'me' && (
-                    <div className="mt-2 max-h-40 overflow-y-auto border border-gray-100 rounded-lg">
+                    <div className="mt-2 max-h-40 overflow-y-auto border border-gray-100 dark:border-neutral-800 rounded-lg">
                       {members.filter(m => m.id !== account.id).map(m => {
                         const on = editing.members?.includes(m.id);
                         return (
                           <button key={m.id} type="button"
                             onClick={() => setEditing(s => ({ ...s, members: on ? s.members.filter(x => x !== m.id) : [...(s.members || []), m.id] }))}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 text-sm">
-                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-800 text-white' : 'border border-gray-300'}`}>{on ? '✓' : ''}</span>
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm">
+                            <span className={`w-4 h-4 rounded flex items-center justify-center ${on ? 'bg-green-800 text-white' : 'border border-gray-300 dark:border-neutral-700'}`}>{on ? '✓' : ''}</span>
                             {m.email}
                           </button>
                         );
                       })}
-                      {members.length === 0 && <p className="text-xs text-gray-400 p-3">No other members yet.</p>}
+                      {members.length === 0 && <p className="text-xs text-gray-400 dark:text-neutral-500 p-3">No other members yet.</p>}
                     </div>
                   )}
                 </div>

@@ -40,82 +40,82 @@ export default function AddClient({ onBack, onSave }) {
   return (
     <div className="pb-20 md:pb-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
-          <ArrowLeft size={20} className="text-gray-600" />
+        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 -ml-1">
+          <ArrowLeft size={20} className="text-gray-600 dark:text-neutral-300" />
         </button>
-        <h1 className="text-xl text-gray-900">New Client</h1>
+        <h1 className="text-xl text-gray-900 dark:text-neutral-100">New Client</h1>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Basic Info</h3>
+        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Basic Info</h3>
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-gray-500 font-medium block mb-1">Full Name *</label>
+              <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Full Name *</label>
               <input
                 type="text"
                 required
                 placeholder="Jane Smith"
                 value={form.name}
                 onChange={e => set('name', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium block mb-1">Phone</label>
+              <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Phone</label>
               <input
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 value={form.phone}
                 onChange={e => set('phone', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium block mb-1">Email</label>
+              <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Email</label>
               <input
                 type="email"
                 placeholder="jane@example.com"
                 value={form.email}
                 onChange={e => set('email', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium block mb-1">Company</label>
+              <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Company</label>
               <input
                 type="text"
                 placeholder="Acme Corp"
                 value={form.company}
                 onChange={e => set('company', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium block mb-1">Position / Title</label>
+              <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Position / Title</label>
               <input
                 type="text"
                 placeholder="CEO"
                 value={form.position}
                 onChange={e => set('position', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
           </div>
         </div>
 
         {customFields.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Additional Details</h3>
+          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Additional Details</h3>
             <div className="space-y-3">
               {customFields.map(f => (
                 <div key={f.key}>
-                  <label className="text-xs text-gray-500 font-medium block mb-1">{f.label}</label>
+                  <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">{f.label}</label>
                   <input
                     type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                     value={form.customFields[f.key] || ''}
                     onChange={e => setCustom(f.key, e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                    className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                   />
                 </div>
               ))}
@@ -123,14 +123,14 @@ export default function AddClient({ onBack, onSave }) {
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Initial Notes</h3>
+        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-6">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Initial Notes</h3>
           <textarea
             placeholder="Any initial notes about this client..."
             value={form.notes}
             onChange={e => set('notes', e.target.value)}
             rows={3}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
+            className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
           />
         </div>
 

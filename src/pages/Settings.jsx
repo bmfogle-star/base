@@ -1,27 +1,56 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server } from 'lucide-react';
+import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server, Sun, Moon, Monitor } from 'lucide-react';
 import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
 import { isLoggedIn, startCheckout, createOrg, joinOrg } from '../lib/api';
+import { getTheme, setTheme } from '../lib/theme';
+
+function ThemeCard() {
+  const [theme, setThemeState] = useState(getTheme());
+  const options = [
+    { id: 'light', label: 'Light', icon: Sun },
+    { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'system', label: 'System', icon: Monitor },
+  ];
+  return (
+    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Appearance</h3>
+      <div className="grid grid-cols-3 gap-2">
+        {options.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => { setTheme(id); setThemeState(id); }}
+            className={`flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 transition-colors ${
+              theme === id ? 'border-green-700 bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-300' : 'border-gray-200 dark:border-neutral-700 text-gray-600 dark:text-neutral-300'
+            }`}
+          >
+            <Icon size={18} />
+            <span className="text-xs font-medium">{label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function ApiKeyField({ label, value, onChange, placeholder, hint }) {
   const [show, setShow] = useState(false);
   return (
     <div className="mb-3">
-      <label className="text-xs text-gray-500 font-medium block mb-1">{label}</label>
+      <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">{label}</label>
       <div className="relative">
         <input
           type={show ? 'text' : 'password'}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
         />
-        <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 hover:text-gray-600">
           {show ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       </div>
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-gray-400 dark:text-neutral-500 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -124,23 +153,26 @@ export default function Settings({ onKeysChange, onManageOrg }) {
   return (
     <div className="pb-20 md:pb-6">
       <div className="mb-6">
-        <h1 className="text-2xl text-gray-900">Settings</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your account and preferences</p>
+        <h1 className="text-2xl text-gray-900 dark:text-neutral-100">Settings</h1>
+        <p className="text-gray-500 dark:text-neutral-400 text-sm mt-1">Manage your account and preferences</p>
       </div>
 
+      {/* Appearance / theme */}
+      <ThemeCard />
+
       {/* Profile */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Your Profile</h3>
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Your Profile</h3>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-gray-500 font-medium block mb-1">Your Name</label>
+            <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Your Name</label>
             <input type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="John Smith"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+              className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
           </div>
           <div>
-            <label className="text-xs text-gray-500 font-medium block mb-1">Email</label>
+            <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Email</label>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@example.com"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+              className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
           </div>
         </div>
       </div>
@@ -149,12 +181,12 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       <AccountCard onManageOrg={onManageOrg} />
 
       {/* Backend connection */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Server size={15} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700">Spark Backend (optional)</h3>
+          <Server size={15} className="text-gray-500 dark:text-neutral-400" />
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Spark Backend (optional)</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-2">
+        <p className="text-xs text-gray-500 dark:text-neutral-400 mb-2">
           Connect your deployed Spark backend so you can sign in and use AI without
           entering your own keys. Leave blank to use the personal keys below.
         </p>
@@ -163,28 +195,28 @@ export default function Settings({ onKeysChange, onManageOrg }) {
           value={form.backendUrl}
           onChange={e => set('backendUrl', e.target.value)}
           placeholder="https://your-spark-backend.fly.dev"
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
         />
-        <p className="text-xs text-gray-400 mt-1">After changing this, tap Save, then sign in above.</p>
+        <p className="text-xs text-gray-400 dark:text-neutral-500 mt-1">After changing this, tap Save, then sign in above.</p>
       </div>
 
       {/* AI Keys */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Key size={15} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700">Personal API Keys (no account)</h3>
+          <Key size={15} className="text-gray-500 dark:text-neutral-400" />
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Personal API Keys (no account)</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-3">These keys power call transcription and AI extraction. All stored locally on your device.</p>
+        <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">These keys power call transcription and AI extraction. All stored locally on your device.</p>
 
         {/* Setup guide */}
-        <details className="mb-4 bg-green-50 border border-green-100 rounded-lg overflow-hidden">
-          <summary className="flex items-center gap-2 px-3 py-2.5 cursor-pointer text-xs font-semibold text-green-800 select-none">
-            <Info size={14} className="text-green-700" />
+        <details className="mb-4 bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900 rounded-lg overflow-hidden">
+          <summary className="flex items-center gap-2 px-3 py-2.5 cursor-pointer text-xs font-semibold text-green-800 dark:text-green-300 select-none">
+            <Info size={14} className="text-green-700 dark:text-green-400" />
             New here? How to set up your AI key (2 min)
           </summary>
-          <div className="px-3 pb-3 pt-1 text-xs text-green-800 space-y-2">
+          <div className="px-3 pb-3 pt-1 text-xs text-green-800 dark:text-green-300 space-y-2">
             <p>Spark uses AI to read your call transcripts and pull out the personal details about each client. To turn that on, you just need one free-to-create key:</p>
-            <ol className="list-decimal list-inside space-y-1.5 text-green-700">
+            <ol className="list-decimal list-inside space-y-1.5 text-green-700 dark:text-green-400">
               <li>Go to <span className="font-semibold">console.anthropic.com</span> and sign up (or log in).</li>
               <li>On the left, click <span className="font-semibold">API Keys</span>.</li>
               <li>Click <span className="font-semibold">Create Key</span>, give it a name like “Spark”, and copy the key (it starts with <span className="font-mono">sk-ant-</span>).</li>
@@ -192,7 +224,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
               <li>Tip: under <span className="font-semibold">Billing → Limits</span>, set a low monthly cap (e.g. $5) so there are no surprises. Each call costs only a fraction of a cent.</li>
             </ol>
             <p className="pt-1">The other keys below are <span className="font-semibold">optional</span> — file transcription already works for free on your device, and the meeting-bot keys are only needed if you want a bot to auto-join Zoom/Meet calls.</p>
-            <p className="text-green-600">🔒 Your key is stored only on this device and is never sent to Spark’s servers.</p>
+            <p className="text-green-600 dark:text-green-400">🔒 Your key is stored only on this device and is never sent to Spark’s servers.</p>
           </div>
         </details>
 
@@ -212,16 +244,16 @@ export default function Settings({ onKeysChange, onManageOrg }) {
           hint="Used by Whisper to transcribe uploaded call recordings. Get yours at platform.openai.com"
         />
 
-        <div className="border-t border-gray-100 pt-3 mt-1">
-          <p className="text-xs font-semibold text-gray-600 mb-2">Meeting bot (Zoom / Google Meet)</p>
+        <div className="border-t border-gray-100 dark:border-neutral-800 pt-3 mt-1">
+          <p className="text-xs font-semibold text-gray-600 dark:text-neutral-300 mb-2">Meeting bot (Zoom / Google Meet)</p>
 
-          <label className="text-xs text-gray-500 font-medium block mb-1">Your bot server URL (self-hosted, free)</label>
+          <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Your bot server URL (self-hosted, free)</label>
           <input
             type="url"
             value={form.botServerUrl}
             onChange={e => set('botServerUrl', e.target.value)}
             placeholder="https://your-server.com"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 mb-2"
+            className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 mb-2"
           />
           <ApiKeyField
             label="Bot server token"
@@ -232,7 +264,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
           />
 
           <details className="mt-1">
-            <summary className="text-xs text-green-700 cursor-pointer">Prefer a managed option instead? (paid)</summary>
+            <summary className="text-xs text-green-700 dark:text-green-400 cursor-pointer">Prefer a managed option instead? (paid)</summary>
             <div className="mt-2">
               <ApiKeyField
                 label="Recall.ai API Key"
@@ -247,16 +279,16 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       </div>
 
       {/* How it works */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">How call recording works</h3>
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">How call recording works</h3>
         <div className="space-y-3">
           <div className="flex gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Mic size={14} className="text-green-700" />
+            <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Mic size={14} className="text-green-700 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-700">Live mic</p>
-              <p className="text-xs text-gray-500">Records your microphone in real time. Put the call on speaker to capture both sides.</p>
+              <p className="text-xs font-semibold text-gray-700 dark:text-neutral-300">Live mic</p>
+              <p className="text-xs text-gray-500 dark:text-neutral-400">Records your microphone in real time. Put the call on speaker to capture both sides.</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -264,46 +296,46 @@ export default function Settings({ onKeysChange, onManageOrg }) {
               <span className="text-purple-600 text-xs font-bold">MP3</span>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-700">Upload recording</p>
-              <p className="text-xs text-gray-500">Upload any audio or video file (iPhone Voice Memos, MP3, MP4, M4A, WAV). Whisper transcribes it, Claude extracts the details.</p>
+              <p className="text-xs font-semibold text-gray-700 dark:text-neutral-300">Upload recording</p>
+              <p className="text-xs text-gray-500 dark:text-neutral-400">Upload any audio or video file (iPhone Voice Memos, MP3, MP4, M4A, WAV). Whisper transcribes it, Claude extracts the details.</p>
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Video size={14} className="text-green-600" />
+            <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Video size={14} className="text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-700">Zoom / Meet / Teams bot</p>
-              <p className="text-xs text-gray-500">Paste a meeting link and a bot joins automatically, records the whole call, and sends the transcript straight back to this client's profile.</p>
+              <p className="text-xs font-semibold text-gray-700 dark:text-neutral-300">Zoom / Meet / Teams bot</p>
+              <p className="text-xs text-gray-500 dark:text-neutral-400">Paste a meeting link and a bot joins automatically, records the whole call, and sends the transcript straight back to this client's profile.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Plan */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <CreditCard size={15} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700">Subscription</h3>
+          <CreditCard size={15} className="text-gray-500 dark:text-neutral-400" />
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Subscription</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div onClick={() => set('plan', 'premium')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'premium' ? 'border-green-600 bg-green-50 dark:bg-green-950/40' : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
-              <p className="font-bold text-gray-900 text-sm">Premium</p>
+              <p className="font-bold text-gray-900 dark:text-neutral-100 text-sm">Premium</p>
               <span className="text-xs bg-green-800 text-white px-2 py-0.5 rounded-full">Popular</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Up to 20 clients · 4 devices</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">$4.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">Up to 20 clients · 4 devices</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-neutral-100 mt-2">$4.99<span className="text-xs font-normal text-gray-500 dark:text-neutral-400">/mo</span></p>
           </div>
           <div onClick={() => set('plan', 'platinum')}
-            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'platinum' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            className={`border-2 rounded-xl p-3 cursor-pointer transition-colors ${form.plan === 'platinum' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'}`}>
             <div className="flex items-center justify-between">
-              <p className="font-bold text-gray-900 text-sm">Platinum</p>
+              <p className="font-bold text-gray-900 dark:text-neutral-100 text-sm">Platinum</p>
               <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">Pro</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Unlimited clients · 8 devices</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">$11.99<span className="text-xs font-normal text-gray-500">/mo</span></p>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">Unlimited clients · 8 devices</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-neutral-100 mt-2">$11.99<span className="text-xs font-normal text-gray-500 dark:text-neutral-400">/mo</span></p>
           </div>
         </div>
         {form.plan === 'premium' && (
@@ -355,7 +387,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
             </button>
             <button
               onClick={() => { setEntMode(entMode === 'create' ? null : 'create'); setEntError(''); setCreatedCode(''); }}
-              className="text-center bg-white text-gray-900 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
+              className="text-center bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
             >
               Create an Enterprise
             </button>
@@ -371,10 +403,10 @@ export default function Settings({ onKeysChange, onManageOrg }) {
                 onChange={e => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="e.g. 7K2QP9"
                 maxLength={6}
-                className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 tracking-widest uppercase focus:outline-none mb-2"
+                className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-neutral-100 tracking-widest uppercase focus:outline-none mb-2"
               />
               <button onClick={handleJoinEnterprise} disabled={entBusy || !joinCode.trim()}
-                className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
+                className="w-full bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
                 {entBusy ? 'Joining…' : 'Join'}
               </button>
             </div>
@@ -388,7 +420,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
                   <p className="text-xs text-gray-300 mb-1">Your enterprise is ready! Share this code with your team:</p>
                   <p className="text-2xl font-bold tracking-widest my-2">{createdCode}</p>
                   <p className="text-xs text-gray-300 mb-3">Employees enter it under “Join an Enterprise.”</p>
-                  <button onClick={() => window.location.reload()} className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold">
+                  <button onClick={() => window.location.reload()} className="w-full bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 py-2.5 rounded-lg text-sm font-semibold">
                     Done
                   </button>
                 </div>
@@ -400,10 +432,10 @@ export default function Settings({ onKeysChange, onManageOrg }) {
                     value={orgName}
                     onChange={e => setOrgName(e.target.value)}
                     placeholder="Company name"
-                    className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none mb-2"
+                    className="w-full rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-neutral-100 focus:outline-none mb-2"
                   />
                   <button onClick={handleCreateEnterprise} disabled={entBusy || !orgName.trim()}
-                    className="w-full bg-white text-gray-900 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
+                    className="w-full bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50">
                     {entBusy ? 'Creating…' : 'Create Enterprise'}
                   </button>
                 </>
@@ -415,17 +447,17 @@ export default function Settings({ onKeysChange, onManageOrg }) {
 
           <a
             href="mailto:sales@spark.app?subject=Spark%20Enterprise%20Inquiry"
-            className="block text-center text-xs text-gray-400 hover:text-gray-200 mt-3"
+            className="block text-center text-xs text-gray-400 dark:text-neutral-500 hover:text-gray-200 mt-3"
           >
             Or contact sales →
           </a>
         </div>
-        {checkoutError && <p className="text-xs text-red-600 mt-2">{checkoutError}</p>}
+        {checkoutError && <p className="text-xs text-red-600 dark:text-red-400 mt-2">{checkoutError}</p>}
       </div>
 
-      <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 flex gap-3">
-        <Info size={16} className="text-green-700 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-green-800">All API keys are stored locally on your device only. They are never sent to Spark servers.</p>
+      <div className="bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900 rounded-xl p-4 mb-4 flex gap-3">
+        <Info size={16} className="text-green-700 dark:text-green-400 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-green-800 dark:text-green-300">All API keys are stored locally on your device only. They are never sent to Spark servers.</p>
       </div>
 
       <button onClick={handleSave}

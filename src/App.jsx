@@ -152,24 +152,24 @@ export default function App() {
   return (
     <Layout page={page} onNav={handleNav}>
       {upgraded && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
-          <p className="text-sm font-medium text-green-800">🎉 Subscription active — thanks! Your plan is now upgraded.</p>
-          <button onClick={() => setUpgraded(false)} className="text-green-700 text-xs font-medium hover:underline">Dismiss</button>
+        <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-green-800 dark:text-green-300">🎉 Subscription active — thanks! Your plan is now upgraded.</p>
+          <button onClick={() => setUpgraded(false)} className="text-green-700 dark:text-green-400 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
       {deviceLimit && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-amber-800">{deviceLimit}</p>
-            <button onClick={() => setPage('settings')} className="text-amber-900 text-xs font-bold underline">Upgrade</button>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{deviceLimit}</p>
+            <button onClick={() => setPage('settings')} className="text-amber-900 dark:text-amber-200 text-xs font-bold underline">Upgrade</button>
           </div>
-          <button onClick={() => setDeviceLimit('')} className="text-amber-700 text-xs font-medium hover:underline">Dismiss</button>
+          <button onClick={() => setDeviceLimit('')} className="text-amber-700 dark:text-amber-300 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
       {calendarMsg && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
-          <button onClick={() => { setCalendarMsg(''); setPage('calendar'); }} className="text-sm font-medium text-green-800 text-left">{calendarMsg} <span className="underline">View</span></button>
-          <button onClick={() => setCalendarMsg('')} className="text-green-700 text-xs font-medium hover:underline">Dismiss</button>
+        <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+          <button onClick={() => { setCalendarMsg(''); setPage('calendar'); }} className="text-sm font-medium text-green-800 dark:text-green-300 text-left">{calendarMsg} <span className="underline">View</span></button>
+          <button onClick={() => setCalendarMsg('')} className="text-green-700 dark:text-green-400 text-xs font-medium hover:underline">Dismiss</button>
         </div>
       )}
       {page === 'dashboard' && (

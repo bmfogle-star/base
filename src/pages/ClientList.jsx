@@ -39,7 +39,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
 
   function ClientRow(client) {
     return (
-      <div key={client.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+      <div key={client.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors border-b border-gray-100 dark:border-neutral-800 last:border-0">
         <button
           onClick={() => onToggleStar(client.id)}
           className={`flex-shrink-0 ${client.starred ? 'text-gold' : 'text-gray-300 hover:text-gold'}`}
@@ -52,20 +52,20 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
             {getInitials(client.name)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-900 text-sm truncate">{client.name || 'Unnamed Client'}</p>
-            <p className="text-xs text-gray-500 truncate">{client.company || client.email || 'No details'}</p>
+            <p className="font-medium text-gray-900 dark:text-neutral-100 text-sm truncate">{client.name || 'Unnamed Client'}</p>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 truncate">{client.company || client.email || 'No details'}</p>
           </div>
           {client.attachments?.length > 0 && (
-            <span className="flex items-center gap-0.5 text-gray-400 text-xs flex-shrink-0">
+            <span className="flex items-center gap-0.5 text-gray-400 dark:text-neutral-500 text-xs flex-shrink-0">
               <Paperclip size={12} />{client.attachments.length}
             </span>
           )}
           {client.tags?.length > 0 && (
-            <span className="hidden sm:block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full truncate max-w-24">
+            <span className="hidden sm:block bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 text-xs px-2 py-0.5 rounded-full truncate max-w-24">
               {client.tags[0]}
             </span>
           )}
-          <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
+          <ChevronRight size={16} className="text-gray-400 dark:text-neutral-500 flex-shrink-0" />
         </button>
       </div>
     );
@@ -75,8 +75,8 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
     <div className="pb-20 md:pb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl text-gray-900">Clients</h1>
-          <p className="text-gray-500 text-sm">{clients.length} total</p>
+          <h1 className="text-2xl text-gray-900 dark:text-neutral-100">Clients</h1>
+          <p className="text-gray-500 dark:text-neutral-400 text-sm">{clients.length} total</p>
         </div>
         <button
           onClick={onAdd}
@@ -89,26 +89,26 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
 
       {/* Quick add options */}
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <button onClick={onScan} className="flex items-center justify-center gap-2 border border-gray-200 bg-white text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
+        <button onClick={onScan} className="flex items-center justify-center gap-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
           <ScanLine size={16} /> Scan card
         </button>
-        <button onClick={onImport} className="flex items-center justify-center gap-2 border border-gray-200 bg-white text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
+        <button onClick={onImport} className="flex items-center justify-center gap-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors">
           <Users size={16} /> Import contacts
         </button>
       </div>
 
       {/* Search */}
       <div className="relative mb-3">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500" />
         <input
           type="text"
           placeholder="Search clients, companies, tags..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full pl-9 pr-4 py-3 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
         />
         {search && (
-          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500">
             <X size={14} />
           </button>
         )}
@@ -116,9 +116,9 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
 
       {/* Directory */}
       {alpha.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-10 text-center">
           <div className="text-4xl mb-3">👤</div>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 dark:text-neutral-400 text-sm">
             {search ? 'No clients match your search.' : 'No clients yet. Add your first one!'}
           </p>
           {!search && (
@@ -129,7 +129,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
         </div>
       ) : q ? (
         // Flat results while searching
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
           {alpha.map(ClientRow)}
         </div>
       ) : (
@@ -138,17 +138,17 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
             <div className="mb-4">
               <div className="flex items-center gap-1.5 px-1 mb-1.5">
                 <Star size={13} className="text-gold" fill="currentColor" />
-                <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Favorites</h2>
+                <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Favorites</h2>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
                 {favorites.map(ClientRow)}
               </div>
             </div>
           )}
           {groups.map(group => (
             <div key={group.letter} className="mb-4">
-              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wide px-1 mb-1.5">{group.letter}</h2>
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide px-1 mb-1.5">{group.letter}</h2>
+              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
                 {group.items.map(ClientRow)}
               </div>
             </div>

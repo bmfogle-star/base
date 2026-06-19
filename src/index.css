@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode (toggle .dark on <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --brand: #0f5132;        /* deep, rich green */
   --brand-strong: #0b3d2e;
@@ -20,6 +23,15 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+.dark body {
+  background: #0a0a0a;
+  color: #f5f5f5;
+  color-scheme: dark;
+}
+
+/* Slightly brighter gold on dark for contrast */
+.dark { --gold: #d2af63; }
 
 #root {
   width: 100%;

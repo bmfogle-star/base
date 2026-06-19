@@ -32,10 +32,10 @@ function getAvatarColor(name) {
 
 function Section({ title, icon: Icon, children }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden mb-3">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-3">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
         <Icon size={15} className="text-gold" />
-        <h3 className="text-gray-900 text-base">{title}</h3>
+        <h3 className="text-gray-900 dark:text-neutral-100 text-base">{title}</h3>
       </div>
       <div className="p-4">{children}</div>
     </div>
@@ -44,7 +44,7 @@ function Section({ title, icon: Icon, children }) {
 
 function TagChip({ label, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1 bg-green-50 text-green-800 text-xs px-2 py-1 rounded-full">
+    <span className="inline-flex items-center gap-1 bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-300 text-xs px-2 py-1 rounded-full">
       {label}
       {onRemove && <button onClick={onRemove}><X size={11} /></button>}
     </span>
@@ -179,16 +179,16 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
   function field(label, value, field, type = 'text', icon) {
     return (
       <div className="mb-3">
-        <label className="text-xs text-gray-500 font-medium block mb-1">{label}</label>
+        <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">{label}</label>
         {editing ? (
           <input
             type={type}
             value={draft[field] || ''}
             onChange={e => setDraft(p => ({ ...p, [field]: e.target.value }))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+            className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
           />
         ) : (
-          <p className="text-sm text-gray-800">{value || <span className="text-gray-400 italic">Not set</span>}</p>
+          <p className="text-sm text-gray-800 dark:text-neutral-100">{value || <span className="text-gray-400 dark:text-neutral-500 italic">Not set</span>}</p>
         )}
       </div>
     );
@@ -356,10 +356,10 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
     <div className="pb-20 md:pb-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 -ml-1">
-          <ArrowLeft size={20} className="text-gray-600" />
+        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 -ml-1">
+          <ArrowLeft size={20} className="text-gray-600 dark:text-neutral-300" />
         </button>
-        <span className="font-medium text-gray-600 text-sm">Back to Clients</span>
+        <span className="font-medium text-gray-600 dark:text-neutral-300 text-sm">Back to Clients</span>
         <div className="flex-1" />
         {!editing && (
           <>
@@ -380,7 +380,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         )}
         {editing && (
           <>
-            <span className="text-xs text-gray-400 mr-1">{autoSaved ? '✓ Saved' : 'Auto-saving…'}</span>
+            <span className="text-xs text-gray-400 dark:text-neutral-500 mr-1">{autoSaved ? '✓ Saved' : 'Auto-saving…'}</span>
             <button onClick={handleSave} className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium">
               <Save size={14} />
               Done
@@ -390,7 +390,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       </div>
 
       {/* Avatar + name */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-3 flex items-center gap-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 mb-3 flex items-center gap-4">
         <div className={`w-16 h-16 rounded-full ${getAvatarColor(c.name)} flex items-center justify-center text-white text-xl font-bold flex-shrink-0`}>
           {getInitials(c.name)}
         </div>
@@ -401,12 +401,12 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               value={draft.name || ''}
               onChange={e => setDraft(p => ({ ...p, name: e.target.value }))}
               placeholder="Full Name"
-              className="text-xl text-gray-900 w-full border-b border-gray-300 focus:outline-none focus:border-green-600 pb-1"
+              className="text-xl text-gray-900 dark:text-neutral-100 w-full border-b border-gray-300 dark:border-neutral-700 focus:outline-none focus:border-green-600 pb-1"
             />
           ) : (
-            <h2 className="text-xl text-gray-900">{c.name || 'Unnamed Client'}</h2>
+            <h2 className="text-xl text-gray-900 dark:text-neutral-100">{c.name || 'Unnamed Client'}</h2>
           )}
-          <p className="text-sm text-gray-500 mt-1">{c.company || ''} {c.position ? `· ${c.position}` : ''}</p>
+          <p className="text-sm text-gray-500 dark:text-neutral-400 mt-1">{c.company || ''} {c.position ? `· ${c.position}` : ''}</p>
           {c.attachments?.length > 0 && (
             <div className="flex items-center gap-2 mt-2">
               <div className="flex -space-x-2">
@@ -414,7 +414,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                   <img key={a.id} src={a.dataUrl} alt="" className="w-7 h-7 rounded-full border-2 border-white object-cover" />
                 ))}
               </div>
-              <span className="flex items-center gap-1 text-xs text-gray-400">
+              <span className="flex items-center gap-1 text-xs text-gray-400 dark:text-neutral-500">
                 <Paperclip size={12} />{c.attachments.length} {c.attachments.length === 1 ? 'file' : 'files'}
               </span>
             </div>
@@ -423,9 +423,9 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       </div>
 
       {/* Tags */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-3">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <Tag size={14} className="text-gray-400" />
+          <Tag size={14} className="text-gray-400 dark:text-neutral-500" />
           {c.tags?.map((tag, i) => (
             <TagChip key={i} label={tag} onRemove={editing ? () => setDraft(p => ({ ...p, tags: p.tags.filter((_, j) => j !== i) })) : null} />
           ))}
@@ -437,36 +437,36 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                 value={newTag}
                 onChange={e => setNewTag(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addTag()}
-                className="text-xs border border-gray-200 rounded-full px-2 py-1 w-24 focus:outline-none focus:ring-1 focus:ring-green-600"
+                className="text-xs border border-gray-200 dark:border-neutral-700 rounded-full px-2 py-1 w-24 focus:outline-none focus:ring-1 focus:ring-green-600"
               />
-              <button onClick={addTag} className="text-green-700"><Plus size={14} /></button>
+              <button onClick={addTag} className="text-green-700 dark:text-green-400"><Plus size={14} /></button>
             </div>
           )}
-          {!c.tags?.length && !editing && <span className="text-xs text-gray-400 italic">No tags</span>}
+          {!c.tags?.length && !editing && <span className="text-xs text-gray-400 dark:text-neutral-500 italic">No tags</span>}
         </div>
       </div>
 
       {/* Prep for a call (AI cheat sheet) */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-3">
         {!points && !pointsBusy ? (
-          <button onClick={generatePoints} className="w-full flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors">
+          <button onClick={generatePoints} className="w-full flex items-center justify-center gap-2 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors">
             <Heart size={15} /> Prep for a call (AI cheat sheet)
           </button>
         ) : pointsBusy ? (
-          <p className="text-sm text-gray-500 text-center py-2">Building your cheat sheet…</p>
+          <p className="text-sm text-gray-500 dark:text-neutral-400 text-center py-2">Building your cheat sheet…</p>
         ) : (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-700">Talking points</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Talking points</h3>
               <div className="flex gap-2">
-                <button onClick={generatePoints} className="text-xs text-green-700 hover:underline">Refresh</button>
-                <button onClick={() => setPoints('')} className="text-xs text-gray-400 hover:underline">Hide</button>
+                <button onClick={generatePoints} className="text-xs text-green-700 dark:text-green-400 hover:underline">Refresh</button>
+                <button onClick={() => setPoints('')} className="text-xs text-gray-400 dark:text-neutral-500 hover:underline">Hide</button>
               </div>
             </div>
-            <p className="text-sm text-gray-800 whitespace-pre-wrap">{points}</p>
+            <p className="text-sm text-gray-800 dark:text-neutral-100 whitespace-pre-wrap">{points}</p>
           </div>
         )}
-        {pointsError && <p className="text-xs text-red-600 mt-2">{pointsError}</p>}
+        {pointsError && <p className="text-xs text-red-600 dark:text-red-400 mt-2">{pointsError}</p>}
       </div>
 
       {/* Contact info */}
@@ -481,7 +481,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       <Section title="Personal Details" icon={Heart}>
         {field('Birthday', c.birthday, 'birthday', 'date')}
         <div className="mb-3">
-          <label className="text-xs text-gray-500 font-medium block mb-2">Hobbies & Interests</label>
+          <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-2">Hobbies & Interests</label>
           <div className="flex flex-wrap gap-1.5">
             {c.hobbies?.map((h, i) => (
               <span key={i} className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 text-xs px-2 py-1 rounded-full">
@@ -497,44 +497,44 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                   value={newHobby}
                   onChange={e => setNewHobby(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addHobby()}
-                  className="text-xs border border-gray-200 rounded-full px-2 py-1 w-28 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  className="text-xs border border-gray-200 dark:border-neutral-700 rounded-full px-2 py-1 w-28 focus:outline-none focus:ring-1 focus:ring-green-600"
                 />
                 <button onClick={addHobby} className="text-purple-600"><Plus size={14} /></button>
               </div>
             )}
-            {!c.hobbies?.length && !editing && <span className="text-xs text-gray-400 italic">None noted yet</span>}
+            {!c.hobbies?.length && !editing && <span className="text-xs text-gray-400 dark:text-neutral-500 italic">None noted yet</span>}
           </div>
         </div>
         <div>
-          <label className="text-xs text-gray-500 font-medium block mb-1">Notes</label>
+          <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Notes</label>
           {editing ? (
             <textarea
               value={draft.notes || ''}
               onChange={e => setDraft(p => ({ ...p, notes: e.target.value }))}
               rows={3}
               placeholder="Any personal notes..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
+              className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none"
             />
           ) : (
-            <p className="text-sm text-gray-800 whitespace-pre-wrap">{c.notes || <span className="text-gray-400 italic">No notes yet</span>}</p>
+            <p className="text-sm text-gray-800 dark:text-neutral-100 whitespace-pre-wrap">{c.notes || <span className="text-gray-400 dark:text-neutral-500 italic">No notes yet</span>}</p>
           )}
         </div>
 
         {/* Org custom fields */}
         {orgCustomFields.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-neutral-800 space-y-3">
             {orgCustomFields.map(f => (
               <div key={f.key}>
-                <label className="text-xs text-gray-500 font-medium block mb-1">{f.label}</label>
+                <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">{f.label}</label>
                 {editing ? (
                   <input
                     type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                     value={draft.customFields?.[f.key] || ''}
                     onChange={e => setDraft(p => ({ ...p, customFields: { ...(p.customFields || {}), [f.key]: e.target.value } }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                    className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                   />
                 ) : (
-                  <p className="text-sm text-gray-800">{c.customFields?.[f.key] || <span className="text-gray-400 italic">Not set</span>}</p>
+                  <p className="text-sm text-gray-800 dark:text-neutral-100">{c.customFields?.[f.key] || <span className="text-gray-400 dark:text-neutral-500 italic">Not set</span>}</p>
                 )}
               </div>
             ))}
@@ -542,25 +542,25 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         )}
 
         {/* Attachments */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <label className="text-xs text-gray-500 font-medium block mb-2">Files & Photos</label>
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
+          <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-2">Files & Photos</label>
 
           <div className="grid grid-cols-3 gap-2 mb-2">
             <button
               onClick={() => cameraInputRef.current?.click()}
-              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg text-xs font-medium text-gray-600 dark:text-neutral-300 hover:border-green-600 hover:text-green-700 transition-colors"
             >
               <Camera size={18} /> Take Photo
             </button>
             <button
               onClick={() => photoInputRef.current?.click()}
-              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg text-xs font-medium text-gray-600 dark:text-neutral-300 hover:border-green-600 hover:text-green-700 transition-colors"
             >
               <ImageIcon size={18} /> Photo Library
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-green-600 hover:text-green-700 transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg text-xs font-medium text-gray-600 dark:text-neutral-300 hover:border-green-600 hover:text-green-700 transition-colors"
             >
               <Paperclip size={18} /> Attach File
             </button>
@@ -593,31 +593,31 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
             className="hidden"
           />
 
-          {attachError && <p className="text-xs text-red-600 mb-2">{attachError}</p>}
+          {attachError && <p className="text-xs text-red-600 dark:text-red-400 mb-2">{attachError}</p>}
 
           {!c.attachments?.length ? (
-            <p className="text-xs text-gray-400 italic">No files or photos yet. Tap “Add” to attach.</p>
+            <p className="text-xs text-gray-400 dark:text-neutral-500 italic">No files or photos yet. Tap “Add” to attach.</p>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {c.attachments.map((att) => {
                 const isImage = att.type?.startsWith('image/');
                 return (
-                  <div key={att.id} className="relative group border border-gray-200 rounded-lg overflow-hidden">
+                  <div key={att.id} className="relative group border border-gray-200 dark:border-neutral-700 rounded-lg overflow-hidden">
                     <a href={att.dataUrl} target="_blank" rel="noopener noreferrer" download={att.name} className="block">
                       {isImage ? (
                         <img src={att.dataUrl} alt={att.name} className="w-full h-20 object-cover" />
                       ) : (
-                        <div className="w-full h-20 flex flex-col items-center justify-center bg-gray-50 px-1">
-                          <FileText size={20} className="text-gray-400" />
-                          <span className="text-[10px] text-gray-500 truncate w-full text-center mt-1">{att.name}</span>
+                        <div className="w-full h-20 flex flex-col items-center justify-center bg-gray-50 dark:bg-neutral-800 px-1">
+                          <FileText size={20} className="text-gray-400 dark:text-neutral-500" />
+                          <span className="text-[10px] text-gray-500 dark:text-neutral-400 truncate w-full text-center mt-1">{att.name}</span>
                         </div>
                       )}
                     </a>
-                    <div className="flex items-center justify-between px-1.5 py-1 bg-white border-t border-gray-100">
-                      <span className="text-[10px] text-gray-400">{formatSize(att.size)}</span>
+                    <div className="flex items-center justify-between px-1.5 py-1 bg-white dark:bg-neutral-900 border-t border-gray-100 dark:border-neutral-800">
+                      <span className="text-[10px] text-gray-400 dark:text-neutral-500">{formatSize(att.size)}</span>
                       <div className="flex items-center gap-1">
-                        <a href={att.dataUrl} download={att.name} className="text-gray-400 hover:text-green-700"><Download size={12} /></a>
-                        <button onClick={() => removeAttachment(att.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={12} /></button>
+                        <a href={att.dataUrl} download={att.name} className="text-gray-400 dark:text-neutral-500 hover:text-green-700"><Download size={12} /></a>
+                        <button onClick={() => removeAttachment(att.id)} className="text-gray-400 dark:text-neutral-500 hover:text-red-500"><Trash2 size={12} /></button>
                       </div>
                     </div>
                   </div>
@@ -631,13 +631,13 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       {/* Family */}
       <Section title="Family Members" icon={Users}>
         {c.family?.length === 0 && !editing && (
-          <p className="text-sm text-gray-400 italic">No family info noted yet</p>
+          <p className="text-sm text-gray-400 dark:text-neutral-500 italic">No family info noted yet</p>
         )}
         {c.family?.map((member, i) => (
-          <div key={member.id || i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+          <div key={member.id || i} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-neutral-800 last:border-0">
             <div>
-              <p className="text-sm font-medium text-gray-800">{member.name}</p>
-              <p className="text-xs text-gray-500">{member.relation}</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-neutral-100">{member.name}</p>
+              <p className="text-xs text-gray-500 dark:text-neutral-400">{member.relation}</p>
             </div>
             {editing && (
               <button onClick={() => setDraft(p => ({ ...p, family: p.family.filter((_, j) => j !== i) }))} className="text-red-400">
@@ -653,14 +653,14 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               placeholder="Name"
               value={newFamilyMember.name}
               onChange={e => setNewFamilyMember(p => ({ ...p, name: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+              className="flex-1 border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <input
               type="text"
               placeholder="Relation"
               value={newFamilyMember.relation}
               onChange={e => setNewFamilyMember(p => ({ ...p, relation: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+              className="flex-1 border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <button onClick={addFamily} className="bg-green-800 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
@@ -672,13 +672,13 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       {/* Events */}
       <Section title="Upcoming Events" icon={Calendar}>
         {c.upcomingEvents?.length === 0 && !editing && (
-          <p className="text-sm text-gray-400 italic">No events noted yet</p>
+          <p className="text-sm text-gray-400 dark:text-neutral-500 italic">No events noted yet</p>
         )}
         {c.upcomingEvents?.map((event, i) => (
-          <div key={event.id || i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+          <div key={event.id || i} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-neutral-800 last:border-0">
             <div>
-              <p className="text-sm font-medium text-gray-800">{event.title}</p>
-              {event.date && <p className="text-xs text-gray-500">{new Date(event.date).toLocaleDateString()}</p>}
+              <p className="text-sm font-medium text-gray-800 dark:text-neutral-100">{event.title}</p>
+              {event.date && <p className="text-xs text-gray-500 dark:text-neutral-400">{new Date(event.date).toLocaleDateString()}</p>}
             </div>
             {editing && (
               <button onClick={() => setDraft(p => ({ ...p, upcomingEvents: p.upcomingEvents.filter((_, j) => j !== i) }))} className="text-red-400">
@@ -694,13 +694,13 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               placeholder="Event title"
               value={newEvent.title}
               onChange={e => setNewEvent(p => ({ ...p, title: e.target.value }))}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+              className="flex-1 border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <input
               type="date"
               value={newEvent.date}
               onChange={e => setNewEvent(p => ({ ...p, date: e.target.value }))}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+              className="border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
             />
             <button onClick={addEvent} className="bg-green-800 text-white px-3 py-2 rounded-lg">
               <Plus size={14} />
@@ -714,14 +714,14 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         <div className="grid grid-cols-2 gap-2 mb-2">
           <button
             onClick={() => onRecord(client.id)}
-            className="flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors"
+            className="flex items-center justify-center gap-2 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors"
           >
             <Mic size={15} />
             Record
           </button>
           <button
             onClick={() => setQuickOpen(o => !o)}
-            className="flex items-center justify-center gap-2 border border-gray-200 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors"
+            className="flex items-center justify-center gap-2 border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-neutral-300 rounded-lg py-2.5 text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors"
           >
             <Plus size={15} />
             Quick log
@@ -735,10 +735,10 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
               onChange={e => setQuickText(e.target.value)}
               rows={2}
               placeholder="What did you talk about? (e.g. 'Called Jane, she's interested in upgrading next month')"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none mb-2"
+              className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none mb-2"
             />
             <div className="flex gap-2">
-              <button onClick={() => { setQuickOpen(false); setQuickText(''); }} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
+              <button onClick={() => { setQuickOpen(false); setQuickText(''); }} className="flex-1 border border-gray-300 dark:border-neutral-700 text-gray-600 dark:text-neutral-300 py-2 rounded-lg text-sm">Cancel</button>
               <button onClick={saveQuickLog} disabled={!quickText.trim()} className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">Save note</button>
             </div>
           </div>
@@ -749,30 +749,30 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
           <button
             onClick={generateFollowupEmail}
             disabled={emailBusy}
-            className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-700 rounded-lg py-2.5 text-sm font-medium mb-3 hover:border-green-600 hover:text-green-700 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-neutral-300 rounded-lg py-2.5 text-sm font-medium mb-3 hover:border-green-600 hover:text-green-700 transition-colors disabled:opacity-50"
           >
             <Mail size={15} />
             {emailBusy ? 'Drafting…' : 'Draft follow-up email (AI)'}
           </button>
         )}
-        {emailError && <p className="text-xs text-red-600 mb-2">{emailError}</p>}
+        {emailError && <p className="text-xs text-red-600 dark:text-red-400 mb-2">{emailError}</p>}
         {emailDraft && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
-            <p className="text-xs font-semibold text-gray-700 mb-1">Subject</p>
-            <p className="text-sm text-gray-900 mb-2">{emailDraft.subject}</p>
-            <p className="text-xs font-semibold text-gray-700 mb-1">Body</p>
-            <p className="text-sm text-gray-800 whitespace-pre-wrap mb-3">{emailDraft.body}</p>
+          <div className="bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg p-3 mb-3">
+            <p className="text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-1">Subject</p>
+            <p className="text-sm text-gray-900 dark:text-neutral-100 mb-2">{emailDraft.subject}</p>
+            <p className="text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-1">Body</p>
+            <p className="text-sm text-gray-800 dark:text-neutral-100 whitespace-pre-wrap mb-3">{emailDraft.body}</p>
             <div className="flex gap-2">
               <button onClick={() => navigator.clipboard?.writeText(`${emailDraft.subject}\n\n${emailDraft.body}`)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-xs font-medium hover:bg-gray-100">Copy</button>
+                className="flex-1 border border-gray-300 dark:border-neutral-700 text-gray-700 dark:text-neutral-300 py-2 rounded-lg text-xs font-medium hover:bg-gray-100 dark:hover:bg-neutral-800">Copy</button>
               <a href={mailtoLink()} className="flex-1 text-center bg-green-800 text-white py-2 rounded-lg text-xs font-semibold hover:bg-green-900">Open in email</a>
-              <button onClick={() => setEmailDraft(null)} className="px-3 text-gray-400 text-xs">Close</button>
+              <button onClick={() => setEmailDraft(null)} className="px-3 text-gray-400 dark:text-neutral-500 text-xs">Close</button>
             </div>
           </div>
         )}
 
         {client.callHistory?.length === 0 && (
-          <p className="text-sm text-gray-400 italic text-center py-2">No calls recorded yet</p>
+          <p className="text-sm text-gray-400 dark:text-neutral-500 italic text-center py-2">No calls recorded yet</p>
         )}
 
         {/* Sort controls */}
@@ -783,7 +783,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                 key={key}
                 onClick={() => setCallSort(key)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  callSort === key ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  callSort === key ? 'bg-green-800 text-white' : 'bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 hover:bg-gray-200'
                 }`}
               >
                 {label}
@@ -793,7 +793,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
         )}
 
         {orderCalls(client.callHistory, callSort).map((call, i, arr) => (
-          <div key={call.id || i} className={`border rounded-lg p-3 mb-2 ${call.pinned ? 'border-green-300 bg-green-50/40' : 'border-gray-100'}`}>
+          <div key={call.id || i} className={`border rounded-lg p-3 mb-2 ${call.pinned ? 'border-green-300 bg-green-50/40' : 'border-gray-100 dark:border-neutral-800'}`}>
             {/* Title row */}
             <div className="flex items-center justify-between gap-2 mb-1">
               {editingTitleId === call.id ? (
@@ -805,26 +805,26 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                     value={titleDraft}
                     onChange={e => setTitleDraft(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && saveCallTitle(call.id)}
-                    className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
+                    className="flex-1 border border-gray-200 dark:border-neutral-700 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
                   />
-                  <button onClick={() => saveCallTitle(call.id)} className="text-green-700"><Save size={14} /></button>
-                  <button onClick={() => setEditingTitleId(null)} className="text-gray-400"><X size={14} /></button>
+                  <button onClick={() => saveCallTitle(call.id)} className="text-green-700 dark:text-green-400"><Save size={14} /></button>
+                  <button onClick={() => setEditingTitleId(null)} className="text-gray-400 dark:text-neutral-500"><X size={14} /></button>
                 </div>
               ) : (
-                <button onClick={() => startEditTitle(call)} className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 hover:text-green-700 group text-left">
-                  {call.pinned && <Pin size={12} className="text-green-600 flex-shrink-0" fill="currentColor" />}
-                  {call.title || <span className="text-gray-400 font-normal italic">Add a title…</span>}
+                <button onClick={() => startEditTitle(call)} className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 dark:text-neutral-100 hover:text-green-700 group text-left">
+                  {call.pinned && <Pin size={12} className="text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" />}
+                  {call.title || <span className="text-gray-400 dark:text-neutral-500 font-normal italic">Add a title…</span>}
                   <Edit2 size={11} className="text-gray-300 group-hover:text-green-700 flex-shrink-0" />
                 </button>
               )}
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 {callSort === 'manual' && (
                   <>
-                    <button onClick={() => moveCall(call.id, -1)} disabled={i === 0} className="text-gray-400 hover:text-green-700 disabled:opacity-30"><ChevronUp size={15} /></button>
-                    <button onClick={() => moveCall(call.id, 1)} disabled={i === arr.length - 1} className="text-gray-400 hover:text-green-700 disabled:opacity-30"><ChevronDown size={15} /></button>
+                    <button onClick={() => moveCall(call.id, -1)} disabled={i === 0} className="text-gray-400 dark:text-neutral-500 hover:text-green-700 disabled:opacity-30"><ChevronUp size={15} /></button>
+                    <button onClick={() => moveCall(call.id, 1)} disabled={i === arr.length - 1} className="text-gray-400 dark:text-neutral-500 hover:text-green-700 disabled:opacity-30"><ChevronDown size={15} /></button>
                   </>
                 )}
-                <button onClick={() => togglePin(call.id)} title={call.pinned ? 'Unpin' : 'Pin to top'} className={call.pinned ? 'text-green-600' : 'text-gray-300 hover:text-green-600'}>
+                <button onClick={() => togglePin(call.id)} title={call.pinned ? 'Unpin' : 'Pin to top'} className={call.pinned ? 'text-green-600 dark:text-green-400' : 'text-gray-300 hover:text-green-600'}>
                   <Pin size={14} fill={call.pinned ? 'currentColor' : 'none'} />
                 </button>
               </div>
@@ -838,30 +838,30 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
                     type="datetime-local"
                     value={callDateDraft}
                     onChange={e => setCallDateDraft(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-600"
+                    className="flex-1 border border-gray-200 dark:border-neutral-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-600"
                   />
-                  <button onClick={() => saveCallDate(call.id)} className="text-green-700"><Save size={14} /></button>
-                  <button onClick={() => setEditingCallId(null)} className="text-gray-400"><X size={14} /></button>
+                  <button onClick={() => saveCallDate(call.id)} className="text-green-700 dark:text-green-400"><Save size={14} /></button>
+                  <button onClick={() => setEditingCallId(null)} className="text-gray-400 dark:text-neutral-500"><X size={14} /></button>
                 </div>
               ) : (
                 <button
                   onClick={() => startEditCallDate(call)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-700 group"
+                  className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-neutral-400 hover:text-green-700 group"
                   title="Edit call date & time"
                 >
-                  <Clock size={12} className="text-gray-400 group-hover:text-green-700" />
+                  <Clock size={12} className="text-gray-400 dark:text-neutral-500 group-hover:text-green-700" />
                   {formatCallDateTime(call.date)}
                   <Edit2 size={10} className="text-gray-300 group-hover:text-green-700" />
                 </button>
               )}
-              {call.duration && <span className="text-xs text-gray-400 flex-shrink-0">{call.duration}</span>}
+              {call.duration && <span className="text-xs text-gray-400 dark:text-neutral-500 flex-shrink-0">{call.duration}</span>}
             </div>
-            {call.source && <p className="text-[11px] text-gray-400 mb-1">via {call.source}</p>}
-            {call.summary && <p className="text-sm text-gray-700 mb-2">{call.summary}</p>}
+            {call.source && <p className="text-[11px] text-gray-400 dark:text-neutral-500 mb-1">via {call.source}</p>}
+            {call.summary && <p className="text-sm text-gray-700 dark:text-neutral-300 mb-2">{call.summary}</p>}
             {call.extracted && (
-              <div className="bg-gray-50 rounded-lg p-2.5 mt-2">
-                <p className="text-xs font-semibold text-gray-600 mb-1">AI Extracted Info:</p>
-                <p className="text-xs text-gray-700 whitespace-pre-wrap">{call.extracted}</p>
+              <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-2.5 mt-2">
+                <p className="text-xs font-semibold text-gray-600 dark:text-neutral-300 mb-1">AI Extracted Info:</p>
+                <p className="text-xs text-gray-700 dark:text-neutral-300 whitespace-pre-wrap">{call.extracted}</p>
               </div>
             )}
           </div>
@@ -874,16 +874,16 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
           {!confirmDelete ? (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="w-full flex items-center justify-center gap-2 text-red-500 border border-red-200 rounded-xl py-3 text-sm hover:bg-red-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-red-500 border border-red-200 dark:border-red-900 rounded-xl py-3 text-sm hover:bg-red-50 transition-colors"
             >
               <Trash2 size={15} />
               Delete Client
             </button>
           ) : (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-              <p className="text-sm font-medium text-red-700 mb-3">Are you sure you want to delete {client.name}?</p>
+            <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl p-4 text-center">
+              <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-3">Are you sure you want to delete {client.name}?</p>
               <div className="flex gap-2">
-                <button onClick={() => setConfirmDelete(false)} className="flex-1 border border-gray-300 rounded-lg py-2 text-sm text-gray-600 hover:bg-gray-100">
+                <button onClick={() => setConfirmDelete(false)} className="flex-1 border border-gray-300 dark:border-neutral-700 rounded-lg py-2 text-sm text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800">
                   Cancel
                 </button>
                 <button onClick={() => onDelete(client.id)} className="flex-1 bg-red-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-red-700">
