@@ -21,7 +21,7 @@
 
 body {
   margin: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
+  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   background: #f5f6f4;
   color: var(--ink);
@@ -46,16 +46,18 @@ body {
   min-height: 100svh;
 }
 
-/* Premium serif display headings */
+/* Amex-style headings — clean Franklin-Gothic sans, tight & confident */
 h1, h2, h3 {
-  font-family: 'Fraunces', Georgia, 'Times New Roman', serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-/* Brand wordmark + opt-in serif display */
+/* Brand wordmark + display text */
 .font-display {
-  font-family: 'Fraunces', Georgia, serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 /* ── Amex-inspired engraved background pattern ── */
