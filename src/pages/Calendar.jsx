@@ -109,7 +109,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
               <button key={i} onClick={() => setSelected(day)}
                 className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative ${isSel ? 'bg-green-800 text-white' : isToday ? 'ring-1 ring-gold text-green-800 dark:text-green-300 font-semibold' : 'hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-neutral-300'}`}>
                 {day.getDate()}
-                {has > 0 && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSel ? 'bg-white dark:bg-neutral-900' : 'bg-green-600'}`} />}
+                {has > 0 && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 bg-gold`} />}
               </button>
             );
           })}

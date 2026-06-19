@@ -138,7 +138,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
             <div className="mb-4">
               <div className="flex items-center gap-1.5 px-1 mb-1.5">
                 <Star size={13} className="text-gold" fill="currentColor" />
-                <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Favorites</h2>
+                <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em]">Favorites</h2>
               </div>
               <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
                 {favorites.map(ClientRow)}
@@ -147,7 +147,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
           )}
           {groups.map(group => (
             <div key={group.letter} className="mb-4">
-              <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide px-1 mb-1.5">{group.letter}</h2>
+              <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em] px-1 mb-1.5">{group.letter}</h2>
               <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
                 {group.items.map(ClientRow)}
               </div>
