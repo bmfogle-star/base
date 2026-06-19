@@ -10,12 +10,11 @@ function ThemeCard() {
   const options = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'system', label: 'System', icon: Monitor },
   ];
   return (
     <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Appearance</h3>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {options.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -183,7 +182,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       {/* Backend connection */}
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Server size={15} className="text-gray-500 dark:text-neutral-400" />
+          <Server size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Spark Backend (optional)</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-neutral-400 mb-2">
@@ -203,7 +202,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       {/* AI Keys */}
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Key size={15} className="text-gray-500 dark:text-neutral-400" />
+          <Key size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Personal API Keys (no account)</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">These keys power call transcription and AI extraction. All stored locally on your device.</p>
@@ -315,7 +314,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       {/* Plan */}
       <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <CreditCard size={15} className="text-gray-500 dark:text-neutral-400" />
+          <CreditCard size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Subscription</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">

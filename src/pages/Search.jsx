@@ -66,7 +66,7 @@ export default function Search({ clients, events, onSelectClient, onBack }) {
 
       {results.clients.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide px-1 mb-1.5">Clients</h2>
+          <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em] px-1 mb-1.5">Clients</h2>
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
             {results.clients.map(c => (
               <button key={c.id} onClick={() => onSelectClient(c.id)} className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 dark:hover:bg-neutral-800 text-left">
@@ -83,7 +83,7 @@ export default function Search({ clients, events, onSelectClient, onBack }) {
 
       {results.calls.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide px-1 mb-1.5">Calls</h2>
+          <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em] px-1 mb-1.5">Calls</h2>
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
             {results.calls.map(({ client, call }) => (
               <button key={call.id} onClick={() => onSelectClient(client.id)} className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 dark:hover:bg-neutral-800 text-left">
@@ -100,7 +100,7 @@ export default function Search({ clients, events, onSelectClient, onBack }) {
 
       {results.events.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wide px-1 mb-1.5">Events</h2>
+          <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em] px-1 mb-1.5">Events</h2>
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
             {results.events.map(e => (
               <div key={e.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">

@@ -130,7 +130,7 @@ export default function AdminConsole({ onBack }) {
           {/* Overview */}
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
-              <Building2 size={15} className="text-gray-500 dark:text-neutral-400" />
+              <Building2 size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">{data.org.name}</h3>
             </div>
             <div className="bg-green-50 dark:bg-green-950/40 rounded-lg p-3 mb-3">
@@ -168,7 +168,7 @@ export default function AdminConsole({ onBack }) {
           {/* Members */}
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden mb-4">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-800">
-              <Users size={15} className="text-gray-500 dark:text-neutral-400" />
+              <Users size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Members ({data.members.length})</h3>
             </div>
             {data.members.map(m => (
@@ -190,7 +190,7 @@ export default function AdminConsole({ onBack }) {
           {/* Customization */}
           <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
-              <Cog size={15} className="text-gray-500 dark:text-neutral-400" />
+              <Cog size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Customization</h3>
             </div>
             <label className="text-xs text-gray-500 dark:text-neutral-400 font-medium block mb-1">Company name (shown in-app)</label>

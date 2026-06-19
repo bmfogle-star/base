@@ -62,7 +62,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
 
       {status === 'idle' && (
         <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
-          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 ring-2 ring-gold/40 rounded-full flex items-center justify-center mx-auto mb-4">
             <ScanLine size={28} className="text-green-700 dark:text-green-400" />
           </div>
           <h3 className="font-semibold text-gray-900 dark:text-neutral-100 mb-1">Snap or upload a card</h3>
