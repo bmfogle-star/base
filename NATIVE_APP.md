@@ -21,19 +21,36 @@ Apple blocks for web apps.
 
 ## Build the iOS app (requires a Mac)
 
-iOS apps can **only** be built and submitted from a Mac with Xcode — this is an
-Apple requirement, not a Spark one.
+iOS apps can **only** be built from a Mac with Xcode — this is an Apple
+requirement. Good news: this project uses **Swift Package Manager**, so there's
+**no CocoaPods to install**, and running on the **iOS Simulator is free** (no
+Apple Developer account needed — you only need that for a physical device or
+the App Store).
 
-1. Install [Xcode](https://apps.apple.com/app/xcode/id497799835) and
-   [CocoaPods](https://cocoapods.org) (`sudo gem install cocoapods`).
-2. Clone this repo on the Mac and run `npm install`.
-3. Build + open in Xcode:
+**Fastest path — see it in the Simulator (free):**
+1. Install [Xcode](https://apps.apple.com/app/xcode/id497799835) from the Mac App Store.
+2. Install [Node.js](https://nodejs.org) (LTS) if you don't have it.
+3. Clone this repo and check out the branch:
+   ```bash
+   git clone <your-repo-url> spark && cd spark
+   git checkout claude/stoic-babbage-y8jhtg
+   npm install
+   ```
+4. Build the web app, sync it into iOS, and open Xcode:
    ```bash
    npm run cap:ios
    ```
-4. In Xcode: pick a Signing Team (your Apple Developer account — $99/yr),
-   set a unique Bundle Identifier if needed, then Run on a device/simulator.
-5. To ship: Product → Archive → Distribute App → App Store Connect.
+5. In Xcode, pick an iPhone simulator in the top toolbar (e.g. "iPhone 16"),
+   then press the ▶ Run button. The app launches in the simulator — splash
+   screen, bottom tab bar, contacts import, the works.
+
+**To run on your own iPhone / submit to the App Store:**
+- Plug in your iPhone (or keep the simulator), then in Xcode select the **App**
+  target → **Signing & Capabilities** → choose your **Team** (a free Apple ID
+  works for on-device testing; a paid Apple Developer account — $99/yr — is
+  required to ship to the App Store).
+- Set a unique Bundle Identifier if Xcode flags a conflict.
+- Run on the device, or **Product → Archive → Distribute App → App Store Connect**.
 
 ## Build the Android app
 
