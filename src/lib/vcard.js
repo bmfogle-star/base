@@ -36,13 +36,48 @@ function normalizeBday(raw) {
   return '';
 }
 
-// True if the browser supports the native Contact Picker API (Chrome on Android).
+import { Capacitor } from '@capacitor/core';
+
+// Running inside the native iOS/Android app (vs. a plain web browser)?
+export function isNativeApp() {
+  return Capacitor?.isNativePlatform?.() === true;
+}
+
+// True if we can pull contacts directly from the device — either the native
+// app (any phone) or Chrome on Android via the web Contact Picker API.
 export function contactPickerSupported() {
-  return 'contacts' in navigator && 'select' in navigator.contacts;
+  return isNativeApp() || ('contacts' in navigator && 'select' in navigator.contacts);
+}
+
+// Native app: read the full address book via the device's Contacts framework
+// (with a permission prompt). Pulls name, phone, email, company, birthday.
+async function pickNativeContacts() {
+  const { Contacts } = await import('@capacitor-community/contacts');
+  const perm = await Contacts.requestPermissions();
+  if (perm.contacts !== 'granted') throw new Error('Contacts permission denied');
+  const { contacts } = await Contacts.getContacts({
+    projection: { name: true, phones: true, emails: true, organization: true, birthday: true },
+  });
+  return contacts.map(c => {
+    const b = c.birthday;
+    const birthday = b && b.year && b.month && b.day
+      ? `${b.year}-${String(b.month).padStart(2, '0')}-${String(b.day).padStart(2, '0')}`
+      : '';
+    return {
+      name: c.name?.display || [c.name?.given, c.name?.family].filter(Boolean).join(' ') || '',
+      phone: c.phones?.[0]?.number || '',
+      email: c.emails?.[0]?.address || '',
+      company: c.organization?.company || '',
+      position: c.organization?.jobTitle || '',
+      birthday,
+      tags: ['Imported'],
+    };
+  }).filter(c => c.name || c.phone || c.email);
 }
 
 export async function pickDeviceContacts() {
-  // Only request properties the platform actually supports.
+  if (isNativeApp()) return pickNativeContacts();
+  // Web fallback: Chrome-on-Android Contact Picker API.
   const supported = (await navigator.contacts.getProperties?.()) || ['name', 'tel', 'email'];
   const props = ['name', 'tel', 'email'].filter(p => supported.includes(p));
   const selected = await navigator.contacts.select(props, { multiple: true });

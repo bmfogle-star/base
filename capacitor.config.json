@@ -1,0 +1,11 @@
+{
+  "appId": "com.spark.crm",
+  "appName": "Spark",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "always"
+  },
+  "server": {
+    "iosScheme": "https"
+  }
+}
