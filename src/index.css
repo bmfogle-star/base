@@ -60,6 +60,11 @@ h1, h2, h3 {
   letter-spacing: -0.02em;
 }
 
+/* Respect device safe areas (notch / home indicator) in the native app.
+   These insets are 0 in a normal browser, so they're harmless on the web. */
+.app-header { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+.app-bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+
 /* ── Amex-inspired engraved background pattern ── */
 .app-bg {
   background-color: #f3f5f2;
