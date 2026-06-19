@@ -3,12 +3,16 @@
 /* Enable class-based dark mode (toggle .dark on <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Register gold as a real theme color so text-/bg-/border-/ring-gold and
+   their /opacity variants all work natively — identical in light & dark. */
+@theme {
+  --color-gold: #c2a14d;
+}
+
 :root {
   --brand: #0f5132;        /* deep, rich green */
   --brand-strong: #0b3d2e;
   --ink: #0c1b14;          /* near-black with a green tint */
-  --gold: #b8923f;         /* refined, muted gold */
-  --gold-soft: #c9a45a;
 }
 
 * {
@@ -31,8 +35,11 @@ body {
   color-scheme: dark;
 }
 
-/* Slightly brighter gold on dark for contrast */
-.dark { --gold: #d2af63; }
+/* Brighter gold on dark for contrast — cascades to every gold utility
+   (text/bg/border/ring + all /opacity variants reference var(--color-gold)). */
+.dark {
+  --color-gold: #d2af63;
+}
 
 #root {
   width: 100%;
@@ -50,9 +57,6 @@ h1, h2, h3 {
 .font-display {
   font-family: 'Fraunces', Georgia, serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
-.text-gold { color: var(--gold); }
-.bg-gold { background-color: var(--gold); }
-.ring-gold { --tw-ring-color: var(--gold); }
 
 /* ── Amex-inspired engraved background pattern ── */
 .app-bg {
