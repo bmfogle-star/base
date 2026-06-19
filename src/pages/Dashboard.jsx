@@ -1,4 +1,5 @@
 import { Users, Phone, Star, ChevronRight, Plus, BellRing, Check, X, CalendarDays, Clock, Cake, Pin } from 'lucide-react';
+import { getBranding } from '../lib/api';
 
 export default function Dashboard({ clients, reminders = [], events = [], onNav, onSelectClient, onAdd, onCompleteReminder, onDismissReminder }) {
   // Pending follow-ups due now or soon (next 2 days), oldest first.
@@ -74,25 +75,52 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
     return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
   })();
   const dateStr = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+  const brandName = getBranding().companyName || 'Spark';
 
   return (
     <div className="pb-20 md:pb-6">
-      <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">{dateStr}</p>
-        <h1 className="text-3xl text-gray-900 dark:text-neutral-100 mt-1.5">{greeting}.</h1>
+      {/* Hero membership card */}
+      <div className="relative overflow-hidden rounded-3xl mb-5 text-white card-elevate bg-gradient-to-br from-green-950 via-green-800 to-green-700">
+        <div className="absolute inset-0 card-pattern pointer-events-none" />
+        <div className="absolute -top-1 left-0 right-0 h-1 bg-gold/80" />
+        <div className="relative p-5">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-lg tracking-tight">{brandName}</span>
+            {/* card chip */}
+            <div className="w-9 h-7 rounded-md bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-600 shadow-inner" />
+          </div>
+
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold mt-6">{dateStr}</p>
+          <h1 className="text-2xl text-white mt-1">{greeting}.</h1>
+
+          <div className="grid grid-cols-3 gap-2 mt-5">
+            <div>
+              <p className="text-2xl font-display leading-none">{clients.length}</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-green-100/70 mt-1">Clients</p>
+            </div>
+            <div>
+              <p className="text-2xl font-display leading-none">{totalCalls}</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-green-100/70 mt-1">Calls</p>
+            </div>
+            <div>
+              <p className="text-2xl font-display leading-none">{starred}</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-green-100/70 mt-1">Favorites</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Add client */}
       <button
         onClick={onAdd}
-        className="w-full flex items-center justify-center gap-2 bg-green-800 text-white py-4 rounded-2xl text-sm font-bold tracking-tight hover:bg-green-900 transition-colors mb-6 shadow-sm shadow-green-900/20"
+        className="w-full flex items-center justify-center gap-2 bg-green-800 text-white py-4 rounded-2xl text-sm font-bold tracking-tight hover:bg-green-900 transition-colors mb-6 card-elevate"
       >
         <Plus size={18} />
         Add Client
       </button>
 
       {/* Daily briefing + today's schedule */}
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-6">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-6">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
           <div className="flex items-center gap-2">
             <CalendarDays size={15} className="text-green-700 dark:text-green-400" />
@@ -118,7 +146,7 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
 
       {/* Birthdays & key dates */}
       {keyDates.length > 0 && (
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-6">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
             <Cake size={15} className="text-green-700 dark:text-green-400" />
             <h2 className="font-bold text-gray-900 dark:text-neutral-100 text-sm">Birthdays & key dates</h2>
@@ -137,7 +165,7 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
 
       {/* Follow-ups due */}
       {dueFollowups.length > 0 && (
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-6">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800 bg-amber-50 dark:bg-amber-950/40">
             <BellRing size={15} className="text-amber-600 dark:text-amber-400" />
             <h2 className="font-bold text-gray-900 dark:text-neutral-100 text-sm">Follow-ups due ({dueFollowups.length})</h2>
@@ -161,25 +189,8 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="relative rounded-2xl p-4 bg-gradient-to-br from-green-900 to-green-700 text-white overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gold" />
-          <p className="text-3xl font-display font-semibold">{clients.length}</p>
-          <p className="text-xs text-green-100/80 mt-1 font-medium">Clients</p>
-        </div>
-        <div className="rounded-2xl p-4 bg-white dark:bg-neutral-900 border border-gray-200/80 dark:border-neutral-700/80">
-          <p className="text-3xl font-display font-semibold text-gray-900 dark:text-neutral-100">{totalCalls}</p>
-          <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 font-medium">Calls logged</p>
-        </div>
-        <div className="rounded-2xl p-4 bg-white dark:bg-neutral-900 border border-gray-200/80 dark:border-neutral-700/80">
-          <p className="text-3xl font-display font-semibold text-gray-900 dark:text-neutral-100">{starred}</p>
-          <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 font-medium">Favorites</p>
-        </div>
-      </div>
-
       {/* Recent clients */}
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-4">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
           <h2 className="font-bold text-gray-900 dark:text-neutral-100 text-sm">Recent Clients</h2>
           <button

@@ -90,7 +90,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
       </div>
 
       {/* Month nav */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-3 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-3 mb-3">
         <div className="flex items-center justify-between mb-2">
           <button onClick={() => setCursor(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"><ChevronLeft size={18} /></button>
           <p className="font-semibold text-gray-900 dark:text-neutral-100 text-sm">{MONTHS[month]} {year}</p>
@@ -117,7 +117,7 @@ export default function Calendar({ events, addEvent, updateEvent, removeEvent })
       </div>
 
       {/* Selected day events */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
           <h2 className="font-semibold text-gray-900 dark:text-neutral-100 text-sm">
             {selected.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}

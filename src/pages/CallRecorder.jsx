@@ -337,7 +337,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
       </div>
 
       {/* Client selector — always visible */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <label className="text-sm font-semibold text-gray-700 dark:text-neutral-300 block mb-2">Link to client</label>
         <select value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)}
           disabled={status !== S.IDLE}
@@ -365,7 +365,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
       {/* ── MIC MODE ── */}
       {mode === MODES.MIC && status === S.IDLE && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center">
           <div className="w-20 h-20 bg-green-100 dark:bg-green-900/40 ring-2 ring-gold/40 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mic size={32} className="text-green-700 dark:text-green-400" />
           </div>
@@ -380,7 +380,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
       )}
 
       {mode === MODES.MIC && status === S.RECORDING && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <Mic size={32} className="text-red-600 dark:text-red-400" />
           </div>
@@ -400,7 +400,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
       {/* ── UPLOAD MODE ── */}
       {mode === MODES.UPLOAD && status === S.IDLE && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Upload call recording</h3>
           <div
             onDrop={onDrop} onDragOver={e => e.preventDefault()}
@@ -463,7 +463,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
       {/* ── ZOOM MODE ── */}
       {mode === MODES.ZOOM && status === S.IDLE && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1">Meeting bot</h3>
           <p className="text-xs text-gray-500 dark:text-neutral-400 mb-4">Paste your Zoom, Google Meet, or Microsoft Teams link. A bot will join, record the whole call, and send the transcript here when it's done.</p>
 
@@ -491,7 +491,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
       {/* ── ZOOM WAITING ── */}
       {mode === MODES.ZOOM && status === S.WAITING && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 ring-2 ring-gold/40 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock size={28} className="text-green-600 dark:text-green-400" />
           </div>
@@ -511,7 +511,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
 
       {/* ── PROCESSING ── */}
       {status === S.PROCESSING && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-8 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-8 text-center">
           <Loader size={40} className="text-green-700 dark:text-green-400 mx-auto mb-4 animate-spin" />
           <p className="font-semibold text-gray-900 dark:text-neutral-100">
             {uploadProgress || 'Analyzing call…'}
@@ -539,7 +539,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
           </div>
 
           {transcript && (
-            <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-3">
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-3">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-2">Transcript</h3>
               <div className="max-h-40 overflow-y-auto">
                 <p className="text-xs text-gray-600 dark:text-neutral-300 whitespace-pre-wrap">{transcript}</p>
@@ -547,7 +547,7 @@ export default function CallRecorder({ clients, preselectedClientId, onSaveCall,
             </div>
           )}
 
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-2">AI Extracted Info</h3>
             <p className="text-sm text-gray-700 dark:text-neutral-300 whitespace-pre-wrap">{extracted}</p>
           </div>

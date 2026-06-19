@@ -113,7 +113,7 @@ export default function AdminConsole({ onBack }) {
       </div>
 
       {loading ? (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-8 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-8 text-center">
           <Loader size={32} className="text-green-700 dark:text-green-400 mx-auto animate-spin" />
         </div>
       ) : error ? (
@@ -122,13 +122,13 @@ export default function AdminConsole({ onBack }) {
           <button onClick={load} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Retry</button>
         </div>
       ) : !data?.org ? (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center text-sm text-gray-500 dark:text-neutral-400">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center text-sm text-gray-500 dark:text-neutral-400">
           You’re not part of an organization yet.
         </div>
       ) : (
         <>
           {/* Overview */}
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <Building2 size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">{data.org.name}</h3>
@@ -166,7 +166,7 @@ export default function AdminConsole({ onBack }) {
           </div>
 
           {/* Members */}
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-4">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-800">
               <Users size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Members ({data.members.length})</h3>
@@ -188,7 +188,7 @@ export default function AdminConsole({ onBack }) {
           </div>
 
           {/* Customization */}
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <Cog size={15} className="text-gold" />
               <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Customization</h3>

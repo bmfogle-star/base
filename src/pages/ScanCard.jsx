@@ -61,7 +61,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
       <input ref={libraryRef} type="file" accept="image/*" onChange={e => { handleFile(e.target.files); e.target.value = ''; }} className="hidden" />
 
       {status === 'idle' && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 ring-2 ring-gold/40 rounded-full flex items-center justify-center mx-auto mb-4">
             <ScanLine size={28} className="text-green-700 dark:text-green-400" />
           </div>
@@ -79,7 +79,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
       )}
 
       {status === 'processing' && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-8 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-8 text-center">
           <Loader size={40} className="text-green-700 dark:text-green-400 mx-auto mb-4 animate-spin" />
           <p className="font-semibold text-gray-900 dark:text-neutral-100">Reading the card…</p>
           <p className="text-sm text-gray-500 dark:text-neutral-400 mt-1">Extracting contact details</p>
@@ -99,7 +99,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
         <div>
           {preview && <img src={preview} alt="card" className="w-full max-h-44 object-contain rounded-xl border border-gray-200 dark:border-neutral-700 mb-4 bg-gray-50 dark:bg-neutral-800" />}
 
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Review details</h3>
             <div className="space-y-3">
               {FIELDS.map(([key, label]) => (
@@ -116,7 +116,7 @@ export default function ScanCard({ clients, onSaveNew, onMerge, onBack, apiKey }
             </div>
           </div>
 
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Save to</h3>
             <label className={`flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer mb-2 ${target === 'new' ? 'border-green-600 bg-green-50 dark:bg-green-950/40' : 'border-gray-200 dark:border-neutral-700'}`}>
               <input type="radio" checked={target === 'new'} onChange={() => setTarget('new')} className="accent-green-700" />

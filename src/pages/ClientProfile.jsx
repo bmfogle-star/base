@@ -32,7 +32,7 @@ function getAvatarColor(name) {
 
 function Section({ title, icon: Icon, children }) {
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/80 dark:border-neutral-700/80 overflow-hidden mb-3">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-3">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
         <Icon size={15} className="text-gold" />
         <h3 className="text-gray-900 dark:text-neutral-100 text-base">{title}</h3>
@@ -390,7 +390,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       </div>
 
       {/* Avatar + name */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 mb-3 flex items-center gap-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 mb-3 flex items-center gap-4">
         <div className={`w-16 h-16 rounded-full ${getAvatarColor(c.name)} flex items-center justify-center text-white text-xl font-bold flex-shrink-0`}>
           {getInitials(c.name)}
         </div>
@@ -423,7 +423,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       </div>
 
       {/* Tags */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-3">
         <div className="flex items-center gap-1.5 flex-wrap">
           <Tag size={14} className="text-gray-400 dark:text-neutral-500" />
           {c.tags?.map((tag, i) => (
@@ -447,7 +447,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
       </div>
 
       {/* Prep for a call (AI cheat sheet) */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-3">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-3">
         {!points && !pointsBusy ? (
           <button onClick={generatePoints} className="w-full flex items-center justify-center gap-2 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors">
             <Heart size={15} /> Prep for a call (AI cheat sheet)

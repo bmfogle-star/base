@@ -12,7 +12,7 @@ function ThemeCard() {
     { id: 'dark', label: 'Dark', icon: Moon },
   ];
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Appearance</h3>
       <div className="grid grid-cols-2 gap-2">
         {options.map(({ id, label, icon: Icon }) => (
@@ -160,7 +160,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       <ThemeCard />
 
       {/* Profile */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">Your Profile</h3>
         <div className="space-y-3">
           <div>
@@ -180,7 +180,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       <AccountCard onManageOrg={onManageOrg} />
 
       {/* Backend connection */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <Server size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Spark Backend (optional)</h3>
@@ -200,7 +200,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       </div>
 
       {/* AI Keys */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <Key size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Personal API Keys (no account)</h3>
@@ -278,7 +278,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       </div>
 
       {/* How it works */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3">How call recording works</h3>
         <div className="space-y-3">
           <div className="flex gap-3">
@@ -312,7 +312,7 @@ export default function Settings({ onKeysChange, onManageOrg }) {
       </div>
 
       {/* Plan */}
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <CreditCard size={15} className="text-gold" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Subscription</h3>

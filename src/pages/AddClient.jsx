@@ -47,7 +47,7 @@ export default function AddClient({ onBack, onSave }) {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3 border-l-2 border-gold pl-2.5">Basic Info</h3>
           <div className="space-y-3">
             <div>
@@ -105,7 +105,7 @@ export default function AddClient({ onBack, onSave }) {
         </div>
 
         {customFields.length > 0 && (
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3 border-l-2 border-gold pl-2.5">Additional Details</h3>
             <div className="space-y-3">
               {customFields.map(f => (
@@ -123,7 +123,7 @@ export default function AddClient({ onBack, onSave }) {
           </div>
         )}
 
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-6">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-3 border-l-2 border-gold pl-2.5">Initial Notes</h3>
           <textarea
             placeholder="Any initial notes about this client..."

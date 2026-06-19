@@ -116,7 +116,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
 
       {/* Directory */}
       {alpha.length === 0 ? (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-10 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-10 text-center">
           <div className="text-4xl mb-3">👤</div>
           <p className="text-gray-500 dark:text-neutral-400 text-sm">
             {search ? 'No clients match your search.' : 'No clients yet. Add your first one!'}
@@ -129,7 +129,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
         </div>
       ) : q ? (
         // Flat results while searching
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden">
           {alpha.map(ClientRow)}
         </div>
       ) : (
@@ -140,7 +140,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
                 <Star size={13} className="text-gold" fill="currentColor" />
                 <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em]">Favorites</h2>
               </div>
-              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden">
                 {favorites.map(ClientRow)}
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
           {groups.map(group => (
             <div key={group.letter} className="mb-4">
               <h2 className="text-xs font-bold text-gold uppercase tracking-[0.15em] px-1 mb-1.5">{group.letter}</h2>
-              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden">
                 {group.items.map(ClientRow)}
               </div>
             </div>

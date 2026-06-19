@@ -15,7 +15,7 @@ export default function AccountCard({ onManageOrg }) {
 
   if (!hasBackend()) {
     return (
-      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <User size={15} className="text-gray-500 dark:text-neutral-400" />
           <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Spark Account</h3>
@@ -42,7 +42,7 @@ export default function AccountCard({ onManageOrg }) {
   }
 
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-4 mb-4">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-4 mb-4">
       <div className="flex items-center gap-2 mb-3">
         <User size={15} className="text-gray-500 dark:text-neutral-400" />
         <h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-300">Spark Account</h3>

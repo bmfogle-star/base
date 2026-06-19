@@ -59,7 +59,7 @@ export default function ImportContacts({ onImport, onBack }) {
       <input ref={fileRef} type="file" accept=".vcf,text/vcard" onChange={e => { fromFile(e.target.files); e.target.value = ''; }} className="hidden" />
 
       {contacts.length === 0 ? (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 p-6 text-center">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate p-6 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 ring-2 ring-gold/40 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users size={28} className="text-green-700 dark:text-green-400" />
           </div>
@@ -93,7 +93,7 @@ export default function ImportContacts({ onImport, onBack }) {
               {selected.size === contacts.length ? 'Deselect all' : 'Select all'}
             </button>
           </div>
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden mb-4 max-h-96 overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200/70 dark:border-neutral-800 card-elevate overflow-hidden mb-4 max-h-96 overflow-y-auto">
             {contacts.map((c, i) => (
               <button key={i} onClick={() => toggle(i)} className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 dark:hover:bg-neutral-800 text-left">
                 <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${selected.has(i) ? 'bg-green-800' : 'border border-gray-300 dark:border-neutral-700'}`}>

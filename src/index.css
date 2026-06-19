@@ -52,3 +52,29 @@ h1, h2, h3 {
 .text-gold { color: var(--gold); }
 .bg-gold { background-color: var(--gold); }
 .ring-gold { --tw-ring-color: var(--gold); }
+
+/* ── Amex-inspired engraved background pattern ── */
+.app-bg {
+  background-color: #f3f5f2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%230f5132' stroke-opacity='0.05'%3E%3Ccircle cx='0' cy='0' r='40'/%3E%3Ccircle cx='80' cy='0' r='40'/%3E%3Ccircle cx='0' cy='80' r='40'/%3E%3Ccircle cx='80' cy='80' r='40'/%3E%3Ccircle cx='40' cy='40' r='40'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+.dark .app-bg {
+  background-color: #080808;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23d2af63' stroke-opacity='0.045'%3E%3Ccircle cx='0' cy='0' r='40'/%3E%3Ccircle cx='80' cy='0' r='40'/%3E%3Ccircle cx='0' cy='80' r='40'/%3E%3Ccircle cx='80' cy='80' r='40'/%3E%3Ccircle cx='40' cy='40' r='40'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* Guilloché texture overlay for the hero/membership card */
+.card-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.10'%3E%3Ccircle cx='0' cy='0' r='45'/%3E%3Ccircle cx='90' cy='0' r='45'/%3E%3Ccircle cx='0' cy='90' r='45'/%3E%3Ccircle cx='90' cy='90' r='45'/%3E%3Ccircle cx='45' cy='45' r='45'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 90px 90px;
+}
+
+/* Soft Amex-style card elevation */
+.card-elevate {
+  box-shadow: 0 1px 2px rgba(12, 27, 20, 0.04), 0 6px 20px -8px rgba(12, 27, 20, 0.10);
+}
+.dark .card-elevate {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+}

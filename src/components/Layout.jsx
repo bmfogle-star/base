@@ -16,11 +16,11 @@ export default function Layout({ page, onNav, children }) {
   const accent = branding.accentColor || null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-neutral-950">
+    <div className="flex flex-col min-h-screen app-bg">
       {/* Brand accent strip (org primary color) */}
       {accent && <div className="h-1 w-full" style={{ backgroundColor: accent }} />}
       {/* Top bar */}
-      <header className="bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+      <header className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-gray-200/70 dark:border-neutral-800 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
           {branding.logo
             ? <img src={branding.logo} alt={branding.companyName || 'Logo'} className="w-8 h-8 rounded-lg object-contain" />
@@ -87,7 +87,7 @@ export default function Layout({ page, onNav, children }) {
       </main>
 
       {/* Bottom mobile nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-700 flex z-40">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/85 dark:bg-neutral-900/85 backdrop-blur-md border-t border-gray-200/70 dark:border-neutral-800 flex z-40">
         {navItems.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
