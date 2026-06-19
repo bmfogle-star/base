@@ -1,6 +1,6 @@
 # Spark — Progress & Next Steps
 
-_Last updated: 2026-06-18 (paused for the night)_
+_Last updated: 2026-06-19 — design overhaul + native app scaffolding._
 
 A sales CRM for individual salespeople / small teams. Track clients' personal
 details (hobbies, family, events) to feel more personable, with AI that extracts
@@ -99,6 +99,49 @@ Enterprise $500/mo ≤50 employees, $1,000/mo 51+ (unlimited devices, team shari
 
 ---
 
+## 🎨 Design + Native App work (2026-06-19 session)
+
+- **Premium "Amex-inspired" visual system** — deep green + gold accents,
+  guilloché/engraved background pattern (`.app-bg`), hero "membership card" on
+  the dashboard, soft `card-elevate` shadows, frosted-glass sticky header.
+- **Light / Dark theme** (`src/lib/theme.js`) — Light/Dark only (no System);
+  toggled in Settings; `.dark` class on `<html>`.
+- **Gold is a real Tailwind theme color** — `@theme { --color-gold }` in
+  `index.css`, so `text-gold` / `bg-gold/80` / `border-gold` / `ring-gold/40`
+  and all opacity variants work, identical in light & dark (dark uses a
+  slightly brighter gold via `.dark { --color-gold }`).
+- **Typography matches the Amex app** — Libre Franklin (closest free match to
+  Amex's proprietary Benton Sans) for body + headings, via Google Fonts.
+- **All icons are Apple emoji** — `src/components/icons.jsx` re-exports every
+  former Lucide name as an `<Emoji>`-backed component (Apple emoji images from
+  iamcal/emoji-data CDN, so they look identical on every device). `lucide-react`
+  removed. `fill="none"` dims an emoji for toggle "off" states.
+- **App icon + splash screens** — source art in `assets/` (`icon.svg`,
+  `splash.svg`, `splash-dark.svg`); all native sizes generated with
+  `@capacitor/assets` (iOS + Android), plus web PWA (`public/manifest.webmanifest`,
+  `public/icons/*`, `apple-touch-icon`).
+- **Native app via Capacitor** (see `NATIVE_APP.md`) — `ios/` + `android/`
+  projects committed, app id `com.spark.crm`. `@capacitor-community/contacts`
+  wired so the packaged app reads device contacts directly (name/phone/email/
+  company/birthday) with a permission prompt; web falls back to Contact Picker
+  (Android) / `.vcf` upload. Permission strings set (iOS `NSContactsUsageDescription`,
+  Android `READ_CONTACTS`). Build scripts: `cap:ios`, `cap:android`, `cap:sync`,
+  `build:native` (uses `CAP_BUILD=1` for a relative asset base; web stays `/base/`).
+- **Contact import** is selective/opt-in (device contacts start unchecked),
+  captures birthdays, dedupes against existing clients, tags imports `Imported`.
+- **Layout** (`src/components/Layout.jsx`) — native app always uses the
+  bottom tab bar (even on iPad), redundant top hamburger hidden, safe-area
+  insets respected (`viewport-fit=cover`). Desktop web spreads the page nav
+  across the full top bar as equal segments divided by thin lines, with large
+  selection boxes. `src/lib/platform.js` → `isNativeApp()`.
+
+### To build the native app (needs a Mac + Xcode for iOS)
+`npm run cap:ios` (or `cap:android`) → set signing team in Xcode → Run / Archive.
+Requires an Apple Developer account ($99/yr) to ship to the App Store.
+Still TODO before submission: real Apple/Google dev accounts, first device build.
+
+---
+
 ## ▶️ NEXT STEPS (where we left off)
 
 ### Part 1 — Start using the app (free, ~5 min) — DO THIS FIRST
@@ -127,13 +170,18 @@ deployed and its URL is set in Settings → Spark Backend URL.
 ---
 
 ## 🔜 RESUME HERE (next session)
-Paused 2026-06-18 for the night. Last thing built: enterprise admin console.
-Open thread we stopped on:
-- **Make custom fields actually render** on the client profile + Add Client
-  forms (admin defines them in the console; they're stored but not yet shown
-  on client forms). This was the proposed next task.
-Other good candidates: apply org branding (company name/accent) in the app;
-build the launch checklist doc; wire Stripe price→plan mapping robustly.
+Paused 2026-06-19. Design overhaul + native app scaffolding are done and pushed;
+the live web app reflects all the design changes. The native (forced bottom-tab)
+behavior only shows once built as an actual app.
+
+Natural next steps (pick one):
+- **First native build** — on a Mac: `npm run cap:ios`, set an Xcode signing
+  team, run on a simulator/device to see the real app (contacts permission,
+  icon, splash, bottom tabs). Needs an Apple Developer account to ship.
+- **Deploy the `/backend`** to make accounts / cloud sync / device limits /
+  enterprise / billing actually live (set URL in Settings → Spark Backend URL).
+- **Make custom fields render** on the client profile + Add Client forms (admin
+  defines them; stored but not yet shown). Still open from the prior session.
 
 ## 💡 Ideas / open questions for tomorrow
 
