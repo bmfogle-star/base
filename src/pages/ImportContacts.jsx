@@ -8,16 +8,18 @@ export default function ImportContacts({ onImport, onBack }) {
   const [error, setError] = useState('');
   const fileRef = useRef(null);
 
-  function load(list) {
+  // preselect: pre-check everything (true for a .vcf the user deliberately
+  // exported) or start with nothing checked (device address book — opt in).
+  function load(list, preselect) {
     setContacts(list);
-    setSelected(new Set(list.map((_, i) => i)));
-    setError(list.length ? '' : 'No contacts found in that file.');
+    setSelected(preselect ? new Set(list.map((_, i) => i)) : new Set());
+    setError(list.length ? '' : 'No contacts found.');
   }
 
   async function fromDevice() {
     setError('');
     try {
-      load(await pickDeviceContacts());
+      load(await pickDeviceContacts(), false);
     } catch (e) {
       setError('Could not access device contacts.');
     }
@@ -28,7 +30,7 @@ export default function ImportContacts({ onImport, onBack }) {
     if (!file) return;
     setError('');
     try {
-      load(parseVCards(await file.text()));
+      load(parseVCards(await file.text()), true);
     } catch {
       setError('Could not read that file. Make sure it’s a .vcf contacts file.');
     }
