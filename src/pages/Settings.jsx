@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server, Sun, Moon, Monitor } from 'lucide-react';
+import { Save, Key, CreditCard, Info, Eye, EyeOff, Video, Mic, Server, Sun, Moon, Monitor } from '../components/icons';
 import { getUser, saveUser } from '../data/store';
 import AccountCard from '../components/AccountCard';
 import { isLoggedIn, startCheckout, createOrg, joinOrg } from '../lib/api';

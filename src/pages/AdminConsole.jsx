@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2, Upload } from 'lucide-react';
+import { ArrowLeft, Loader, Copy, Check, Users, Settings as Cog, Plus, Trash2, Building2, Upload } from '../components/icons';
 import { getOrg, updateOrgSettings, updateOrgSeats, setMemberRole, fetchMe } from '../lib/api';
 import { compressImageFile } from '../lib/image';
 import Emoji from '../components/Emoji';

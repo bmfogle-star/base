@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Mic, StopCircle, Loader, CheckCircle, ArrowLeft, AlertCircle,
   Upload, Video, FileAudio, RefreshCw, X, Clock, Zap, Lock
-} from 'lucide-react';
+} from '../components/icons';
 import { decodeAudio, transcribeInBrowser, transcribeWithOpenAI } from '../lib/transcribe';
 import Emoji from '../components/Emoji';
 import { isLoggedIn, extractViaBackend } from '../lib/api';

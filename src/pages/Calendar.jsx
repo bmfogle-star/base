@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X, Trash2, Save, CalendarDays, Apple, ExternalLink, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Trash2, Save, CalendarDays, Apple, ExternalLink, Users } from '../components/icons';
 import { getAccountInfo, isEnterprise, getOrg } from '../lib/api';
 import { downloadICS, googleCalUrl } from '../lib/ics';
 import Emoji from '../components/Emoji';

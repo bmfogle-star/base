@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Users, Upload, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Users, Upload, Check, AlertCircle } from '../components/icons';
 import { parseVCards, contactPickerSupported, pickDeviceContacts } from '../lib/vcard';
 
 export default function ImportContacts({ onImport, onBack }) {

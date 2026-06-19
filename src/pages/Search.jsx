@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeft, Search as SearchIcon, X, User, Phone, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Search as SearchIcon, X, User, Phone, CalendarDays } from '../components/icons';
 
 function getInitials(name) {
   return name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';

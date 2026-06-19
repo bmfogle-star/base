@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, LogOut, Loader, CheckCircle } from 'lucide-react';
+import { User, LogOut, Loader, CheckCircle } from './icons';
 import { useAuth } from '../hooks/useAuth';
 import { hasBackend } from '../lib/api';
 import Emoji from './Emoji';

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { ArrowLeft, UserPlus } from '../components/icons';
 import { getCustomFields } from '../lib/api';
 
 const DRAFT_KEY = 'spark_addclient_draft';

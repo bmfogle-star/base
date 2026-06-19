@@ -3,7 +3,7 @@
 // Images: iamcal/emoji-data (Apple set) via jsDelivr CDN.
 const BASE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-64/';
 
-export default function Emoji({ e, size = '1.15em', className = '' }) {
+export default function Emoji({ e, size = '1.15em', className = '', style }) {
   const code = [...e].map(c => c.codePointAt(0).toString(16)).join('-').replace(/-fe0f$/, '');
   return (
     <img
@@ -12,7 +12,7 @@ export default function Emoji({ e, size = '1.15em', className = '' }) {
       draggable="false"
       loading="lazy"
       className={`inline-block align-[-0.15em] ${className}`}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, ...style }}
     />
   );
 }

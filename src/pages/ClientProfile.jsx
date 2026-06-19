@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock, Pin, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock, Pin, ChevronUp, ChevronDown } from '../components/icons';
 // (Mail icon already imported above)
 import { getCustomFields } from '../lib/api';
 import { draftFollowupEmail } from '../lib/followup';

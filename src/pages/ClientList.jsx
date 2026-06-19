@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip, ScanLine, Users } from 'lucide-react';
+import { Search, Plus, Star, ChevronRight, Filter, X, Paperclip, ScanLine, Users } from '../components/icons';
 import Emoji from '../components/Emoji';
 
 function getInitials(name) {

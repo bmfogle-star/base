@@ -1,4 +1,4 @@
-import { Users, Phone, Star, ChevronRight, Plus, BellRing, Check, X, CalendarDays, Clock, Cake, Pin } from 'lucide-react';
+import { Users, Phone, Star, ChevronRight, Plus, BellRing, Check, X, CalendarDays, Clock, Cake, Pin } from '../components/icons';
 import { getBranding } from '../lib/api';
 
 export default function Dashboard({ clients, reminders = [], events = [], onNav, onSelectClient, onAdd, onCompleteReminder, onDismissReminder }) {

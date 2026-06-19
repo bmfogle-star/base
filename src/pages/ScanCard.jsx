@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Camera, Image as ImageIcon, Loader, AlertCircle, ScanLine, UserPlus, UserCheck } from 'lucide-react';
+import { ArrowLeft, Camera, Image as ImageIcon, Loader, AlertCircle, ScanLine, UserPlus, UserCheck } from '../components/icons';
 import { compressImageFile } from '../lib/image';
 import { extractBusinessCard } from '../lib/businessCard';
 

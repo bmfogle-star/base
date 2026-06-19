@@ -1,4 +1,4 @@
-import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon, Search as SearchIcon } from 'lucide-react';
+import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon, Search as SearchIcon } from './icons';
 import { useState } from 'react';
 import { getBranding } from '../lib/api';
 
