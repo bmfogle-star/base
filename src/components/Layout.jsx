@@ -1,5 +1,5 @@
 import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon, Search as SearchIcon } from './icons';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { getBranding } from '../lib/api';
 import { isNativeApp } from '../lib/platform';
 
@@ -33,22 +33,25 @@ export default function Layout({ page, onNav, children }) {
           <span className="font-display font-semibold text-gray-900 dark:text-neutral-100 text-xl tracking-tight">{branding.companyName || 'Spark'}</span>
         </div>
 
-        {/* Desktop nav — spread evenly across the full width of the top bar (web only) */}
+        {/* Desktop nav — equal segments spanning the top bar, divided by thin
+            lines, each with a generous selection box (web only) */}
         {!native && (
-          <nav className="hidden md:flex flex-1 items-center justify-evenly">
-            {navItems.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => onNav(id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  page === id
-                    ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-300'
-                    : 'text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </button>
+          <nav className="hidden md:flex flex-1 items-stretch">
+            {navItems.map(({ id, label, icon: Icon }, i) => (
+              <Fragment key={id}>
+                {i > 0 && <span className="self-center h-6 w-px bg-gray-200 dark:bg-neutral-700" />}
+                <button
+                  onClick={() => onNav(id)}
+                  className={`flex-1 flex items-center justify-center gap-2 mx-2 my-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                    page === id
+                      ? 'bg-green-50 dark:bg-green-950/50 text-green-800 dark:text-green-300 shadow-sm'
+                      : 'text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
+                  }`}
+                >
+                  <Icon size={17} />
+                  {label}
+                </button>
+              </Fragment>
             ))}
           </nav>
         )}
