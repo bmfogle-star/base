@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#13683f"/>
+      <stop offset="0.55" stop-color="#0f5132"/>
+      <stop offset="1" stop-color="#0a3a24"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.38" r="0.75">
+      <stop stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="430" y1="150" x2="640" y2="880" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0d893"/>
+      <stop offset="0.5" stop-color="#cda85c"/>
+      <stop offset="1" stop-color="#a9802f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed background (iOS rounds the corners itself) -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+
+  <!-- Subtle engraved guilloché texture (Amex feel) -->
+  <g fill="none" stroke="#e6c878" stroke-opacity="0.05" stroke-width="2">
+    <circle cx="160" cy="160" r="320"/>
+    <circle cx="864" cy="160" r="320"/>
+    <circle cx="160" cy="864" r="320"/>
+    <circle cx="864" cy="864" r="320"/>
+    <circle cx="512" cy="512" r="320"/>
+  </g>
+
+  <!-- Ghost S behind the bolt -->
+  <path d="M650 215c-48-32-128-48-208-48-144 0-240 80-240 192 0 96 80 144 176 176l-144 336h272l48-112c128-16 208-96 208-208 0-96-80-144-176-176l144-160h-148z"
+        fill="#ffffff" opacity="0.07"/>
+
+  <!-- Gold lightning bolt -->
+  <path d="M592 150 300 560h176l-64 314 308-440H540l128-284z"
+        fill="url(#gold)"/>
+</svg>

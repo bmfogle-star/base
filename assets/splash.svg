@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="2732" y2="2732" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f5132"/>
+      <stop offset="1" stop-color="#0a3a24"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
+      <stop stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="1290" y1="1060" x2="1470" y2="1620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0d893"/>
+      <stop offset="0.5" stop-color="#cda85c"/>
+      <stop offset="1" stop-color="#a9802f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="2732" height="2732" fill="url(#bg)"/>
+  <rect width="2732" height="2732" fill="url(#glow)"/>
+
+  <!-- Bolt centered -->
+  <path d="M1416 1066 1196 1376h132l-48 236 232-330h-126l96-212z" fill="url(#gold)"/>
+
+  <!-- Wordmark -->
+  <text x="1366" y="1740" text-anchor="middle"
+        font-family="Libre Franklin, Helvetica, Arial, sans-serif" font-weight="800"
+        font-size="150" letter-spacing="-3" fill="#ffffff">Spark</text>
+</svg>
