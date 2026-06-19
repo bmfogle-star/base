@@ -64,7 +64,11 @@ export default function ImportContacts({ onImport, onBack }) {
             <Users size={28} className="text-green-700 dark:text-green-400" />
           </div>
           <h3 className="font-semibold text-gray-900 dark:text-neutral-100 mb-1">Add clients from your contacts</h3>
-          <p className="text-sm text-gray-500 dark:text-neutral-400 mb-5">Pick from your device, or upload a contacts file exported from your phone.</p>
+          <p className="text-sm text-gray-500 dark:text-neutral-400 mb-5">
+            {contactPickerSupported()
+              ? 'Pick straight from your device, or upload a contacts (.vcf) file.'
+              : 'Upload a contacts (.vcf) file exported from your phone or computer. Works on any device.'}
+          </p>
           <div className="space-y-2 max-w-xs mx-auto">
             {contactPickerSupported() && (
               <button onClick={fromDevice} className="w-full flex items-center justify-center gap-2 bg-green-800 text-white py-3 rounded-xl text-sm font-semibold hover:bg-green-900">
@@ -76,9 +80,12 @@ export default function ImportContacts({ onImport, onBack }) {
             </button>
           </div>
           {!contactPickerSupported() && (
-            <p className="text-xs text-gray-400 dark:text-neutral-500 mt-4">
-              Tip: on iPhone, open a contact → Share Contact → Save to Files, then upload the .vcf here.
-            </p>
+            <div className="text-xs text-gray-400 dark:text-neutral-500 mt-4 space-y-1.5 text-left max-w-xs mx-auto">
+              <p className="font-semibold text-gray-500 dark:text-neutral-400">How to export a .vcf:</p>
+              <p><span className="font-medium">iPhone / iPad:</span> Contacts app → tap a contact (or Lists → select) → Share Contact → Save to Files.</p>
+              <p><span className="font-medium">Desktop:</span> export from iCloud.com or Google Contacts (Export → vCard), then upload it here.</p>
+              <p><span className="font-medium">Android:</span> open this app in Chrome to pick contacts directly.</p>
+            </div>
           )}
           {error && <p className="text-xs text-red-600 dark:text-red-400 mt-3">{error}</p>}
         </div>

@@ -141,10 +141,22 @@ export default function App() {
     setPage('profile');
   }
 
-  // Bulk-import contacts as new clients.
+  // Bulk-import contacts as new clients, skipping ones that already exist
+  // (matched by phone, email, or name) so re-importing is safe.
   function handleImportContacts(list) {
-    let last = null;
-    list.forEach(c => { last = addClient(c); });
+    const norm = (s) => (s || '').replace(/[^\dA-Za-z@.]/g, '').toLowerCase();
+    const existingPhones = new Set(clients.map(c => norm(c.phone)).filter(Boolean));
+    const existingEmails = new Set(clients.map(c => norm(c.email)).filter(Boolean));
+    const existingNames = new Set(clients.map(c => norm(c.name)).filter(Boolean));
+    list.forEach(c => {
+      const p = norm(c.phone), e = norm(c.email), n = norm(c.name);
+      const dup = (p && existingPhones.has(p)) || (e && existingEmails.has(e)) || (n && existingNames.has(n));
+      if (dup) return;
+      addClient(c);
+      if (p) existingPhones.add(p);
+      if (e) existingEmails.add(e);
+      if (n) existingNames.add(n);
+    });
     setPage('clients');
   }
 
