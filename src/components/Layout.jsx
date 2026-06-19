@@ -25,7 +25,7 @@ export default function Layout({ page, onNav, children }) {
           {branding.logo
             ? <img src={branding.logo} alt={branding.companyName || 'Logo'} className="w-8 h-8 rounded-lg object-contain" />
             : <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Spark" className="w-8 h-8 rounded-lg" />}
-          <span className="font-extrabold tracking-tight text-gray-900 text-xl">{branding.companyName || 'Spark'}</span>
+          <span className="font-display font-semibold text-gray-900 text-xl tracking-tight">{branding.companyName || 'Spark'}</span>
         </div>
         <div className="flex items-center gap-1">
         <button

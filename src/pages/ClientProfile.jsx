@@ -365,7 +365,7 @@ export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuic
           <>
             <button
               onClick={() => onUpdate({ ...client, starred: !client.starred })}
-              className={client.starred ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}
+              className={client.starred ? 'text-gold' : 'text-gray-300 hover:text-gold'}
             >
               <Star size={20} fill={client.starred ? 'currentColor' : 'none'} />
             </button>

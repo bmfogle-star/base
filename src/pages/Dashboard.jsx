@@ -78,8 +78,8 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
   return (
     <div className="pb-20 md:pb-6">
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-green-700">{dateStr}</p>
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mt-1">{greeting}.</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">{dateStr}</p>
+        <h1 className="text-3xl text-gray-900 mt-1.5">{greeting}.</h1>
       </div>
 
       {/* Add client */}
@@ -163,16 +163,17 @@ export default function Dashboard({ clients, reminders = [], events = [], onNav,
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-green-800 to-green-600 text-white">
-          <p className="text-3xl font-extrabold tracking-tight">{clients.length}</p>
-          <p className="text-xs text-green-100 mt-1 font-medium">Clients</p>
+        <div className="relative rounded-2xl p-4 bg-gradient-to-br from-green-900 to-green-700 text-white overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gold" />
+          <p className="text-3xl font-display font-semibold">{clients.length}</p>
+          <p className="text-xs text-green-100/80 mt-1 font-medium">Clients</p>
         </div>
         <div className="rounded-2xl p-4 bg-white border border-gray-200/80">
-          <p className="text-3xl font-extrabold tracking-tight text-gray-900">{totalCalls}</p>
+          <p className="text-3xl font-display font-semibold text-gray-900">{totalCalls}</p>
           <p className="text-xs text-gray-500 mt-1 font-medium">Calls logged</p>
         </div>
         <div className="rounded-2xl p-4 bg-white border border-gray-200/80">
-          <p className="text-3xl font-extrabold tracking-tight text-gray-900">{starred}</p>
+          <p className="text-3xl font-display font-semibold text-gray-900">{starred}</p>
           <p className="text-xs text-gray-500 mt-1 font-medium">Favorites</p>
         </div>
       </div>

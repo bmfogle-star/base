@@ -42,7 +42,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
       <div key={client.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
         <button
           onClick={() => onToggleStar(client.id)}
-          className={`flex-shrink-0 ${client.starred ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`}
+          className={`flex-shrink-0 ${client.starred ? 'text-gold' : 'text-gray-300 hover:text-gold'}`}
           title={client.starred ? 'Unfavorite' : 'Add to favorites'}
         >
           <Star size={16} fill={client.starred ? 'currentColor' : 'none'} />
@@ -75,12 +75,12 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
     <div className="pb-20 md:pb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
+          <h1 className="text-2xl text-gray-900">Clients</h1>
           <p className="text-gray-500 text-sm">{clients.length} total</p>
         </div>
         <button
           onClick={onAdd}
-          className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors"
+          className="flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-900 transition-colors"
         >
           <Plus size={16} />
           Add Client
@@ -137,7 +137,7 @@ export default function ClientList({ clients, onSelect, onAdd, onScan, onImport,
           {favorites.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center gap-1.5 px-1 mb-1.5">
-                <Star size={13} className="text-yellow-400" fill="currentColor" />
+                <Star size={13} className="text-gold" fill="currentColor" />
                 <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Favorites</h2>
               </div>
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
