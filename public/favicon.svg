@@ -4,10 +4,15 @@
       <stop stop-color="#15803d"/>
       <stop offset="1" stop-color="#14532d"/>
     </linearGradient>
+    <linearGradient id="gold" x1="19" y1="10" x2="40" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e6c878"/>
+      <stop offset="0.5" stop-color="#c9a45a"/>
+      <stop offset="1" stop-color="#a9802f"/>
+    </linearGradient>
   </defs>
   <rect width="64" height="64" rx="15" fill="url(#bg)"/>
   <!-- S formed around a lightning bolt -->
   <path d="M40 12c-3-2-8-3-13-3-9 0-15 5-15 12 0 6 5 9 11 11l-9 21h17l3-7c8-1 13-6 13-13 0-6-5-9-11-11l9-10h-9z"
-        fill="#ffffff" opacity="0.16"/>
-  <path d="M37 10 19 35h11l-4 19 19-27H33l8-17z" fill="#ffffff"/>
+        fill="#ffffff" opacity="0.14"/>
+  <path d="M37 10 19 35h11l-4 19 19-27H33l8-17z" fill="url(#gold)"/>
 </svg>
