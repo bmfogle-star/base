@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Edit2, Star, Phone, Mail, Building, Calendar, Heart, Users, Mic, Trash2, Plus, Tag, Save, X, Paperclip, FileText, Download, Camera, Image as ImageIcon, Clock, Pin, ChevronUp, ChevronDown } from 'lucide-react';
+// (Mail icon already imported above)
 import { getCustomFields } from '../lib/api';
+import { draftFollowupEmail } from '../lib/followup';
+import { getUser } from '../data/store';
 
 // Order calls: pinned always float to top, then by the chosen sort.
 function orderCalls(calls, sort) {
@@ -47,7 +50,7 @@ function TagChip({ label, onRemove }) {
   );
 }
 
-export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRecord }) {
+export default function ClientProfile({ client, apiKey, onBack, onUpdate, onQuickLog, onDelete, onRecord }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(client);
   const [newTag, setNewTag] = useState('');
@@ -269,6 +272,58 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
 
   function togglePin(callId) {
     persistCalls((client.callHistory || []).map(c => c.id === callId ? { ...c, pinned: !c.pinned } : c));
+  }
+
+  // AI follow-up email from the most recent call.
+  const [emailDraft, setEmailDraft] = useState(null); // { subject, body } | null
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  function latestCallWithTranscript() {
+    return [...(client.callHistory || [])]
+      .filter(c => c.transcript || c.extracted)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  }
+
+  async function generateFollowupEmail() {
+    setEmailError(''); setEmailBusy(true); setEmailDraft(null);
+    try {
+      const call = latestCallWithTranscript();
+      const source = call?.transcript || call?.extracted || '';
+      if (!source) { setEmailError('No call with content to base an email on yet.'); setEmailBusy(false); return; }
+      const text = await draftFollowupEmail(source, client.name, getUser()?.name || '', apiKey);
+      const m = text.match(/^subject:\s*(.*)\n+([\s\S]*)$/i);
+      setEmailDraft(m ? { subject: m[1].trim(), body: m[2].trim() } : { subject: `Following up`, body: text.trim() });
+    } catch (e) {
+      setEmailError(e.message);
+    } finally {
+      setEmailBusy(false);
+    }
+  }
+
+  function mailtoLink() {
+    if (!emailDraft) return '#';
+    const to = client.email || '';
+    return `mailto:${to}?subject=${encodeURIComponent(emailDraft.subject)}&body=${encodeURIComponent(emailDraft.body)}`;
+  }
+
+  // Quick log — capture a fast note as a call entry (also schedules follow-ups).
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickText, setQuickText] = useState('');
+  function saveQuickLog() {
+    if (!quickText.trim()) return;
+    const call = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      title: 'Quick note',
+      summary: quickText.trim(),
+      extracted: quickText.trim(),
+      transcript: '',
+      source: 'quick log',
+      duration: '',
+    };
+    onQuickLog?.({ ...client, callHistory: [...(client.callHistory || []), call] }, call);
+    setQuickText(''); setQuickOpen(false);
   }
 
   function moveCall(callId, dir) {
@@ -617,13 +672,66 @@ export default function ClientProfile({ client, onBack, onUpdate, onDelete, onRe
 
       {/* Call history */}
       <Section title="Call History" icon={Mic}>
-        <button
-          onClick={() => onRecord(client.id)}
-          className="w-full flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium mb-3 hover:bg-green-100 transition-colors"
-        >
-          <Mic size={15} />
-          Record New Call
-        </button>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <button
+            onClick={() => onRecord(client.id)}
+            className="flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-lg py-2.5 text-sm font-medium hover:bg-green-100 transition-colors"
+          >
+            <Mic size={15} />
+            Record
+          </button>
+          <button
+            onClick={() => setQuickOpen(o => !o)}
+            className="flex items-center justify-center gap-2 border border-gray-200 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:border-green-600 hover:text-green-700 transition-colors"
+          >
+            <Plus size={15} />
+            Quick log
+          </button>
+        </div>
+        {quickOpen && (
+          <div className="mb-3">
+            <textarea
+              autoFocus
+              value={quickText}
+              onChange={e => setQuickText(e.target.value)}
+              rows={2}
+              placeholder="What did you talk about? (e.g. 'Called Jane, she's interested in upgrading next month')"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 resize-none mb-2"
+            />
+            <div className="flex gap-2">
+              <button onClick={() => { setQuickOpen(false); setQuickText(''); }} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">Cancel</button>
+              <button onClick={saveQuickLog} disabled={!quickText.trim()} className="flex-1 bg-green-700 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">Save note</button>
+            </div>
+          </div>
+        )}
+
+        {/* AI follow-up email */}
+        {latestCallWithTranscript() && (
+          <button
+            onClick={generateFollowupEmail}
+            disabled={emailBusy}
+            className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-700 rounded-lg py-2.5 text-sm font-medium mb-3 hover:border-green-600 hover:text-green-700 transition-colors disabled:opacity-50"
+          >
+            <Mail size={15} />
+            {emailBusy ? 'Drafting…' : 'Draft follow-up email (AI)'}
+          </button>
+        )}
+        {emailError && <p className="text-xs text-red-600 mb-2">{emailError}</p>}
+        {emailDraft && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+            <p className="text-xs font-semibold text-gray-700 mb-1">Subject</p>
+            <p className="text-sm text-gray-900 mb-2">{emailDraft.subject}</p>
+            <p className="text-xs font-semibold text-gray-700 mb-1">Body</p>
+            <p className="text-sm text-gray-800 whitespace-pre-wrap mb-3">{emailDraft.body}</p>
+            <div className="flex gap-2">
+              <button onClick={() => navigator.clipboard?.writeText(`${emailDraft.subject}\n\n${emailDraft.body}`)}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-xs font-medium hover:bg-gray-100">Copy</button>
+              <a href={mailtoLink()} className="flex-1 text-center bg-green-700 text-white py-2 rounded-lg text-xs font-semibold hover:bg-green-800">Open in email</a>
+              <button onClick={() => setEmailDraft(null)} className="px-3 text-gray-400 text-xs">Close</button>
+            </div>
+          </div>
+        )}
+
         {client.callHistory?.length === 0 && (
           <p className="text-sm text-gray-400 italic text-center py-2">No calls recorded yet</p>
         )}

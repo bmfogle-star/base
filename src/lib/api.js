@@ -173,6 +173,23 @@ export async function extractEventsViaBackend(transcript) {
   return data.events || [];
 }
 
+// ── Reminder sync ──
+export async function listRemindersRemote(since) {
+  const qs = since ? `?since=${encodeURIComponent(since)}` : '';
+  return call(`/reminders${qs}`, { auth: true });
+}
+export async function upsertReminderRemote(reminder) {
+  return call(`/reminders/${reminder.id}`, { method: 'PUT', auth: true, body: { data: reminder, updatedAt: reminder.updatedAt } });
+}
+export async function deleteReminderRemote(id) {
+  return call(`/reminders/${id}`, { method: 'DELETE', auth: true });
+}
+
+export async function followupEmailViaBackend(transcript, clientName, senderName) {
+  const data = await call('/ai/followup-email', { method: 'POST', auth: true, body: { transcript, clientName, senderName } });
+  return data.email || '';
+}
+
 // Extract contact details from a business card image (server-side vision).
 export async function extractCardViaBackend(imageDataUrl) {
   const data = await call('/ai/business-card', { method: 'POST', auth: true, body: { image: imageDataUrl } });

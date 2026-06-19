@@ -69,6 +69,17 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_events_scope ON events (org_id, owner_id, updated_at);
 
+  -- Follow-up reminders, same scoping as clients/events.
+  CREATE TABLE IF NOT EXISTS reminders (
+    id          TEXT PRIMARY KEY,
+    owner_id    TEXT,
+    org_id      TEXT,
+    data_json   TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    deleted     INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE INDEX IF NOT EXISTS idx_reminders_scope ON reminders (org_id, owner_id, updated_at);
+
   -- Devices signed into an account (for the per-plan device limit).
   CREATE TABLE IF NOT EXISTS devices (
     user_id    TEXT NOT NULL,

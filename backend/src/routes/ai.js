@@ -51,6 +51,29 @@ router.post('/business-card', requireAuth, async (req, res) => {
   }
 });
 
+router.post('/followup-email', requireAuth, async (req, res) => {
+  const { transcript, clientName, senderName } = req.body || {};
+  if (!transcript?.trim()) return res.status(400).json({ error: 'transcript is required' });
+  if (!canUseAI(req.user)) return res.status(429).json({ error: 'Monthly AI limit reached.' });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server is missing its AI key' });
+
+  const p = `Write a warm, concise follow-up email to ${clientName || 'the client'} after this sales call. Reference specific things discussed (personal details and business points) to feel genuine and personable. Keep it short (under 150 words), friendly, and end with a clear next step. ${senderName ? `Sign off as ${senderName}.` : ''} Return ONLY the email text (subject line first, prefixed "Subject:").\n\nTranscript:\n${transcript}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 600, messages: [{ role: 'user', content: p }] }),
+    });
+    if (!r.ok) return res.status(502).json({ error: `AI provider error ${r.status}` });
+    const data = await r.json();
+    incrementAI(req.user.id);
+    res.json({ email: data.content?.[0]?.text || '' });
+  } catch (e) {
+    res.status(502).json({ error: 'Failed to reach AI provider', detail: e.message });
+  }
+});
+
 router.post('/extract-events', requireAuth, async (req, res) => {
   const { transcript } = req.body || {};
   if (!transcript?.trim()) return res.status(400).json({ error: 'transcript is required' });

@@ -5,11 +5,13 @@
 //   • enterprise account → shared across the whole organization/team
 // Local storage stays the source the UI reads; this keeps it converged.
 import { isLoggedIn, listClientsRemote, upsertClientRemote, deleteClientRemote, registerDevice,
-  listEventsRemote, upsertEventRemote, deleteEventRemote } from './api';
-import { getClients, saveClients, getEvents, saveEvents } from '../data/store';
+  listEventsRemote, upsertEventRemote, deleteEventRemote,
+  listRemindersRemote, upsertReminderRemote, deleteReminderRemote } from './api';
+import { getClients, saveClients, getEvents, saveEvents, getReminders, saveReminders } from '../data/store';
 
 const LAST_PULL_KEY = 'spark_last_pull';
 const LAST_EVENT_PULL_KEY = 'spark_last_event_pull';
+const LAST_REMINDER_PULL_KEY = 'spark_last_reminder_pull';
 
 // Pull remote changes, merge into local (last-write-wins), then push local rows.
 export async function syncClients() {
@@ -79,6 +81,32 @@ export function pushEvent(event) {
 
 export function pushDeleteEvent(id) {
   if (isLoggedIn()) deleteEventRemote(id).catch(() => {});
+}
+
+// Same two-way sync for reminders.
+export async function syncReminders() {
+  if (!isLoggedIn()) return { synced: false };
+  const since = localStorage.getItem(LAST_REMINDER_PULL_KEY) || '';
+  const { reminders: remote, serverTime } = await listRemindersRemote(since);
+  const byId = new Map(getReminders().map(r => [r.id, r]));
+  for (const r of remote) {
+    if (r.deleted) { byId.delete(r.id); continue; }
+    const local = byId.get(r.id);
+    if (!local || new Date(r.updatedAt) >= new Date(local.updatedAt || 0)) byId.set(r.id, r.data);
+  }
+  const merged = [...byId.values()];
+  saveReminders(merged);
+  localStorage.setItem(LAST_REMINDER_PULL_KEY, serverTime || new Date().toISOString());
+  await Promise.allSettled(merged.map(r => upsertReminderRemote(r)));
+  return { synced: true };
+}
+
+export function pushReminder(reminder) {
+  if (isLoggedIn()) upsertReminderRemote(reminder).catch(() => {});
+}
+
+export function pushDeleteReminder(id) {
+  if (isLoggedIn()) deleteReminderRemote(id).catch(() => {});
 }
 
 export { isLoggedIn };

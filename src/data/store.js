@@ -3,6 +3,7 @@ const CLIENTS_KEY = 'salestracker_clients';
 const USER_KEY = 'salestracker_user';
 const CALLS_KEY = 'salestracker_calls';
 const EVENTS_KEY = 'salestracker_events';
+const REMINDERS_KEY = 'salestracker_reminders';
 
 export function getClients() {
   try {
@@ -137,4 +138,49 @@ export function createEvent(data) {
     ...data,
   };
   return saveEvent(event);
+}
+
+// ── Follow-up reminders ──
+export function getReminders() {
+  try {
+    return JSON.parse(localStorage.getItem(REMINDERS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+export function saveReminders(reminders) {
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
+}
+
+export function saveReminder(reminder) {
+  const reminders = getReminders();
+  const idx = reminders.findIndex(r => r.id === reminder.id);
+  if (idx >= 0) reminders[idx] = reminder;
+  else reminders.push(reminder);
+  saveReminders(reminders);
+  return reminder;
+}
+
+export function deleteReminder(id) {
+  saveReminders(getReminders().filter(r => r.id !== id));
+}
+
+export function createReminder(data) {
+  const now = new Date().toISOString();
+  const reminder = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+    clientId: null,
+    clientName: '',
+    label: 'Follow up',
+    context: '',
+    dueDate: now,
+    status: 'pending',  // 'pending' | 'done'
+    source: 'manual',   // 'manual' | 'call'
+    createdBy: null,
+    createdAt: now,
+    updatedAt: now,
+    ...data,
+  };
+  return saveReminder(reminder);
 }

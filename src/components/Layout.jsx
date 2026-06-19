@@ -1,4 +1,4 @@
-import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon } from 'lucide-react';
+import { Users, Mic, Settings, Home, Menu, X, Calendar as CalendarIcon, Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { getBranding } from '../lib/api';
 
@@ -27,6 +27,14 @@ export default function Layout({ page, onNav, children }) {
             : <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Spark" className="w-8 h-8 rounded-lg" />}
           <span className="font-bold text-gray-900 text-lg">{branding.companyName || 'Spark'}</span>
         </div>
+        <div className="flex items-center gap-1">
+        <button
+          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+          onClick={() => onNav('search')}
+          title="Search"
+        >
+          <SearchIcon size={20} />
+        </button>
         <button
           className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -50,6 +58,7 @@ export default function Layout({ page, onNav, children }) {
             </button>
           ))}
         </nav>
+        </div>
       </header>
 
       {/* Mobile dropdown menu */}

@@ -78,6 +78,17 @@ those details from recorded calls.
 - **Org branding** — admins upload a logo + primary color in the admin console;
   applied in the header (logo, company name, accent strip) for org members.
 - **Persistent login** — 90-day rolling JWT session (refreshed on each use).
+- **Follow-up reminders** — auto-created at 1/3/5/7/14 days after each call;
+  shown on the dashboard "Follow-ups due" section (complete/dismiss). Synced
+  (`/backend/src/routes/reminders.js`, `useReminders`, `syncReminders`).
+- **Global search** — header search icon → searches clients, calls (incl.
+  transcripts/notes), custom fields, and events (`src/pages/Search.jsx`).
+- **Daily briefing + Today** on the home page — today's schedule summary +
+  event list, plus follow-ups due.
+- **AI follow-up email** — Client Profile drafts a personalized email from the
+  latest call (`/ai/followup-email`, `src/lib/followup.js`); copy or open in mail.
+- **Quick log** — fast note button on a client that logs a call entry instantly
+  (and schedules its follow-ups).
 
 Local storage is the UI source of truth; the backend (when configured) adds
 identity, the AI key, limits, billing, cloud sync, org sharing, and device limits.

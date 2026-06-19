@@ -10,11 +10,15 @@ import CallRecorder from './pages/CallRecorder';
 import Settings from './pages/Settings';
 import AdminConsole from './pages/AdminConsole';
 import Calendar from './pages/Calendar';
+import Search from './pages/Search';
 import { useClients } from './hooks/useClients';
 import { useEvents } from './hooks/useEvents';
+import { useReminders } from './hooks/useReminders';
 import { getUser } from './data/store';
 import { extractCallEvents } from './lib/callEvents';
 import { getAccountInfo } from './lib/api';
+
+const FOLLOWUP_DAYS = [1, 3, 5, 7, 14];
 import './index.css';
 
 export default function App() {
@@ -34,6 +38,7 @@ export default function App() {
 
   const { clients, addClient, updateClient, removeClient } = useClients();
   const { events, addEvent, updateEvent, removeEvent, addEvents } = useEvents();
+  const { reminders, updateReminder, removeReminder, addReminders } = useReminders();
 
   // Detect return from Stripe checkout success and clean the URL.
   useEffect(() => {
@@ -90,6 +95,18 @@ export default function App() {
     updateClient(updatedClient);
     setSelectedClientId(updatedClient.id);
     setPage('profile');
+
+    // Schedule follow-up reminders at 1/3/5/7/14 days after the call.
+    const base = call?.date ? new Date(call.date) : new Date();
+    addReminders(FOLLOWUP_DAYS.map(days => ({
+      clientId: updatedClient.id,
+      clientName: updatedClient.name || 'Client',
+      label: `Follow up with ${updatedClient.name || 'client'}`,
+      context: call?.title || (call?.extracted ? call.extracted.split('\n')[0] : '') || '',
+      dueDate: new Date(base.getTime() + days * 86400000).toISOString(),
+      source: 'call',
+      createdBy: getAccountInfo().id || null,
+    })));
 
     // Auto-add any meetings/events mentioned on the call to the calendar.
     const transcript = call?.transcript;
@@ -158,9 +175,13 @@ export default function App() {
       {page === 'dashboard' && (
         <Dashboard
           clients={clients}
+          reminders={reminders}
+          events={events}
           onNav={handleNav}
           onSelectClient={handleSelectClient}
           onAdd={() => setPage('add')}
+          onCompleteReminder={(r) => updateReminder({ ...r, status: 'done' })}
+          onDismissReminder={(id) => removeReminder(id)}
         />
       )}
       {page === 'clients' && (
@@ -181,6 +202,14 @@ export default function App() {
           removeEvent={removeEvent}
         />
       )}
+      {page === 'search' && (
+        <Search
+          clients={clients}
+          events={events}
+          onSelectClient={handleSelectClient}
+          onBack={() => setPage('dashboard')}
+        />
+      )}
       {page === 'scan' && (
         <ScanCard
           clients={clients}
@@ -199,8 +228,10 @@ export default function App() {
       {page === 'profile' && selectedClient && (
         <ClientProfile
           client={selectedClient}
+          apiKey={keys.apiKey}
           onBack={() => setPage('clients')}
           onUpdate={handleUpdateClient}
+          onQuickLog={handleSaveCall}
           onDelete={handleDeleteClient}
           onRecord={handleRecord}
         />

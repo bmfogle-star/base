@@ -12,6 +12,7 @@ import orgRoutes from './routes/org.js';
 import clientRoutes from './routes/clients.js';
 import deviceRoutes from './routes/devices.js';
 import eventRoutes from './routes/events.js';
+import reminderRoutes from './routes/reminders.js';
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL ? [process.env.APP_URL, /github\.io$/] : true }));
@@ -28,6 +29,7 @@ app.use('/orgs', orgRoutes);
 app.use('/clients', clientRoutes);
 app.use('/devices', deviceRoutes);
 app.use('/events', eventRoutes);
+app.use('/reminders', reminderRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Spark backend listening on :${PORT}`));

@@ -1,6 +1,34 @@
-import { Users, Phone, Star, TrendingUp, ChevronRight, Plus } from 'lucide-react';
+import { Users, Phone, Star, TrendingUp, ChevronRight, Plus, BellRing, Check, X, CalendarDays, Clock } from 'lucide-react';
 
-export default function Dashboard({ clients, onNav, onSelectClient, onAdd }) {
+export default function Dashboard({ clients, reminders = [], events = [], onNav, onSelectClient, onAdd, onCompleteReminder, onDismissReminder }) {
+  // Pending follow-ups due now or soon (next 2 days), oldest first.
+  const soon = Date.now() + 2 * 86400000;
+  const dueFollowups = reminders
+    .filter(r => r.status === 'pending' && new Date(r.dueDate).getTime() <= soon)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+  // Today's schedule.
+  const now = new Date();
+  const isToday = (d) => { const x = new Date(d); return x.getFullYear() === now.getFullYear() && x.getMonth() === now.getMonth() && x.getDate() === now.getDate(); };
+  const todaysEvents = events.filter(e => isToday(e.start)).sort((a, b) => new Date(a.start) - new Date(b.start));
+  const dueToday = dueFollowups.filter(r => new Date(r.dueDate).getTime() <= Date.now() + 86400000).length;
+
+  const briefingParts = [];
+  if (todaysEvents.length) briefingParts.push(`${todaysEvents.length} event${todaysEvents.length > 1 ? 's' : ''}`);
+  if (dueToday) briefingParts.push(`${dueToday} follow-up${dueToday > 1 ? 's' : ''} due`);
+  const briefing = briefingParts.length
+    ? `Today you have ${briefingParts.join(' and ')}.`
+    : 'Nothing scheduled today — a good time to reach out to a client.';
+
+  function dueLabel(iso) {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diff = Math.round((new Date(d).setHours(0, 0, 0, 0) - today) / 86400000);
+    if (diff < 0) return `${-diff}d overdue`;
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return `In ${diff}d`;
+  }
   const recentClients = [...clients]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 5);
@@ -33,6 +61,57 @@ export default function Dashboard({ clients, onNav, onSelectClient, onAdd }) {
         <Plus size={18} />
         Add Client
       </button>
+
+      {/* Daily briefing + today's schedule */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <CalendarDays size={15} className="text-green-700" />
+            <h2 className="font-semibold text-gray-900 text-sm">Today</h2>
+          </div>
+          <button onClick={() => onNav('calendar')} className="text-green-700 text-xs font-medium hover:underline">Open calendar</button>
+        </div>
+        <div className="px-4 py-3">
+          <p className="text-sm text-gray-700 mb-2">{briefing}</p>
+          {todaysEvents.length > 0 && (
+            <div className="space-y-1.5">
+              {todaysEvents.map(e => (
+                <div key={e.id} className="flex items-center gap-2 text-sm">
+                  <Clock size={13} className="text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-500 w-16 flex-shrink-0">{new Date(e.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+                  <span className="text-gray-900 truncate">{e.title}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Follow-ups due */}
+      {dueFollowups.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-amber-50">
+            <BellRing size={15} className="text-amber-600" />
+            <h2 className="font-semibold text-amber-900 text-sm">Follow-ups due ({dueFollowups.length})</h2>
+          </div>
+          {dueFollowups.slice(0, 6).map(r => {
+            const overdue = new Date(r.dueDate).getTime() < Date.now() - 86400000;
+            return (
+              <div key={r.id} className="flex items-center gap-2 px-4 py-3 border-b border-gray-50 last:border-0">
+                <button onClick={() => onSelectClient(r.clientId)} className="flex-1 min-w-0 text-left">
+                  <p className="font-medium text-gray-900 text-sm truncate">{r.label}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    <span className={overdue ? 'text-red-500 font-medium' : 'text-amber-600'}>{dueLabel(r.dueDate)}</span>
+                    {r.context ? ` · ${r.context}` : ''}
+                  </p>
+                </button>
+                <button onClick={() => onCompleteReminder(r)} title="Mark done" className="p-1.5 rounded-lg text-green-700 hover:bg-green-50"><Check size={16} /></button>
+                <button onClick={() => onDismissReminder(r.id)} title="Dismiss" className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100"><X size={16} /></button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
