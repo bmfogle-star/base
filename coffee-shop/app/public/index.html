@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2A5F70">
+<title>Order ahead</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+  :root{
+    --ink:#2B1E16; --ink-soft:#5C4B3E; --paper:#F6F1E8; --card:#FFFFFF;
+    --line:#E5DCCE; --bird:#3A7D91; --bird-deep:#2A5F70; --bird-tint:#E7F0F2;
+    --star:#C9862F; --star-tint:#F7EBD7; --good:#2F7A4D; --bad:#A6442E;
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; margin:0; }
+  html,body{ height:100%; }
+  body{
+    background:#E9E2D4; color:var(--ink);
+    font:16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{ font-family:"Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif; }
+  button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+  input{ font:inherit; }
+  button:focus-visible, input:focus-visible{ outline:3px solid var(--bird); outline-offset:2px; border-radius:6px; }
+
+  .phone{ width:100%; max-width:480px; margin:0 auto; height:100dvh; background:var(--paper); position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 0 40px rgba(0,0,0,.15); }
+  .demo-ribbon{ background:var(--ink); color:#EFE6D8; font-size:11.5px; letter-spacing:.04em; text-align:center; padding:6px 10px; }
+  .demo-ribbon b{ color:#F3C878; font-weight:600; }
+  header.app{ display:flex; align-items:center; gap:10px; padding:12px 16px 10px; background:var(--paper); border-bottom:1px solid var(--line); }
+  .logo{ width:40px; height:40px; border-radius:12px; background:var(--bird); display:grid; place-items:center; flex:none; }
+  .brand .name{ font-size:19px; font-weight:600; letter-spacing:.01em; }
+  .brand .status{ font-size:12.5px; color:var(--good); font-weight:600; }
+  .brand .status .dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--good); margin-right:4px; }
+  .pts-chip{ margin-left:auto; background:var(--star-tint); color:#8A5A17; border:1px solid #EAD9B8; padding:6px 12px; border-radius:999px; font-weight:700; font-size:14px; font-variant-numeric:tabular-nums; }
+  main.screen{ flex:1; overflow-y:auto; padding:16px 16px 96px; }
+
+  nav.tabs{ position:absolute; left:0; right:0; bottom:0; display:flex; background:var(--card); border-top:1px solid var(--line); padding:6px 8px calc(8px + env(safe-area-inset-bottom)); }
+  nav.tabs button{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 0 5px; border-radius:12px; font-size:11px; font-weight:600; color:var(--ink-soft); }
+  nav.tabs button svg{ opacity:.75; }
+  nav.tabs button.on{ color:var(--bird-deep); background:var(--bird-tint); }
+  nav.tabs button.on svg{ opacity:1; }
+
+  h2.sect{ font-size:20px; margin:22px 2px 10px; letter-spacing:.01em; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); }
+  .money{ font-variant-numeric:tabular-nums; }
+  .btn{ display:block; width:100%; text-align:center; background:var(--bird); color:#fff; font-weight:700; padding:14px; border-radius:999px; font-size:16px; }
+  .btn:active{ background:var(--bird-deep); }
+  .btn[disabled]{ opacity:.45; cursor:default; }
+  .btn.ghost{ background:transparent; color:var(--bird-deep); border:1.5px solid var(--bird); }
+  .chip-row{ display:flex; gap:8px; overflow-x:auto; padding:2px; scrollbar-width:none; }
+  .chip-row::-webkit-scrollbar{ display:none; }
+  .chip{ flex:none; padding:8px 15px; border-radius:999px; border:1px solid var(--line); background:var(--card); font-size:14px; font-weight:600; color:var(--ink-soft); }
+  .chip.on{ background:var(--ink); border-color:var(--ink); color:#F3EDE2; }
+
+  .hello{ font-size:26px; margin:4px 2px 2px; text-wrap:balance; }
+  .sub{ color:var(--ink-soft); font-size:14px; margin:0 2px; }
+  .reward-card{ margin-top:14px; border-radius:18px; padding:18px; color:#FBF7EE; background:linear-gradient(135deg, var(--bird-deep), var(--bird) 70%); position:relative; overflow:hidden; }
+  .reward-card .rc-label{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.85; }
+  .reward-card .rc-balance{ font-size:38px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .reward-card .rc-balance small{ font-size:16px; font-weight:600; opacity:.9; }
+  .meter{ height:9px; background:rgba(255,255,255,.25); border-radius:99px; margin-top:12px; overflow:hidden; }
+  .meter i{ display:block; height:100%; background:#F3C878; border-radius:99px; transition:width .5s ease; }
+  @media (prefers-reduced-motion: reduce){ .meter i{ transition:none; } }
+  .rc-next{ margin-top:8px; font-size:13px; opacity:.95; }
+  .rc-bird{ position:absolute; right:-6px; top:-10px; opacity:.14; }
+  .quick{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+  .quick .card{ padding:14px; display:flex; flex-direction:column; gap:2px; text-align:left; }
+  .quick .t{ font-weight:700; }
+  .quick .d{ font-size:12.5px; color:var(--ink-soft); }
+  .deal{ padding:13px 14px; display:flex; gap:12px; align-items:center; }
+  .deal + .deal{ margin-top:8px; }
+  .deal .ic{ flex:none; width:40px; height:40px; border-radius:11px; background:var(--star-tint); display:grid; place-items:center; font-size:19px; }
+  .deal .t{ font-weight:700; font-size:14.5px; }
+  .deal .d{ font-size:12.5px; color:var(--ink-soft); }
+
+  .menu-item{ display:flex; gap:12px; padding:12px; align-items:center; width:100%; text-align:left; }
+  .menu-item + .menu-item{ border-top:1px solid var(--line); }
+  .thumb{ flex:none; width:52px; height:52px; border-radius:13px; display:grid; place-items:center; font-size:26px; background:var(--bird-tint); }
+  .thumb.warm{ background:var(--star-tint); }
+  .mi-name{ font-weight:700; font-size:15.5px; }
+  .mi-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
+  .mi-price{ margin-left:auto; font-weight:700; }
+
+  .overlay{ position:absolute; inset:0; background:rgba(30,20,12,.45); display:flex; align-items:flex-end; z-index:20; }
+  .sheet{ background:var(--paper); width:100%; max-height:88%; overflow-y:auto; border-radius:22px 22px 0 0; padding:10px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .grab{ width:44px; height:5px; border-radius:3px; background:var(--line); margin:4px auto 12px; }
+  .sheet h3{ font-size:22px; }
+  .sheet .desc{ color:var(--ink-soft); font-size:14px; margin-top:3px; }
+  .opt-group{ margin-top:16px; }
+  .opt-label{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin-bottom:8px; }
+  .opts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .opt{ padding:9px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--card); font-size:14px; font-weight:600; }
+  .opt.on{ border-color:var(--bird); background:var(--bird-tint); color:var(--bird-deep); }
+  .qty-row{ display:flex; align-items:center; gap:16px; margin-top:18px; }
+  .qty-row .qbtn{ width:42px; height:42px; border-radius:50%; border:1.5px solid var(--line); background:var(--card); font-size:20px; font-weight:700; }
+  .qty-row .q{ font-size:18px; font-weight:700; min-width:24px; text-align:center; font-variant-numeric:tabular-nums; }
+  .sheet .btn{ margin-top:18px; }
+  .field{ margin-top:14px; }
+  .field label{ display:block; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin-bottom:6px; }
+  .field input{ width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--card); font-size:16px; }
+  .err{ color:var(--bad); font-size:13.5px; font-weight:600; margin-top:10px; }
+
+  .line{ display:flex; gap:10px; padding:12px 2px; border-bottom:1px solid var(--line); align-items:baseline; }
+  .line .n{ font-weight:700; }
+  .line .mods{ font-size:12.5px; color:var(--ink-soft); }
+  .line .rm{ font-size:12.5px; color:var(--bad); font-weight:600; padding:2px 0; }
+  .line .p{ margin-left:auto; font-weight:700; }
+  .free-tag{ display:inline-block; background:var(--star-tint); color:#8A5A17; font-size:11.5px; font-weight:700; border-radius:6px; padding:1px 7px; margin-left:6px; }
+  .totals{ margin-top:12px; font-size:14.5px; }
+  .totals .tr{ display:flex; justify-content:space-between; padding:3px 2px; color:var(--ink-soft); }
+  .totals .tr.grand{ color:var(--ink); font-weight:800; font-size:17px; padding-top:8px; }
+  .redeem-strip{ margin-top:14px; padding:12px 14px; display:flex; align-items:center; gap:10px; background:var(--star-tint); border:1px solid #EAD9B8; border-radius:var(--radius); }
+  .redeem-strip .t{ font-size:13.5px; font-weight:600; color:#7A4F12; }
+  .redeem-strip button{ margin-left:auto; color:var(--bird-deep); font-weight:700; font-size:13.5px; white-space:nowrap; }
+  .empty{ text-align:center; color:var(--ink-soft); padding:48px 20px; }
+  .empty .big{ font-size:40px; }
+
+  .tier{ display:flex; align-items:center; gap:12px; padding:14px; }
+  .tier + .tier{ border-top:1px solid var(--line); }
+  .tier .pts{ flex:none; width:56px; text-align:center; font-weight:800; color:var(--star); font-variant-numeric:tabular-nums; }
+  .tier .pts small{ display:block; font-size:10px; letter-spacing:.08em; color:var(--ink-soft); font-weight:700; }
+  .tier .t{ font-weight:700; font-size:15px; }
+  .tier .d{ font-size:12.5px; color:var(--ink-soft); }
+  .tier .go{ margin-left:auto; flex:none; padding:8px 14px; border-radius:999px; background:var(--bird); color:#fff; font-size:13px; font-weight:700; }
+  .tier .go[disabled]{ background:var(--line); color:var(--ink-soft); }
+  .how{ padding:14px 16px; font-size:14px; color:var(--ink-soft); }
+  .how b{ color:var(--ink); }
+
+  .order-card{ padding:14px; }
+  .order-card + .order-card{ margin-top:10px; }
+  .oc-head{ display:flex; align-items:center; gap:8px; }
+  .oc-id{ font-weight:800; }
+  .oc-when{ font-size:12.5px; color:var(--ink-soft); }
+  .status-pill{ margin-left:auto; font-size:12px; font-weight:700; padding:4px 11px; border-radius:999px; }
+  .status-pill.s0{ background:var(--bird-tint); color:var(--bird-deep); }
+  .status-pill.s1{ background:var(--star-tint); color:#8A5A17; }
+  .status-pill.s2{ background:#E2F0E6; color:var(--good); }
+  .status-pill.s3{ background:var(--line); color:var(--ink-soft); }
+  .oc-items{ font-size:13.5px; color:var(--ink-soft); margin-top:6px; }
+  .timeline{ display:flex; gap:6px; margin-top:12px; }
+  .timeline .step{ flex:1; }
+  .timeline .bar{ height:5px; border-radius:3px; background:var(--line); }
+  .timeline .step.done .bar{ background:var(--good); }
+  .timeline .lbl{ font-size:10.5px; font-weight:700; color:var(--ink-soft); margin-top:4px; text-align:center; letter-spacing:.02em; }
+  .timeline .step.done .lbl{ color:var(--good); }
+  .oc-actions{ margin-top:12px; display:flex; gap:8px; }
+  .oc-actions button{ flex:1; padding:10px; border-radius:999px; font-weight:700; font-size:13.5px; border:1.5px solid var(--bird); color:var(--bird-deep); }
+
+  .toast{ position:absolute; left:50%; bottom:92px; transform:translateX(-50%); background:var(--ink); color:#F6EFE3; padding:10px 18px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; z-index:30; animation:pop .25s ease; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+  @keyframes pop{ from{ opacity:0; transform:translateX(-50%) translateY(8px);} }
+  @media (prefers-reduced-motion: reduce){ .toast{ animation:none; } }
+
+  .float-cart{ position:absolute; left:16px; right:16px; bottom:calc(74px + env(safe-area-inset-bottom)); z-index:10; background:var(--ink); color:#F6EFE3; border-radius:999px; padding:14px 20px; display:flex; align-items:center; font-weight:700; box-shadow:0 10px 26px rgba(30,20,10,.3); }
+  .float-cart .cnt{ background:var(--star); color:#fff; border-radius:999px; min-width:24px; height:24px; display:grid; place-items:center; font-size:13px; margin-right:10px; padding:0 6px; }
+  .float-cart .tot{ margin-left:auto; }
+  .loading{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="demo-ribbon" id="ribbon" hidden><b>DEMO MODE</b> · no real charges</div>
+  <header class="app">
+    <div class="logo" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z" fill="#F6F1E8"/>
+        <circle cx="16.6" cy="10.6" r=".8" fill="#2A5F70"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <div class="name serif" id="shopName">…</div>
+      <div class="status"><span class="dot"></span><span id="shopHours"></span></div>
+    </div>
+    <div class="pts-chip" id="ptsChip">★ 0</div>
+  </header>
+  <main class="screen" id="screen"><div class="loading">Loading the menu…</div></main>
+  <nav class="tabs" id="tabs" aria-label="App sections"></nav>
+  <div id="layer"></div>
+</div>
+
+<script>
+'use strict';
+/* ---------------- Server state ---------------- */
+let SHOP = null;            // /api/shop payload
+let ME = { phone: localStorage.getItem('cust-phone') || '', name: localStorage.getItem('cust-name') || '', points: 0, orders: [] };
+let S = { cart: [], tab: 'home', cat: null };
+try { S.cart = JSON.parse(localStorage.getItem('cust-cart')) || []; } catch(e) {}
+
+const $ = s => document.querySelector(s);
+const fmt = n => '$' + n.toFixed(2);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path, body) {
+  const res = await fetch('/api' + path, body ? { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) } : undefined);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong — try again.');
+  return data;
+}
+
+function itemById(id){ return SHOP.menu.find(m => m.id === id); }
+function cats(){ return [...new Set(SHOP.menu.map(m => m.cat))]; }
+function linePrice(l){
+  if (l.redeem) return 0;
+  const it = itemById(l.id); if (!it) return 0;
+  let p = it.price;
+  if (it.sized && l.size!=null) p += SHOP.sizes[l.size].d;
+  if (it.milk && l.milk!=null) p += SHOP.milks[l.milk].d;
+  (l.extras||[]).forEach(i => p += SHOP.extras[i].d);
+  return p * l.qty;
+}
+function lineMods(l){
+  const it = itemById(l.id); if (!it) return '';
+  const parts = [];
+  if (it.sized && l.size!=null) parts.push(SHOP.sizes[l.size].n);
+  if (it.milk && l.milk!=null && SHOP.milks[l.milk].n !== 'Whole') parts.push(SHOP.milks[l.milk].n + ' milk');
+  (l.extras||[]).forEach(i => parts.push(SHOP.extras[i].n));
+  return parts.join(' · ');
+}
+function cartCount(){ return S.cart.reduce((a,l)=>a+l.qty,0); }
+function cartSubtotal(){ return S.cart.reduce((a,l)=>a+linePrice(l),0); }
+function pendingRedeemPts(){ return S.cart.reduce((a,l)=>a+(l.redeem||0),0); }
+function nextTier(){ return SHOP.tiers.find(t => t.pts > ME.points) || null; }
+
+let toastTimer = null;
+function toast(msg){
+  $('#layer').querySelectorAll('.toast').forEach(t=>t.remove());
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  $('#layer').appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.remove(), 2600);
+}
+
+function icon(name){
+  const p = {
+    home:'M3 10.5 12 3l9 7.5M5 9.5V21h5v-6h4v6h5V9.5',
+    cup:'M4 8h13v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm13 1h2a2.5 2.5 0 0 1 0 5h-2M7 3.5v2M11 3.5v2M15 3.5v2',
+    star:'M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6L12 16.7 6.6 19.6l1.1-6L3.2 9.4l6.1-.8L12 3Z',
+    bag:'M6 8h12l1 13H5L6 8Zm3 0V6a3 3 0 0 1 6 0v2'
+  }[name];
+  return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+p+'"/></svg>';
+}
+
+/* ---------------- Render ---------------- */
+function render(){
+  $('#ptsChip').textContent = '★ ' + ME.points;
+  const tabs = [ ['home','Home','home'], ['order','Order','cup'], ['rewards','Rewards','star'], ['orders','Orders','bag'] ];
+  $('#tabs').innerHTML = tabs.map(([id,label,ic]) =>
+    '<button class="'+(S.tab===id?'on':'')+'" data-tab="'+id+'" aria-label="'+label+'">'+icon(ic)+'<span>'+label+'</span></button>').join('');
+  const views = { home: viewHome, order: viewOrder, rewards: viewRewards, orders: viewOrders };
+  $('#screen').innerHTML = views[S.tab]();
+  renderFloatCart();
+  localStorage.setItem('cust-cart', JSON.stringify(S.cart));
+}
+function renderFloatCart(){
+  document.querySelectorAll('.float-cart').forEach(e=>e.remove());
+  if (!cartCount() || S.tab==='orders') return;
+  const b = document.createElement('button');
+  b.className = 'float-cart';
+  b.innerHTML = '<span class="cnt">'+cartCount()+'</span> View cart <span class="tot money">'+fmt(cartSubtotal())+'</span>';
+  b.addEventListener('click', openCart);
+  $('#phone').appendChild(b);
+}
+
+function viewHome(){
+  const nt = nextTier();
+  const prev = nt ? (SHOP.tiers[SHOP.tiers.indexOf(nt)-1]?.pts || 0) : (SHOP.tiers[SHOP.tiers.length-1]?.pts || 1);
+  const pct = nt ? Math.min(100, Math.max(0, Math.round((ME.points - prev) / (nt.pts - prev) * 100))) : 100;
+  const avail = SHOP.tiers.filter(t=>t.pts<=ME.points).length;
+  return `
+    <h1 class="hello serif">${ME.name ? 'Welcome back, ' + esc(ME.name.split(' ')[0]) : 'Welcome'} ☀️</h1>
+    <p class="sub">Order ahead — skip the line at ${esc(SHOP.address)}.</p>
+    <div class="reward-card">
+      <svg class="rc-bird" width="120" height="120" viewBox="0 0 24 24" fill="#fff"><path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z"/></svg>
+      <div class="rc-label">${esc(SHOP.name)} Rewards</div>
+      <div class="rc-balance">${ME.points} <small>★</small></div>
+      <div class="meter" role="progressbar" aria-valuenow="${ME.points}" aria-valuemin="0" aria-valuemax="${nt?nt.pts:ME.points}"><i style="width:${pct}%"></i></div>
+      <div class="rc-next">${ME.phone ? (nt ? (nt.pts - ME.points) + '★ to go → ' + esc(nt.name.toLowerCase()) : 'Top tier reached — treat yourself!') : 'Stars save automatically with your phone number'}</div>
+    </div>
+    <div class="quick">
+      <button class="card" data-go="order"><span class="t">Order ahead</span><span class="d">Ready when you arrive</span></button>
+      <button class="card" data-go="rewards"><span class="t">Redeem stars</span><span class="d">${avail} reward${avail===1?'':'s'} available</span></button>
+    </div>
+    <h2 class="sect serif">This week</h2>
+    ${SHOP.deals.map(d=>'<div class="card deal"><div class="ic">'+esc(d.ic)+'</div><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}
+    <h2 class="sect serif">Favorites</h2>
+    <div class="card">${SHOP.menu.slice(0,3).map(m=>menuRow(m.id)).join('')}</div>`;
+}
+function menuRow(id){
+  const m = itemById(id); if (!m) return '';
+  return '<button class="menu-item" data-item="'+m.id+'">'
+    + '<span class="thumb'+(m.warm?' warm':'')+'">'+esc(m.ic)+'</span>'
+    + '<span><span class="mi-name">'+esc(m.name)+'</span><br><span class="mi-desc">'+esc(m.desc)+'</span></span>'
+    + '<span class="mi-price money">'+fmt(m.price)+'</span></button>';
+}
+function viewOrder(){
+  const cs = cats();
+  if (!S.cat || !cs.includes(S.cat)) S.cat = cs[0];
+  return `
+    <h1 class="hello serif">Order ahead</h1>
+    <p class="sub">Pickup at the counter — ${esc(SHOP.address)}</p>
+    <div class="chip-row" style="margin-top:14px">
+      ${cs.map(c=>'<button class="chip'+(S.cat===c?' on':'')+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')}
+    </div>
+    <div style="margin-top:12px"><div class="card">${SHOP.menu.filter(m=>m.cat===S.cat).map(m=>menuRow(m.id)).join('')}</div></div>`;
+}
+function viewRewards(){
+  const nt = nextTier();
+  return `
+    <h1 class="hello serif">${esc(SHOP.name)} Rewards</h1>
+    <p class="sub">${ME.phone ? 'You have <b>'+ME.points+'★</b>'+(nt ? ' — '+(nt.pts-ME.points)+'★ from your next reward' : ' — every reward is unlocked') : 'Stars are saved to your phone number at checkout.'}</p>
+    <h2 class="sect serif">Redeem</h2>
+    <div class="card">
+      ${SHOP.tiers.map((t,i)=>{
+        const can = ME.points - pendingRedeemPts() >= t.pts;
+        return '<div class="tier"><div class="pts">'+t.pts+'<small>STARS</small></div>'
+          + '<div><div class="t">'+esc(t.name)+'</div><div class="d">'+esc(t.desc)+'</div></div>'
+          + '<button class="go" data-redeem="'+i+'" '+(can?'':'disabled')+'>'+(can?'Redeem':'Locked')+'</button></div>';
+      }).join('')}
+    </div>
+    <h2 class="sect serif">How it works</h2>
+    <div class="card how">Earn <b>${SHOP.earnRate}★ for every $1</b> you spend in the app. Redeem stars on any order — no punch cards, no fine print.</div>
+    <h2 class="sect serif">Member deals</h2>
+    ${SHOP.deals.map(d=>'<div class="card deal"><div class="ic">'+esc(d.ic)+'</div><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}`;
+}
+const STATUSES = ['Received','Preparing','Ready for pickup'];
+function viewOrders(){
+  if (!ME.orders.length){
+    return '<h1 class="hello serif">Your orders</h1>'
+      + '<div class="empty"><div class="big">🧾</div><p>No orders yet.<br>Your pickup orders will show up here.</p>'
+      + '<button class="btn" style="margin-top:18px" data-go="order">Start an order</button></div>';
+  }
+  return '<h1 class="hello serif">Your orders</h1>'
+    + ME.orders.slice().reverse().map(o=>{
+      const items = o.lines.map(l=>l.qty+'× '+(itemById(l.id)?.name || l.id) + (l.redeem?' (reward)':'')).join(', ');
+      const st = Math.min(o.status, 2);
+      const when = new Date(o.placedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ', ' + new Date(o.placedAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+      return '<div class="card order-card">'
+        + '<div class="oc-head"><span class="oc-id">#'+o.num+'</span><span class="oc-when">'+when+'</span>'
+        + '<span class="status-pill s'+o.status+'">'+(o.status===3?'Picked up':STATUSES[st])+'</span></div>'
+        + '<div class="oc-items">'+esc(items)+'</div>'
+        + (o.status<3 ? '<div class="timeline">'+STATUSES.map((s,i)=>'<div class="step'+(i<=st?' done':'')+'"><div class="bar"></div><div class="lbl">'+s+'</div></div>').join('')+'</div>' : '')
+        + '<div class="oc-actions"><button data-reorder="'+o.num+'">Reorder</button></div>'
+        + '<div class="totals"><div class="tr"><span>Paid</span><span class="money">'+fmt(o.total)+'</span></div>'
+        + '<div class="tr"><span>Stars</span><span>+'+o.earned+'★'+(o.spent?' · −'+o.spent+'★ redeemed':'')+'</span></div></div>'
+        + '</div>';
+    }).join('');
+}
+
+/* ---------------- Item sheet ---------------- */
+let draft = null;
+function openItem(id, preset){
+  const m = itemById(id);
+  if (!m){ toast('That item isn’t available right now'); return; }
+  draft = preset || { id, qty:1, size: m.sized?1:null, milk: m.milk?0:null, extras: [], redeem: 0 };
+  drawSheet(sheetItemHTML(m), bindItemSheet);
+}
+function sheetItemHTML(m){
+  const d = draft;
+  return `
+    <h3 class="serif">${esc(m.name)} ${d.redeem?'<span class="free-tag">FREE · reward</span>':''}</h3>
+    <p class="desc">${esc(m.desc)}</p>
+    ${m.sized ? optGroup('Size', SHOP.sizes.map((s,i)=>opt(s.n + (s.d?' +'+fmt(s.d).slice(1):''), d.size===i, 'size', i))) : ''}
+    ${m.milk  ? optGroup('Milk', SHOP.milks.map((s,i)=>opt(s.n + (s.d?' +'+fmt(s.d).slice(1):''), d.milk===i, 'milk', i))) : ''}
+    ${m.cat!=='Bakery' ? optGroup('Extras', SHOP.extras.map((s,i)=>opt(s.n+' +'+fmt(s.d).slice(1), d.extras.includes(i), 'extra', i))) : ''}
+    <div class="qty-row">
+      <button class="qbtn" data-q="-1" aria-label="Decrease quantity">−</button>
+      <span class="q">${d.qty}</span>
+      <button class="qbtn" data-q="1" aria-label="Increase quantity">+</button>
+    </div>
+    <button class="btn" id="addBtn">Add to cart · <span class="money">${d.redeem?'FREE':fmt(linePrice(d))}</span></button>`;
+}
+function optGroup(label, opts){ return '<div class="opt-group"><div class="opt-label">'+label+'</div><div class="opts">'+opts.join('')+'</div></div>'; }
+function opt(text, on, kind, i){ return '<button class="opt'+(on?' on':'')+'" data-'+kind+'="'+i+'">'+esc(text)+'</button>'; }
+function bindItemSheet(sheet){
+  const m = itemById(draft.id);
+  sheet.addEventListener('click', e=>{
+    const t = e.target.closest('button'); if(!t) return;
+    if (t.dataset.size!=null){ draft.size = +t.dataset.size; }
+    else if (t.dataset.milk!=null){ draft.milk = +t.dataset.milk; }
+    else if (t.dataset.extra!=null){
+      const i = +t.dataset.extra;
+      draft.extras = draft.extras.includes(i) ? draft.extras.filter(x=>x!==i) : draft.extras.concat(i);
+    }
+    else if (t.dataset.q){ draft.qty = Math.max(1, Math.min(9, draft.qty + +t.dataset.q)); }
+    else if (t.id==='addBtn'){
+      if (draft.redeem) draft.qty = 1;
+      S.cart.push(draft);
+      closeSheet(); toast('Added to cart'); render(); return;
+    }
+    sheet.innerHTML = '<div class="grab"></div>' + sheetItemHTML(m);
+  });
+}
+
+/* ---------------- Cart & checkout ---------------- */
+let co = { tip: 2, pickup: 0, busy: false, error: '' };
+const TIPS = [0, .10, .15, .20];
+const PICKUPS = ['ASAP (5–10 min)', 'In 15 min', 'In 30 min'];
+function openCart(){
+  if (!cartCount()){ toast('Cart is empty'); return; }
+  co.error = ''; co.busy = false;
+  drawSheet(cartHTML(), bindCartSheet);
+}
+function cartHTML(){
+  const sub = cartSubtotal();
+  const tax = sub * SHOP.taxRate;
+  const tip = sub * TIPS[co.tip];
+  const total = sub + tax + tip;
+  const redeemable = SHOP.tiers.filter(t => ME.points - pendingRedeemPts() >= t.pts);
+  return `
+    <h3 class="serif">Your order</h3>
+    <div>
+      ${S.cart.map((l,i)=>{
+        const m = itemById(l.id); if (!m) return '';
+        return '<div class="line"><div><span class="n">'+l.qty+'× '+esc(m.name)+'</span>'
+          + (l.redeem?'<span class="free-tag">FREE · −'+l.redeem+'★</span>':'')
+          + (lineMods(l)?'<div class="mods">'+esc(lineMods(l))+'</div>':'')
+          + '<div><button class="rm" data-rm="'+i+'">Remove</button></div></div>'
+          + '<span class="p money">'+(l.redeem?'$0.00':fmt(linePrice(l)))+'</span></div>';
+      }).join('')}
+    </div>
+    ${!pendingRedeemPts() && redeemable.length ? '<div class="redeem-strip"><span>★</span><span class="t">You have '+ME.points+'★ — redeem a free item?</span><button data-open-rewards>See rewards</button></div>' : ''}
+    <div class="field"><label for="cName">Name for the cup</label><input id="cName" autocomplete="name" placeholder="First name" value="${esc(ME.name)}"></div>
+    <div class="field"><label for="cPhone">Phone (saves your stars)</label><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-1234" value="${esc(ME.phone)}"></div>
+    <div class="opt-group"><div class="opt-label">Pickup time</div>
+      <div class="opts">${PICKUPS.map((p,i)=>opt(p, co.pickup===i, 'pickup', i)).join('')}</div></div>
+    <div class="opt-group"><div class="opt-label">Tip the baristas</div>
+      <div class="opts">${TIPS.map((t,i)=>opt(t?Math.round(t*100)+'%':'No tip', co.tip===i, 'tip', i)).join('')}</div></div>
+    <div class="totals">
+      <div class="tr"><span>Subtotal</span><span class="money">${fmt(sub)}</span></div>
+      <div class="tr"><span>Tax</span><span class="money">${fmt(tax)}</span></div>
+      <div class="tr"><span>Tip</span><span class="money">${fmt(tip)}</span></div>
+      <div class="tr grand"><span>Total</span><span class="money">${fmt(total)}</span></div>
+      <div class="tr"><span>You'll earn</span><span>+${Math.floor(sub*SHOP.earnRate)}★</span></div>
+    </div>
+    ${co.error ? '<div class="err">'+esc(co.error)+'</div>' : ''}
+    <button class="btn" id="payBtn" ${co.busy?'disabled':''}>${co.busy?'One moment…':(SHOP.payMode==='stripe' ? 'Continue to payment · '+fmt(total) : 'Place order · '+fmt(total)+' (demo)')}</button>
+    <button class="btn ghost" style="margin-top:10px" id="keepBtn">Keep browsing</button>`;
+}
+function bindCartSheet(sheet){
+  sheet.addEventListener('click', async e=>{
+    const t = e.target.closest('button'); if(!t) return;
+    // keep typed values across re-renders
+    const nameEl = sheet.querySelector('#cName'), phoneEl = sheet.querySelector('#cPhone');
+    if (nameEl) ME.name = nameEl.value;
+    if (phoneEl) ME.phone = phoneEl.value;
+
+    if (t.dataset.rm!=null){ S.cart.splice(+t.dataset.rm,1); if(!cartCount()){ closeSheet(); render(); return; } }
+    else if (t.dataset.pickup!=null){ co.pickup = +t.dataset.pickup; }
+    else if (t.dataset.tip!=null){ co.tip = +t.dataset.tip; }
+    else if (t.hasAttribute('data-open-rewards')){ closeSheet(); S.tab='rewards'; render(); return; }
+    else if (t.id==='keepBtn'){ closeSheet(); render(); return; }
+    else if (t.id==='payBtn'){ await placeOrder(sheet); return; }
+    sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
+    renderFloatCart();
+  });
+}
+async function placeOrder(sheet){
+  co.error = '';
+  const digits = ME.phone.replace(/\D/g,'');
+  if (!ME.name.trim()) co.error = 'Add a name for the cup.';
+  else if (digits.length < 10) co.error = 'Enter a 10-digit phone number so your stars are saved.';
+  if (co.error){ sheet.innerHTML = '<div class="grab"></div>' + cartHTML(); return; }
+  co.busy = true;
+  sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
+  try {
+    localStorage.setItem('cust-name', ME.name);
+    localStorage.setItem('cust-phone', ME.phone);
+    const resp = await api('/orders', { lines: S.cart, tipPct: TIPS[co.tip], pickup: PICKUPS[co.pickup], name: ME.name, phone: ME.phone });
+    if (resp.checkoutUrl){ location.href = resp.checkoutUrl; return; } // Stripe hosted payment page
+    orderPlaced(resp);
+  } catch (err) {
+    co.busy = false; co.error = err.message;
+    sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
+  }
+}
+function orderPlaced(resp){
+  S.cart = [];
+  ME.points = resp.points;
+  ME.orders.push(resp.order);
+  S.tab = 'orders';
+  closeSheet(); render();
+  toast('Order #' + resp.order.num + ' placed · +' + resp.order.earned + '★');
+}
+
+/* ---------------- Sheet plumbing ---------------- */
+function drawSheet(innerHTML, bind){
+  closeSheet();
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+innerHTML+'</div>';
+  ov.addEventListener('click', e=>{ if (e.target===ov) closeSheet(); });
+  $('#layer').appendChild(ov);
+  bind(ov.querySelector('.sheet'));
+}
+function closeSheet(){ document.querySelectorAll('.overlay').forEach(e=>e.remove()); }
+
+/* ---------------- Events ---------------- */
+document.addEventListener('click', e=>{
+  const tab = e.target.closest('[data-tab]');
+  if (tab){ S.tab = tab.dataset.tab; render(); return; }
+  const go = e.target.closest('[data-go]');
+  if (go){ S.tab = go.dataset.go; render(); return; }
+  const cat = e.target.closest('[data-cat]');
+  if (cat){ S.cat = cat.dataset.cat; render(); return; }
+  const item = e.target.closest('[data-item]');
+  if (item){ openItem(item.dataset.item); return; }
+  const red = e.target.closest('[data-redeem]');
+  if (red && !red.disabled){
+    const t = SHOP.tiers[+red.dataset.redeem];
+    const it = itemById(t.grants);
+    if (!it){ toast('That reward item is sold out right now'); return; }
+    openItem(t.grants, { id:t.grants, qty:1, size: it.sized?1:null, milk: it.milk?0:null, extras:[], redeem:t.pts });
+    return;
+  }
+  const re = e.target.closest('[data-reorder]');
+  if (re){
+    const o = ME.orders.find(o=>o.num===+re.dataset.reorder);
+    if (o){ S.cart = S.cart.concat(o.lines.filter(l=>!l.redeem && itemById(l.id)).map(l=>({...l}))); render(); toast('Added to cart'); }
+    return;
+  }
+});
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeSheet(); });
+
+/* ---------------- Live status polling ---------------- */
+async function pollActive(){
+  const active = ME.orders.filter(o => o.status < 2);
+  for (const o of active){
+    try {
+      const fresh = await api('/orders/' + o.num);
+      if (fresh.status !== o.status){
+        o.status = fresh.status;
+        if (o.status === 2) toast('Order #' + o.num + ' is ready for pickup ✅');
+        if (S.tab === 'orders') render();
+      }
+    } catch(e) {}
+  }
+}
+setInterval(pollActive, 5000);
+
+/* ---------------- Boot ---------------- */
+(async function boot(){
+  try { SHOP = await api('/shop'); }
+  catch(e){ $('#screen').innerHTML = '<div class="empty"><div class="big">😕</div><p>Can’t reach the shop right now.<br>Check your connection and refresh.</p></div>'; return; }
+  document.title = SHOP.name + ' — Order ahead';
+  $('#shopName').textContent = SHOP.name;
+  $('#shopHours').textContent = SHOP.hours;
+  $('#ribbon').hidden = SHOP.payMode !== 'demo';
+
+  // returning customer: load points + history
+  const digits = ME.phone.replace(/\D/g,'');
+  if (digits.length >= 10){
+    try {
+      const me = await api('/customers/lookup', { phone: ME.phone });
+      ME.points = me.points; ME.orders = me.orders;
+      if (me.name && !ME.name) ME.name = me.name;
+    } catch(e) {}
+  }
+
+  // back from Stripe checkout?
+  const params = new URLSearchParams(location.search);
+  if (params.get('finalize')){
+    history.replaceState(null, '', location.pathname);
+    try {
+      const resp = await api('/orders/finalize', { token: params.get('finalize') });
+      orderPlaced(resp);
+      return;
+    } catch(err){ toast(err.message); }
+  }
+  if (params.get('canceled')){
+    history.replaceState(null, '', location.pathname);
+    toast('Payment canceled — your cart is saved');
+  }
+  render();
+})();
+</script>
+</body>
+</html>
