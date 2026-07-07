@@ -70,7 +70,7 @@
   /* menu editor */
   .m-row{ display:flex; align-items:center; gap:12px; padding:12px 16px; }
   .m-row + .m-row{ border-top:1px solid var(--line); }
-  .m-row .ic{ font-size:22px; width:34px; text-align:center; }
+  .m-row .ic-img{ width:38px; height:38px; border-radius:10px; object-fit:cover; background:var(--line); }
   .m-row .n{ font-weight:700; }
   .m-row .c{ font-size:12px; color:var(--ink-soft); }
   .m-row input.price{ width:84px; padding:8px 10px; border:1.5px solid var(--line); border-radius:10px; text-align:right; font-variant-numeric:tabular-nums; margin-left:auto; background:var(--card); }
@@ -198,7 +198,7 @@ function renderOrders(){
   const doneToday = orders.filter(o => o.status === 3);
   $('#main').innerHTML = `
     <div class="board">
-      ${list.length ? list.map(orderCard).join('') : '<div class="empty"><div class="big">☕</div><p>No open orders.<br>New orders pop up here with a chime.</p></div>'}
+      ${list.length ? list.map(orderCard).join('') : '<div class="empty"><p>No open orders.<br>New orders pop up here with a chime.</p></div>'}
     </div>
     ${doneToday.length ? '<h2 class="serif" style="margin:26px 2px 12px; font-size:19px;">Recently picked up</h2><div class="board">' + doneToday.slice(0,6).map(orderCard).join('') + '</div>' : ''}`;
   document.querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', async () => {
@@ -233,7 +233,7 @@ const maskPhone = p => p ? '(•••) •••-' + String(p).slice(-4) : '';
 function renderMenu(){
   $('#main').innerHTML = `<div class="card">${menu.map(m => `
     <div class="m-row">
-      <span class="ic">${esc(m.ic)}</span>
+      <img class="ic-img" src="/img/menu/${m.id}" alt="" onerror="this.style.visibility='hidden'">
       <div><div class="n">${esc(m.name)}</div><div class="c">${esc(m.cat)}</div></div>
       <input class="price money" data-price="${m.id}" value="${m.price.toFixed(2)}" inputmode="decimal" aria-label="Price for ${esc(m.name)}">
       <button class="avail ${m.available?'yes':'no'}" data-avail="${m.id}">${m.available ? 'Available' : 'Sold out'}</button>
@@ -269,6 +269,11 @@ function renderRewards(){
           <input class="wide" data-tf="grants:${i}" value="${esc(t.grants)}" aria-label="Free item id" title="Menu item id (e.g. drip, croissant, latte)">
         </div>`).join('')}
       <button class="save" id="saveSet">Save rewards</button><span class="saved-note" id="savedNote"></span>
+    </div>
+    <div class="card set-card" style="margin-top:14px">
+      <h3 class="serif">Gift cards</h3>
+      <p class="hint">Sell digital gift cards in the customer app ($10 / $25 / $50). Customers buy a code and share it; balances apply at checkout.</p>
+      <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="gcEnabled" ${settings.giftCardsEnabled?'checked':''}> Sell gift cards</label></div>
     </div>`;
   $('#saveSet').addEventListener('click', async () => {
     const tiers = settings.tiers.map((t,i) => ({
@@ -277,7 +282,7 @@ function renderRewards(){
       desc: t.desc,
       grants: document.querySelector('[data-tf="grants:'+i+'"]').value || t.grants,
     }));
-    await api('/staff/settings', { earnRate: parseFloat($('#er').value), tiers });
+    await api('/staff/settings', { earnRate: parseFloat($('#er').value), tiers, giftCardsEnabled: $('#gcEnabled').checked });
     settings = await api('/staff/settings');
     $('#savedNote').textContent = 'Saved ✓';
     setTimeout(()=>{ const n=$('#savedNote'); if(n) n.textContent=''; }, 2500);
@@ -292,7 +297,7 @@ function renderCustomers(){
       <tbody>${customers.map(c => `<tr><td><b>${esc(c.name||'—')}</b></td><td>${esc(maskPhone(c.phone))}</td>
         <td class="num">${c.points}★</td><td class="num">${c.orders}</td><td class="num">${fmt(c.spend)}</td></tr>`).join('')}</tbody>
     </table></div>` :
-    '<div class="empty"><div class="big">⭐</div><p>No customers yet — they appear here after their first order.</p></div>';
+    '<div class="empty"><p>No customers yet — they appear here after their first order.</p></div>';
 }
 
 /* ---------- toast ---------- */

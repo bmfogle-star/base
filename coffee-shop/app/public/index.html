@@ -124,6 +124,8 @@
     box-shadow:inset 0 0 0 1px rgba(124,196,214,.14), inset 0 -9px 12px -9px rgba(0,0,0,.4); }
   .thumb.warm{ background:radial-gradient(circle at 30% 25%, rgba(232,180,92,.26) 0%, rgba(232,180,92,.08) 72%);
     box-shadow:inset 0 0 0 1px rgba(232,180,92,.16), inset 0 -9px 12px -9px rgba(0,0,0,.4); }
+  .thumb{ overflow:hidden; }
+  .thumb img, .item-art img{ width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block; }
   .mi-name{ font-weight:700; font-size:15.5px; }
   .mi-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
   .mi-price{ margin-left:auto; font-weight:700; }
@@ -140,6 +142,18 @@
     box-shadow:inset 0 0 0 1px rgba(124,196,214,.15), 0 16px 28px -14px rgba(0,0,0,.7); }
   .item-art.warm{ background:radial-gradient(circle at 30% 25%, rgba(232,180,92,.28) 0%, rgba(232,180,92,.08) 75%);
     box-shadow:inset 0 0 0 1px rgba(232,180,92,.16), 0 16px 28px -14px rgba(0,0,0,.7); }
+  .item-art{ overflow:hidden; }
+
+  /* ---------- Wallet & gift cards ---------- */
+  .wallet-cta{ margin-top:10px; padding:14px; display:flex; flex-direction:column; gap:2px; text-align:left; width:100%; }
+  .pay-row{ display:flex; align-items:center; gap:10px; padding:13px 14px; }
+  .pay-row + .pay-row{ border-top:1px solid var(--line); }
+  .pay-row .pc-brand{ font-weight:700; }
+  .pay-row .rm{ margin-left:auto; color:var(--bad); font-weight:600; font-size:12.5px; }
+  .pay-row .code{ font-weight:700; letter-spacing:.06em; margin-left:auto; font-variant-numeric:tabular-nums; }
+  .gift-balance{ padding:18px; display:flex; align-items:baseline; gap:10px; }
+  .gift-balance .gb-amt{ font-size:32px; font-weight:800; color:var(--star); }
+  .gift-balance .gb-lbl{ color:var(--ink-soft); font-size:13px; }
   .grab{ width:44px; height:5px; border-radius:3px; background:var(--line); margin:4px auto 12px; }
   .sheet h3{ font-size:22px; }
   .sheet .desc{ color:var(--ink-soft); font-size:14px; margin-top:3px; }
@@ -223,31 +237,17 @@
   #splash.done{ opacity:0; pointer-events:none; }
   #splash .splash-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0; transition:opacity .7s ease; }
   #splash.has-video .splash-video{ opacity:1; }
-  #splash.has-video .pour-scene{ display:none; }
   #splash::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0; transition:opacity .7s ease;
     background:linear-gradient(rgba(15,13,11,.35), rgba(15,13,11,.12) 42%, rgba(15,13,11,.8)); }
   #splash.has-video::after{ opacity:1; }
   .pour-scene{ z-index:1; }
   .splash-brand{ position:relative; z-index:2; }
-  .pour-scene{ position:relative; width:130px; height:150px; }
-  .stream{ position:absolute; left:50%; top:0; width:9px; height:70px; margin-left:-4.5px; border-radius:0 0 5px 5px;
-    background:linear-gradient(#6F4A2E, #8B5E3C); transform-origin:top;
-    animation:pourin .35s ease .2s both, pourout .35s ease 1.5s forwards; }
-  @keyframes pourin{ from{ transform:scaleY(0); } }
-  @keyframes pourout{ to{ transform:scaleY(0); opacity:0; } }
-  .cup{ position:absolute; left:50%; bottom:6px; transform:translateX(-50%); width:88px; height:66px; }
-  .cup::before{ content:""; position:absolute; right:-21px; top:13px; width:22px; height:27px; border:5px solid #E9DFCF; border-radius:45%; }
-  .cup-in{ position:absolute; inset:0; border:5px solid #E9DFCF; border-radius:10px 10px 30px 30px; overflow:hidden; background:rgba(255,255,255,.03); }
-  .coffee{ position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(#9A6A44, #5F3D24); animation:fillcup 1.3s ease-out .3s forwards; }
-  .coffee::after{ content:""; position:absolute; left:0; right:0; top:-2px; height:6px; background:#C89A6B; opacity:.7; border-radius:50%; }
-  @keyframes fillcup{ to{ height:76%; } }
-  .splash-brand{ display:flex; flex-direction:column; align-items:center; gap:12px; opacity:0; animation:brandin .55s ease 1.7s forwards; }
-  @keyframes brandin{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; } }
+  .splash-brand{ display:flex; flex-direction:column; align-items:center; gap:12px; opacity:0;
+    animation:brandin .65s cubic-bezier(.2,1.5,.32,1) .45s forwards; }
+  @keyframes brandin{ from{ opacity:0; transform:scale(1.8); filter:blur(8px); } 60%{ filter:blur(0); } to{ opacity:1; transform:scale(1); } }
   .splash-brand .slogo{ width:66px; height:66px; border-radius:19px; background:var(--bird); display:grid; place-items:center; box-shadow:0 16px 30px -12px rgba(0,0,0,.7); }
   .splash-name{ font-size:21px; color:var(--ink); letter-spacing:.02em; }
   @media (prefers-reduced-motion: reduce){
-    .stream{ animation:none; opacity:0; }
-    .coffee{ animation:none; height:76%; }
     .splash-brand{ animation:none; opacity:1; }
   }
 </style>
@@ -256,10 +256,6 @@
 <div class="phone" id="phone">
   <div id="splash" aria-hidden="true">
     <video class="splash-video" src="/splash.mp4" muted playsinline autoplay preload="auto"></video>
-    <div class="pour-scene">
-      <div class="stream"></div>
-      <div class="cup"><div class="cup-in"><div class="coffee"></div></div></div>
-    </div>
     <div class="splash-brand">
       <div class="slogo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z" fill="#F6F1E8"/><circle cx="16.6" cy="10.6" r=".8" fill="#2A5F70"/></svg></div>
       <div class="splash-name serif">Bluebird Coffee Co.</div>
@@ -288,7 +284,10 @@
 'use strict';
 /* ---------------- Server state ---------------- */
 let SHOP = null;            // /api/shop payload
-let ME = { phone: localStorage.getItem('cust-phone') || '', name: localStorage.getItem('cust-name') || '', token: localStorage.getItem('cust-token') || '', points: 0, orders: [] };
+let ME = { phone: localStorage.getItem('cust-phone') || '', name: localStorage.getItem('cust-name') || '', token: localStorage.getItem('cust-token') || '', points: 0, giftBalance: 0, orders: [], wallet: [], gifts: [] };
+try { ME.wallet = JSON.parse(localStorage.getItem('cust-wallet')) || []; } catch(e) {}
+try { ME.gifts = JSON.parse(localStorage.getItem('cust-gifts')) || []; } catch(e) {}
+function saveWallet(){ localStorage.setItem('cust-wallet', JSON.stringify(ME.wallet)); localStorage.setItem('cust-gifts', JSON.stringify(ME.gifts)); }
 let S = { cart: [], tab: 'home', cat: null };
 try { S.cart = JSON.parse(localStorage.getItem('cust-cart')) || []; } catch(e) {}
 
@@ -358,7 +357,7 @@ function render(){
   const tabs = [ ['home','Home','home'], ['order','Order','cup'], ['rewards','Rewards','star'], ['orders','Orders','bag'] ];
   $('#tabs').innerHTML = tabs.map(([id,label,ic]) =>
     '<button class="'+(S.tab===id?'on':'')+'" data-tab="'+id+'" aria-label="'+label+'">'+icon(ic)+'<span>'+label+'</span></button>').join('');
-  const views = { home: viewHome, order: viewOrder, rewards: viewRewards, orders: viewOrders };
+  const views = { home: viewHome, order: viewOrder, rewards: viewRewards, orders: viewOrders, wallet: viewWallet };
   $('#screen').innerHTML = views[S.tab]();
   renderFloatCart();
   localStorage.setItem('cust-cart', JSON.stringify(S.cart));
@@ -379,7 +378,7 @@ function viewHome(){
   const pct = nt ? Math.min(100, Math.max(0, Math.round((ME.points - prev) / (nt.pts - prev) * 100))) : 100;
   const avail = SHOP.tiers.filter(t=>t.pts<=ME.points).length;
   return `
-    <h1 class="hello serif">${ME.name ? 'Welcome back, ' + esc(ME.name.split(' ')[0]) : 'Welcome'} ☀️</h1>
+    <h1 class="hello serif">${ME.name ? 'Welcome back, ' + esc(ME.name.split(' ')[0]) : 'Welcome'}</h1>
     <p class="sub">Order ahead — skip the line at ${esc(SHOP.address)}.</p>
     <div class="reward-card">
       <svg class="rc-bird" width="120" height="120" viewBox="0 0 24 24" fill="#fff"><path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z"/></svg>
@@ -392,15 +391,16 @@ function viewHome(){
       <button class="card" data-go="order"><span class="t">Order ahead</span><span class="d">Ready when you arrive</span></button>
       <button class="card" data-go="rewards"><span class="t">Redeem stars</span><span class="d">${avail} reward${avail===1?'':'s'} available</span></button>
     </div>
+    <button class="card wallet-cta" data-go="wallet"><span class="t">Cards &amp; gift cards</span><span class="d">${SHOP.giftCards && SHOP.giftCards.enabled ? 'Buy or redeem a gift card, manage payment' : 'Manage your saved cards'}</span></button>
     <h2 class="sect serif">This week</h2>
-    ${SHOP.deals.map(d=>'<div class="card deal"><div class="ic">'+esc(d.ic)+'</div><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}
+    ${SHOP.deals.map(d=>'<div class="card deal"><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}
     <h2 class="sect serif">Favorites</h2>
     <div class="card">${SHOP.menu.slice(0,3).map(m=>menuRow(m.id)).join('')}</div>`;
 }
 function menuRow(id){
   const m = itemById(id); if (!m) return '';
   return '<button class="menu-item" data-item="'+m.id+'">'
-    + '<span class="thumb'+(m.warm?' warm':'')+'">'+esc(m.ic)+'</span>'
+    + '<span class="thumb'+(m.warm?' warm':'')+'"><img src="/img/menu/'+m.id+'" alt="" loading="lazy" onerror="this.remove()"></span>'
     + '<span><span class="mi-name">'+esc(m.name)+'</span><br><span class="mi-desc">'+esc(m.desc)+'</span></span>'
     + '<span class="mi-price money">'+fmt(m.price)+'</span></button>';
 }
@@ -432,13 +432,13 @@ function viewRewards(){
     <h2 class="sect serif">How it works</h2>
     <div class="card how">Earn <b>${SHOP.earnRate}★ for every $1</b> you spend in the app. Redeem stars on any order — no punch cards, no fine print. <a href="/privacy" style="color:var(--accent-text)">Privacy &amp; your data</a></div>
     <h2 class="sect serif">Member deals</h2>
-    ${SHOP.deals.map(d=>'<div class="card deal"><div class="ic">'+esc(d.ic)+'</div><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}`;
+    ${SHOP.deals.map(d=>'<div class="card deal"><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}`;
 }
 const STATUSES = ['Received','Preparing','Ready for pickup'];
 function viewOrders(){
   if (!ME.orders.length){
     return '<h1 class="hello serif">Your orders</h1>'
-      + '<div class="empty"><div class="big">🧾</div><p>No orders yet.<br>Your pickup orders will show up here.</p>'
+      + '<div class="empty"><p>No orders yet.<br>Your pickup orders will show up here.</p>'
       + '<button class="btn" style="margin-top:18px" data-go="order">Start an order</button></div>';
   }
   return '<h1 class="hello serif">Your orders</h1>'
@@ -452,10 +452,39 @@ function viewOrders(){
         + '<div class="oc-items">'+esc(items)+'</div>'
         + (o.status<3 ? '<div class="timeline">'+STATUSES.map((s,i)=>'<div class="step'+(i<=st?' done':'')+(i===st&&o.status<2?' now':'')+'"><div class="bar"></div><div class="lbl">'+s+'</div></div>').join('')+'</div>' : '')
         + '<div class="oc-actions"><button data-reorder="'+o.num+'">Reorder</button></div>'
-        + '<div class="totals"><div class="tr"><span>Paid</span><span class="money">'+fmt(o.total)+'</span></div>'
+        + '<div class="totals"><div class="tr"><span>Paid</span><span class="money">'+fmt(o.total - (o.giftApplied||0))+(o.giftApplied?' <span style="color:var(--star)">(+'+fmt(o.giftApplied)+' gift card)</span>':'')+'</span></div>'
         + '<div class="tr"><span>Stars</span><span>+'+o.earned+'★'+(o.spent?' · −'+o.spent+'★ redeemed':'')+'</span></div></div>'
         + '</div>';
     }).join('');
+}
+
+function viewWallet(){
+  const gc = SHOP.giftCards || {};
+  const phoneOk = ME.phone.replace(/\D/g,'').length >= 10;
+  return `
+    <h1 class="hello serif">Cards &amp; gift cards</h1>
+    <p class="sub">Payment details are handled by Stripe — card numbers are never stored on ${esc(SHOP.name)}'s servers.</p>
+
+    <h2 class="sect serif">Payment cards</h2>
+    <div class="card">
+      ${ME.wallet.length
+        ? ME.wallet.map((w,i)=>'<div class="pay-row"><span class="pc-brand">'+esc(w.brand)+'</span><span class="money">•••• '+esc(w.last4)+'</span><button class="rm" data-rmcard="'+i+'">Remove</button></div>').join('')
+        : '<div class="pay-row" style="color:var(--ink-soft)">No saved cards yet — your card saves securely when you pay.</div>'}
+    </div>
+    ${SHOP.payMode==='demo' ? '<button class="btn ghost" style="margin-top:10px" data-addcard>Add card (demo)</button>' : ''}
+
+    <h2 class="sect serif">Gift card balance</h2>
+    <div class="card gift-balance"><span class="gb-amt money">$${(ME.giftBalance||0).toFixed(2)}</span><span class="gb-lbl">applies automatically at checkout when you choose it</span></div>
+    ${!phoneOk ? '<div class="field"><label for="walletPhone">Your phone (your balance saves to it)</label><input id="walletPhone" type="tel" inputmode="tel" placeholder="(555) 555-1234"></div>' : ''}
+    <div class="field"><label for="giftCode">Have a gift card code?</label><input id="giftCode" placeholder="BB-XXXX-XXXX" autocapitalize="characters" autocomplete="off"></div>
+    <button class="btn ghost" style="margin-top:10px" data-redeemcode>Redeem code</button>
+
+    ${gc.enabled ? `
+    <h2 class="sect serif">Buy a digital gift card</h2>
+    <p class="sub">Get an instant code to share with anyone.</p>
+    <div class="opts" style="margin-top:10px">${(gc.amounts||[]).map(a=>opt('$'+a, co.giftAmt===a, 'giftamt', a)).join('')}</div>
+    <button class="btn" style="margin-top:14px" data-buygift>Buy $${co.giftAmt} gift card${SHOP.payMode==='demo'?' · demo, no real charge':''}</button>
+    ${ME.gifts.length ? '<h2 class="sect serif">Your purchased codes</h2><div class="card">'+ME.gifts.map(g=>'<div class="pay-row"><span class="money">$'+g.amount+'</span><span class="code">'+esc(g.code)+'</span></div>').join('')+'</div><p class="sub" style="margin-top:8px">Share a code with anyone — they redeem it here in the app.</p>' : ''}` : ''}`;
 }
 
 /* ---------------- Item sheet ---------------- */
@@ -469,7 +498,7 @@ function openItem(id, preset){
 function sheetItemHTML(m){
   const d = draft;
   return `
-    <div class="item-art${m.warm?' warm':''}">${esc(m.ic)}</div>
+    <div class="item-art${m.warm?' warm':''}"><img src="/img/menu/${m.id}" alt="" onerror="this.remove()"></div>
     <h3 class="serif" style="text-align:center">${esc(m.name)} ${d.redeem?'<span class="free-tag">FREE · reward</span>':''}</h3>
     <p class="desc" style="text-align:center">${esc(m.desc)}</p>
     ${m.sized ? optGroup('Size', SHOP.sizes.map((s,i)=>opt(s.n + (s.d?' +'+fmt(s.d).slice(1):''), d.size===i, 'size', i))) : ''}
@@ -505,7 +534,7 @@ function bindItemSheet(sheet){
 }
 
 /* ---------------- Cart & checkout ---------------- */
-let co = { tip: 2, pickup: 0, busy: false, error: '' };
+let co = { tip: 2, pickup: 0, busy: false, error: '', useGift: false, giftAmt: 25 };
 const TIPS = [0, .10, .15, .20];
 const PICKUPS = ['ASAP (5–10 min)', 'In 15 min', 'In 30 min'];
 function openCart(){
@@ -518,6 +547,9 @@ function cartHTML(){
   const tax = sub * SHOP.taxRate;
   const tip = sub * TIPS[co.tip];
   const total = sub + tax + tip;
+  const gb = ME.giftBalance || 0;
+  const giftApplied = co.useGift ? Math.min(gb, total) : 0;
+  const due = total - giftApplied;
   const redeemable = SHOP.tiers.filter(t => ME.points - pendingRedeemPts() >= t.pts);
   return `
     <h3 class="serif">Your order</h3>
@@ -538,15 +570,17 @@ function cartHTML(){
       <div class="opts">${PICKUPS.map((p,i)=>opt(p, co.pickup===i, 'pickup', i)).join('')}</div></div>
     <div class="opt-group"><div class="opt-label">Tip the baristas</div>
       <div class="opts">${TIPS.map((t,i)=>opt(t?Math.round(t*100)+'%':'No tip', co.tip===i, 'tip', i)).join('')}</div></div>
+    ${gb > 0 ? '<div class="opt-group"><div class="opt-label">Gift card</div><div class="opts"><button class="opt'+(co.useGift?' on':'')+'" data-giftuse>Use my $'+gb.toFixed(2)+' balance</button></div></div>' : ''}
     <div class="totals">
       <div class="tr"><span>Subtotal</span><span class="money">${fmt(sub)}</span></div>
       <div class="tr"><span>Tax</span><span class="money">${fmt(tax)}</span></div>
       <div class="tr"><span>Tip</span><span class="money">${fmt(tip)}</span></div>
-      <div class="tr grand"><span>Total</span><span class="money">${fmt(total)}</span></div>
+      ${giftApplied > 0 ? '<div class="tr"><span>Gift card</span><span class="money">−'+fmt(giftApplied)+'</span></div>' : ''}
+      <div class="tr grand"><span>${giftApplied>0?'You pay':'Total'}</span><span class="money">${fmt(due)}</span></div>
       <div class="tr"><span>You'll earn</span><span>+${Math.floor(sub*SHOP.earnRate)}★</span></div>
     </div>
     ${co.error ? '<div class="err">'+esc(co.error)+'</div>' : ''}
-    <button class="btn" id="payBtn" ${co.busy?'disabled':''}>${co.busy?'One moment…':(SHOP.payMode==='stripe' ? 'Continue to payment · '+fmt(total) : 'Place order · '+fmt(total)+' (demo)')}</button>
+    <button class="btn" id="payBtn" ${co.busy?'disabled':''}>${co.busy?'One moment…':(SHOP.payMode==='stripe' && due > 0 ? 'Continue to payment · '+fmt(due) : 'Place order · '+fmt(due)+(SHOP.payMode==='demo'?' (demo)':''))}</button>
     <button class="btn ghost" style="margin-top:10px" id="keepBtn">Keep browsing</button>`;
 }
 function bindCartSheet(sheet){
@@ -560,6 +594,7 @@ function bindCartSheet(sheet){
     if (t.dataset.rm!=null){ S.cart.splice(+t.dataset.rm,1); if(!cartCount()){ closeSheet(); render(); return; } }
     else if (t.dataset.pickup!=null){ co.pickup = +t.dataset.pickup; }
     else if (t.dataset.tip!=null){ co.tip = +t.dataset.tip; }
+    else if (t.hasAttribute('data-giftuse')){ co.useGift = !co.useGift; }
     else if (t.hasAttribute('data-open-rewards')){ closeSheet(); S.tab='rewards'; render(); return; }
     else if (t.id==='keepBtn'){ closeSheet(); render(); return; }
     else if (t.id==='payBtn'){ await placeOrder(sheet); return; }
@@ -578,7 +613,7 @@ async function placeOrder(sheet){
   try {
     localStorage.setItem('cust-name', ME.name);
     localStorage.setItem('cust-phone', ME.phone);
-    const resp = await api('/orders', { lines: S.cart, tipPct: TIPS[co.tip], pickup: PICKUPS[co.pickup], name: ME.name, phone: ME.phone });
+    const resp = await api('/orders', { lines: S.cart, tipPct: TIPS[co.tip], pickup: PICKUPS[co.pickup], name: ME.name, phone: ME.phone, useGift: co.useGift, token: ME.token });
     if (resp.checkoutUrl){ location.href = resp.checkoutUrl; return; } // Stripe hosted payment page
     orderPlaced(resp);
   } catch (err) {
@@ -588,7 +623,9 @@ async function placeOrder(sheet){
 }
 function orderPlaced(resp){
   S.cart = [];
+  co.useGift = false;
   ME.points = resp.points;
+  if (resp.giftBalance !== undefined) ME.giftBalance = resp.giftBalance;
   if (resp.token){ ME.token = resp.token; localStorage.setItem('cust-token', resp.token); }
   ME.orders.push(resp.order);
   S.tab = 'orders';
@@ -632,6 +669,43 @@ document.addEventListener('click', e=>{
     if (o){ S.cart = S.cart.concat(o.lines.filter(l=>!l.redeem && itemById(l.id)).map(l=>({...l}))); render(); toast('Added to cart'); }
     return;
   }
+
+  /* Wallet actions */
+  if (e.target.closest('[data-addcard]')){
+    ME.wallet.push({ brand: 'Visa', last4: '4242' });
+    saveWallet(); render(); toast('Demo card added');
+    return;
+  }
+  const rmc = e.target.closest('[data-rmcard]');
+  if (rmc){ ME.wallet.splice(+rmc.dataset.rmcard, 1); saveWallet(); render(); return; }
+  const ga = e.target.closest('[data-giftamt]');
+  if (ga){ co.giftAmt = +ga.dataset.giftamt; render(); return; }
+  if (e.target.closest('[data-redeemcode]')){
+    (async () => {
+      const wp = $('#walletPhone');
+      if (wp && wp.value) { ME.phone = wp.value; localStorage.setItem('cust-phone', ME.phone); }
+      const code = ($('#giftCode') || {}).value || '';
+      if (!code.trim()){ toast('Enter a gift card code'); return; }
+      try {
+        const resp = await api('/giftcards/redeem', { phone: ME.phone, name: ME.name, code });
+        ME.giftBalance = resp.giftBalance;
+        if (resp.token){ ME.token = resp.token; localStorage.setItem('cust-token', resp.token); }
+        render(); toast('Balance added: $' + resp.giftBalance.toFixed(2));
+      } catch (err){ toast(err.message); }
+    })();
+    return;
+  }
+  if (e.target.closest('[data-buygift]')){
+    (async () => {
+      try {
+        const resp = await api('/giftcards/buy', { amount: co.giftAmt, phone: ME.phone });
+        if (resp.checkoutUrl){ location.href = resp.checkoutUrl; return; }
+        ME.gifts.push({ code: resp.code, amount: resp.amount });
+        saveWallet(); render(); toast('Gift card created — share the code');
+      } catch (err){ toast(err.message); }
+    })();
+    return;
+  }
 });
 document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeSheet(); });
 
@@ -643,7 +717,7 @@ async function pollActive(){
       const fresh = await api('/orders/' + o.num);
       if (fresh.status !== o.status){
         o.status = fresh.status;
-        if (o.status === 2) toast('Order #' + o.num + ' is ready for pickup ✅');
+        if (o.status === 2) toast('Order #' + o.num + ' is ready for pickup');
         if (S.tab === 'orders') render();
       }
     } catch(e) {}
@@ -657,7 +731,7 @@ setInterval(pollActive, 5000);
   if (!el) return;
   const q = new URLSearchParams(location.search);
   // Skip the ceremony when returning from the payment page
-  if (q.get('finalize') || q.get('canceled')){ el.remove(); return; }
+  if (q.get('finalize') || q.get('giftfinalize') || q.get('canceled')){ el.remove(); return; }
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dismiss = () => { el.classList.add('done'); setTimeout(()=>el.remove(), 550); };
   let timer = setTimeout(dismiss, reduced ? 900 : 2400);
@@ -692,6 +766,7 @@ setInterval(pollActive, 5000);
     try {
       const me = await api('/customers/lookup', { phone: ME.phone, token: ME.token });
       ME.points = me.points; ME.orders = me.orders || [];
+      if (me.giftBalance !== undefined) ME.giftBalance = me.giftBalance;
       if (me.name && !ME.name) ME.name = me.name;
     } catch(e) {}
   }
@@ -704,6 +779,16 @@ setInterval(pollActive, 5000);
       const resp = await api('/orders/finalize', { token: params.get('finalize') });
       orderPlaced(resp);
       return;
+    } catch(err){ toast(err.message); }
+  }
+  if (params.get('giftfinalize')){
+    history.replaceState(null, '', location.pathname);
+    try {
+      const resp = await api('/giftcards/finalize', { token: params.get('giftfinalize') });
+      ME.gifts.push({ code: resp.code, amount: resp.amount });
+      saveWallet();
+      S.tab = 'wallet';
+      toast('Gift card purchased — share the code');
     } catch(err){ toast(err.message); }
   }
   if (params.get('canceled')){

@@ -35,6 +35,7 @@ const SEED = {
     hours: 'Open · closes 6:00 pm',
     earnRate: 2,            // stars per $1
     taxRate: 0.08,
+    giftCards: { enabled: true, amounts: [10, 25, 50] },
     tiers: [
       { pts: 50,  name: 'Free drip coffee',      desc: 'Any size brewed coffee, on us',        grants: 'drip' },
       { pts: 100, name: 'Free bakery item',      desc: 'Muffin, croissant, cookie — you pick', grants: 'croissant' },
@@ -66,7 +67,8 @@ const SEED = {
     { id:'cookie',    cat:'Bakery',        name:'Sea-Salt Choc Chip', desc:'Big, chewy, still warm at 8am',       price:2.95, ic:'🍪', warm:true,  sized:false, milk:false, available:true },
   ],
   orders: [],       // { num, phone, name, lines, subtotal, tax, tip, total, earned, spent, status, placedAt }
-  customers: {},    // phone -> { name, points, orders: [num], createdAt }
+  customers: {},    // phone -> { name, points, giftBalance, orders: [num], createdAt }
+  giftcards: {},    // code -> { balance, amount, purchasedBy, createdAt, redeemedBy }
   seq: 100,
 };
 
@@ -77,6 +79,7 @@ function loadDb() {
   catch (e) { db = JSON.parse(JSON.stringify(SEED)); saveDb(); }
   // additive migrations: pick up new seed fields
   for (const k of Object.keys(SEED)) if (db[k] === undefined) db[k] = SEED[k];
+  if (!db.shop.giftCards) db.shop.giftCards = JSON.parse(JSON.stringify(SEED.shop.giftCards));
 }
 let saveTimer = null;
 function saveDb() {
@@ -138,27 +141,36 @@ function priceCart(rawLines, customer) {
   return { lines, subtotal: r2(subtotal), redeemPts };
 }
 
-function createOrder({ lines, subtotal, redeemPts, tipPct, pickup, phone, name }) {
+function createOrder({ lines, subtotal, redeemPts, tipPct, pickup, phone, name, giftApplied }) {
   const tip = r2(subtotal * (tipPct || 0));
   const tax = r2(subtotal * db.shop.taxRate);
   const total = r2(subtotal + tax + tip);
   const earned = Math.floor(subtotal * db.shop.earnRate);
   const num = ++db.seq;
+  let c = db.customers[phone];
+  if (!c) c = db.customers[phone] = { name, points: 0, orders: [], createdAt: Date.now() };
+  if (!c.token) c.token = crypto.randomBytes(16).toString('hex');
+  const gift = r2(Math.min(giftApplied || 0, c.giftBalance || 0, total));
   const order = {
     num, phone, name, lines, subtotal, tax, tip, total,
-    earned, spent: redeemPts, pickup: pickup || 'ASAP',
+    earned, spent: redeemPts, giftApplied: gift, pickup: pickup || 'ASAP',
     status: 0, placedAt: Date.now(),
   };
   db.orders.push(order);
   if (db.orders.length > 500) db.orders = db.orders.slice(-400);
-  let c = db.customers[phone];
-  if (!c) c = db.customers[phone] = { name, points: 0, orders: [], createdAt: Date.now() };
-  if (!c.token) c.token = crypto.randomBytes(16).toString('hex');
   c.name = name || c.name;
   c.points = c.points - redeemPts + earned;
+  if (gift) c.giftBalance = r2((c.giftBalance || 0) - gift);
   c.orders.push(num);
   saveDb();
   return order;
+}
+
+function genGiftCode() {
+  const s = () => crypto.randomBytes(2).toString('hex').toUpperCase();
+  let code;
+  do { code = 'BB-' + s() + '-' + s(); } while (db.giftcards[code]);
+  return code;
 }
 
 function staffLine(l) {
@@ -173,8 +185,8 @@ const staffOrder = o => ({ ...o, lines: o.lines.map(staffLine) });
 
 const publicOrder = o => ({
   num: o.num, lines: o.lines, subtotal: o.subtotal, tax: o.tax, tip: o.tip,
-  total: o.total, earned: o.earned, spent: o.spent, status: o.status,
-  pickup: o.pickup, placedAt: o.placedAt,
+  total: o.total, earned: o.earned, spent: o.spent, giftApplied: o.giftApplied || 0,
+  status: o.status, pickup: o.pickup, placedAt: o.placedAt,
 });
 
 /* ---------------- App ---------------------------------------------------- */
@@ -204,6 +216,7 @@ app.get('/api/shop', (req, res) => {
   const { name, address, hours, earnRate, tiers, deals, sizes, milks, extras, taxRate } = db.shop;
   res.json({
     name, address, hours, earnRate, tiers, deals, sizes, milks, extras, taxRate,
+    giftCards: db.shop.giftCards || { enabled: false, amounts: [] },
     payMode: stripe ? 'stripe' : 'demo',
     menu: db.menu.filter(m => m.available),
   });
@@ -220,7 +233,7 @@ app.post('/api/customers/lookup', (req, res) => {
     return res.json({ phone, points: c ? c.points : 0 });
   }
   const orders = db.orders.filter(o => o.phone === phone).slice(-10).map(publicOrder);
-  res.json({ phone, name: c.name, points: c.points, orders });
+  res.json({ phone, name: c.name, points: c.points, giftBalance: c.giftBalance || 0, orders });
 });
 
 // Pending carts awaiting Stripe payment: token -> {cart data, expires}
@@ -236,12 +249,23 @@ app.post('/api/orders', async (req, res) => {
   const tp = [0, 0.10, 0.15, 0.20].includes(+tipPct) ? +tipPct : 0;
   const priced = priceCart(lines, db.customers[phone]);
   if (priced.error) return res.status(400).json({ error: priced.error });
-  const data = { ...priced, tipPct: tp, pickup: String(pickup || 'ASAP').slice(0, 30), phone, name };
 
-  if (!stripe) { // demo mode: place instantly
+  // Gift balance: spendable only from a device holding the customer's token
+  let giftApplied = 0;
+  const cust = db.customers[phone];
+  const total = r2(priced.subtotal * (1 + db.shop.taxRate) + priced.subtotal * tp);
+  if (req.body.useGift) {
+    if (!cust || !req.body.token || req.body.token !== cust.token) {
+      return res.status(400).json({ error: 'Gift balance can only be used from a device that has ordered or redeemed a card before.' });
+    }
+    giftApplied = r2(Math.min(cust.giftBalance || 0, total));
+  }
+  const data = { ...priced, tipPct: tp, pickup: String(pickup || 'ASAP').slice(0, 30), phone, name, giftApplied };
+
+  if (!stripe || (giftApplied >= total && giftApplied > 0)) { // demo mode, or gift fully covers it
     const order = createOrder(data);
     const c = db.customers[phone];
-    return res.json({ order: publicOrder(order), points: c.points, token: c.token });
+    return res.json({ order: publicOrder(order), points: c.points, giftBalance: c.giftBalance || 0, token: c.token });
   }
 
   // Stripe mode: create a Checkout Session, finalize after payment
@@ -249,16 +273,22 @@ app.post('/api/orders', async (req, res) => {
     const token = crypto.randomBytes(16).toString('hex');
     const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
     const tip = r2(data.subtotal * tp), tax = r2(data.subtotal * db.shop.taxRate);
-    const items = data.lines.filter(l => !l.redeem).map(l => ({
-      quantity: l.qty,
-      price_data: {
-        currency: 'usd',
-        unit_amount: Math.round(priceLine(l) / l.qty * 100),
-        product_data: { name: itemById(l.id).name },
-      },
-    }));
-    if (tax > 0) items.push({ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round(tax * 100), product_data: { name: 'Sales tax' } } });
-    if (tip > 0) items.push({ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round(tip * 100), product_data: { name: 'Tip' } } });
+    let items;
+    if (giftApplied > 0) {
+      // Gift card partially covers the order: charge the remainder as one line
+      items = [{ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round((total - giftApplied) * 100), product_data: { name: db.shop.name + ' order (gift card applied)' } } }];
+    } else {
+      items = data.lines.filter(l => !l.redeem).map(l => ({
+        quantity: l.qty,
+        price_data: {
+          currency: 'usd',
+          unit_amount: Math.round(priceLine(l) / l.qty * 100),
+          product_data: { name: itemById(l.id).name },
+        },
+      }));
+      if (tax > 0) items.push({ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round(tax * 100), product_data: { name: 'Sales tax' } } });
+      if (tip > 0) items.push({ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round(tip * 100), product_data: { name: 'Tip' } } });
+    }
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: items,
@@ -275,18 +305,83 @@ app.post('/api/orders', async (req, res) => {
 
 app.post('/api/orders/finalize', async (req, res) => {
   const p = pending.get(String(req.body.token || ''));
-  if (!p) return res.status(404).json({ error: 'Order session expired — please try again.' });
+  if (!p || p.type) return res.status(404).json({ error: 'Order session expired — please try again.' });
   try {
     const session = await stripe.checkout.sessions.retrieve(p.sessionId);
     if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
     pending.delete(req.body.token);
     const order = createOrder(p.data);
     const c = db.customers[p.data.phone];
-    res.json({ order: publicOrder(order), points: c.points, token: c.token });
+    res.json({ order: publicOrder(order), points: c.points, giftBalance: c.giftBalance || 0, token: c.token });
   } catch (e) {
     console.error('finalize error', e.message);
     res.status(502).json({ error: 'Could not verify payment.' });
   }
+});
+
+/* ---- Gift cards ---- */
+app.post('/api/giftcards/buy', async (req, res) => {
+  const gc = db.shop.giftCards || {};
+  if (!gc.enabled) return res.status(400).json({ error: 'This shop does not sell gift cards.' });
+  if (!allow('gift:' + req.ip, 20, 3600e3)) return res.status(429).json({ error: 'Too many attempts — try again later.' });
+  const amount = +req.body.amount;
+  if (!gc.amounts.includes(amount)) return res.status(400).json({ error: 'Invalid gift card amount.' });
+  const phone = normPhone(req.body.phone) || null;
+
+  if (!stripe) { // demo: instant code
+    const code = genGiftCode();
+    db.giftcards[code] = { balance: amount, amount, purchasedBy: phone, createdAt: Date.now() };
+    saveDb();
+    return res.json({ code, amount });
+  }
+  try {
+    const token = crypto.randomBytes(16).toString('hex');
+    const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: amount * 100, product_data: { name: db.shop.name + ' digital gift card' } } }],
+      success_url: `${base}/?giftfinalize=${token}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${base}/?canceled=1`,
+    });
+    pending.set(token, { type: 'gift', amount, phone, sessionId: session.id, expires: Date.now() + 30 * 60 * 1000 });
+    res.json({ checkoutUrl: session.url });
+  } catch (e) {
+    console.error('gift stripe error', e.message);
+    res.status(502).json({ error: 'Payment system error — please try again.' });
+  }
+});
+
+app.post('/api/giftcards/finalize', async (req, res) => {
+  const p = pending.get(String(req.body.token || ''));
+  if (!p || p.type !== 'gift') return res.status(404).json({ error: 'Purchase session expired.' });
+  try {
+    const session = await stripe.checkout.sessions.retrieve(p.sessionId);
+    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
+    pending.delete(req.body.token);
+    const code = genGiftCode();
+    db.giftcards[code] = { balance: p.amount, amount: p.amount, purchasedBy: p.phone, createdAt: Date.now() };
+    saveDb();
+    res.json({ code, amount: p.amount });
+  } catch (e) {
+    res.status(502).json({ error: 'Could not verify payment.' });
+  }
+});
+
+app.post('/api/giftcards/redeem', (req, res) => {
+  if (!allow('redeem:' + req.ip, 20, 3600e3)) return res.status(429).json({ error: 'Too many attempts — try again later.' });
+  const phone = normPhone(req.body.phone);
+  const name = String(req.body.name || '').slice(0, 40).trim();
+  if (phone.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit phone number — your balance saves to it.' });
+  const code = String(req.body.code || '').toUpperCase().replace(/\s/g, '');
+  const card = db.giftcards[code];
+  if (!card || card.balance <= 0) return res.status(404).json({ error: 'That code is invalid or already used.' });
+  let c = db.customers[phone];
+  if (!c) c = db.customers[phone] = { name, points: 0, orders: [], createdAt: Date.now() };
+  if (!c.token) c.token = crypto.randomBytes(16).toString('hex');
+  c.giftBalance = r2((c.giftBalance || 0) + card.balance);
+  card.balance = 0; card.redeemedBy = phone; card.redeemedAt = Date.now();
+  saveDb();
+  res.json({ giftBalance: c.giftBalance, token: c.token });
 });
 
 app.get('/api/orders/:num', (req, res) => {
@@ -340,10 +435,14 @@ app.get('/api/staff/customers', staff, (req, res) => {
 });
 app.get('/api/staff/settings', staff, (req, res) => {
   const { earnRate, tiers } = db.shop;
-  res.json({ earnRate, tiers });
+  res.json({ earnRate, tiers, giftCardsEnabled: !!(db.shop.giftCards && db.shop.giftCards.enabled) });
 });
 app.post('/api/staff/settings', staff, (req, res) => {
   if (req.body.earnRate != null && +req.body.earnRate >= 0 && +req.body.earnRate <= 20) db.shop.earnRate = +req.body.earnRate;
+  if (typeof req.body.giftCardsEnabled === 'boolean') {
+    db.shop.giftCards = db.shop.giftCards || { amounts: [10, 25, 50] };
+    db.shop.giftCards.enabled = req.body.giftCardsEnabled;
+  }
   if (Array.isArray(req.body.tiers)) {
     const ok = req.body.tiers.every(t => t && +t.pts > 0 && t.name && itemById(t.grants));
     if (ok) db.shop.tiers = req.body.tiers.map(t => ({ pts: +t.pts, name: String(t.name).slice(0, 60), desc: String(t.desc || '').slice(0, 100), grants: t.grants }));
@@ -353,32 +452,54 @@ app.post('/api/staff/settings', staff, (req, res) => {
 
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
-// Splash pour video: fetched once from the asset CDN (unreachable from some
-// dev sandboxes, fine in production), cached on the data volume, then served
-// locally. If unavailable, the app's CSS pour animation is the fallback.
-const SPLASH_VIDEO_URL = process.env.SPLASH_VIDEO_URL || 'https://d8j0ntlcm91z4.cloudfront.net/user_3EpLWxWBo6QlDmwjFC7NjlTBGAZ/hf_20260707_211322_4ec6fe2e-29a3-402b-80b5-eb64f87b17b0.mp4';
-let splashFetching = null;
-app.get('/splash.mp4', async (req, res) => {
-  const cached = path.join(DATA_DIR, 'splash.mp4');
+// Generated media (splash video + menu photos): fetched once from the asset
+// CDN (unreachable from some dev sandboxes, fine in production), cached on
+// the data volume, then served locally. The app degrades gracefully on 404.
+const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EpLWxWBo6QlDmwjFC7NjlTBGAZ/';
+const MEDIA_URLS = {
+  'splash.mp4': process.env.SPLASH_VIDEO_URL || CDN + 'hf_20260707_223135_aaf8d3e8-2e4b-4568-8ab7-7d7517aae822.mp4',
+  'menu-latte.webp': CDN + 'hf_20260707_230542_b8fa9218-f6b2-441d-b07a-2640b314117d_min.webp',
+  'menu-capp.webp': CDN + 'hf_20260707_230551_4cfb6b7c-19ae-4b2d-8464-31ab6bc81e70_min.webp',
+  'menu-mocha.webp': CDN + 'hf_20260707_230618_ee9d22eb-8b2c-41d2-a1bd-df8764e509d1_min.webp',
+  'menu-flat.webp': CDN + 'hf_20260707_230621_71336eaf-b757-4860-bf52-352a9165ac67_min.webp',
+  'menu-esp.webp': CDN + 'hf_20260707_230647_42714135-a3d9-4b38-b781-3fc1fb110c4a_min.webp',
+  'menu-drip.webp': CDN + 'hf_20260707_230650_510bb8b6-016c-459d-a55d-31d768bf8b32_min.webp',
+  'menu-coldbrew.webp': CDN + 'hf_20260707_230652_46e05186-fb9e-4659-a8ee-c15a664ebe58_min.webp',
+  'menu-icedlatte.webp': CDN + 'hf_20260707_230655_68fba3a0-3103-4797-affc-167668f1357f_min.webp',
+  'menu-chai.webp': CDN + 'hf_20260707_230658_ac7526ea-e738-42ce-bcb0-81b504381e6d_min.webp',
+  'menu-matcha.webp': CDN + 'hf_20260707_230701_40e91b2a-0e5c-4fb6-9a8e-cc28535675c0_min.webp',
+  'menu-cocoa.webp': CDN + 'hf_20260707_230708_a52b88ff-7879-4250-82d5-14dbc6a91b84_min.webp',
+  'menu-croissant.webp': CDN + 'hf_20260707_230723_8ee86a68-fa6c-43fd-b5e8-e44899fcbcf0_min.webp',
+  'menu-muffin.webp': CDN + 'hf_20260707_230731_94710071-cbd3-4d6d-b408-063bce8e369d_min.webp',
+  'menu-cookie.webp': CDN + 'hf_20260707_223627_26bd0780-55b0-40a7-850d-6380d2be587d_min.webp',
+};
+const mediaFetching = new Map();
+async function serveCachedMedia(key, res) {
+  const url = MEDIA_URLS[key];
+  if (!url || !url.startsWith('http')) return res.status(404).end();
+  const cached = path.join(DATA_DIR, 'media-' + key.replace(/[^a-z0-9.-]/gi, '_'));
   if (!fs.existsSync(cached)) {
     try {
-      splashFetching = splashFetching || (async () => {
-        const r = await fetch(SPLASH_VIDEO_URL);
+      if (!mediaFetching.has(key)) mediaFetching.set(key, (async () => {
+        const r = await fetch(url);
         if (!r.ok) throw new Error('upstream ' + r.status);
         fs.mkdirSync(DATA_DIR, { recursive: true });
         const buf = Buffer.from(await r.arrayBuffer());
         fs.writeFileSync(cached + '.tmp', buf);
         fs.renameSync(cached + '.tmp', cached);
-      })();
-      await splashFetching;
+      })());
+      await mediaFetching.get(key);
+      mediaFetching.delete(key);
     } catch (e) {
-      splashFetching = null;
-      console.error('splash video fetch failed:', e.message);
+      mediaFetching.delete(key);
+      console.error('media fetch failed:', key, e.message);
       return res.status(404).end();
     }
   }
   res.sendFile(cached);
-});
+}
+app.get('/splash.mp4', (req, res) => serveCachedMedia('splash.mp4', res));
+app.get('/img/menu/:id', (req, res) => serveCachedMedia('menu-' + String(req.params.id).replace(/[^a-z0-9]/gi, '') + '.webp', res));
 
 app.get('/privacy', (req, res) => {
   const shop = db.shop.name;
