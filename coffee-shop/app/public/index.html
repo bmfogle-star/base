@@ -185,7 +185,7 @@
 'use strict';
 /* ---------------- Server state ---------------- */
 let SHOP = null;            // /api/shop payload
-let ME = { phone: localStorage.getItem('cust-phone') || '', name: localStorage.getItem('cust-name') || '', points: 0, orders: [] };
+let ME = { phone: localStorage.getItem('cust-phone') || '', name: localStorage.getItem('cust-name') || '', token: localStorage.getItem('cust-token') || '', points: 0, orders: [] };
 let S = { cart: [], tab: 'home', cat: null };
 try { S.cart = JSON.parse(localStorage.getItem('cust-cart')) || []; } catch(e) {}
 
@@ -322,7 +322,7 @@ function viewRewards(){
       }).join('')}
     </div>
     <h2 class="sect serif">How it works</h2>
-    <div class="card how">Earn <b>${SHOP.earnRate}★ for every $1</b> you spend in the app. Redeem stars on any order — no punch cards, no fine print.</div>
+    <div class="card how">Earn <b>${SHOP.earnRate}★ for every $1</b> you spend in the app. Redeem stars on any order — no punch cards, no fine print. <a href="/privacy" style="color:var(--bird-deep)">Privacy &amp; your data</a></div>
     <h2 class="sect serif">Member deals</h2>
     ${SHOP.deals.map(d=>'<div class="card deal"><div class="ic">'+esc(d.ic)+'</div><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}`;
 }
@@ -480,6 +480,7 @@ async function placeOrder(sheet){
 function orderPlaced(resp){
   S.cart = [];
   ME.points = resp.points;
+  if (resp.token){ ME.token = resp.token; localStorage.setItem('cust-token', resp.token); }
   ME.orders.push(resp.order);
   S.tab = 'orders';
   closeSheet(); render();
@@ -554,8 +555,8 @@ setInterval(pollActive, 5000);
   const digits = ME.phone.replace(/\D/g,'');
   if (digits.length >= 10){
     try {
-      const me = await api('/customers/lookup', { phone: ME.phone });
-      ME.points = me.points; ME.orders = me.orders;
+      const me = await api('/customers/lookup', { phone: ME.phone, token: ME.token });
+      ME.points = me.points; ME.orders = me.orders || [];
       if (me.name && !ME.name) ME.name = me.name;
     } catch(e) {}
   }

@@ -153,6 +153,7 @@ function createOrder({ lines, subtotal, redeemPts, tipPct, pickup, phone, name }
   if (db.orders.length > 500) db.orders = db.orders.slice(-400);
   let c = db.customers[phone];
   if (!c) c = db.customers[phone] = { name, points: 0, orders: [], createdAt: Date.now() };
+  if (!c.token) c.token = crypto.randomBytes(16).toString('hex');
   c.name = name || c.name;
   c.points = c.points - redeemPts + earned;
   c.orders.push(num);
@@ -178,8 +179,25 @@ const publicOrder = o => ({
 
 /* ---------------- App ---------------------------------------------------- */
 const app = express();
+app.set('trust proxy', 1); // Railway/Render terminate TLS in front of us
 app.use(express.json({ limit: '100kb' }));
+app.use((req, res, next) => {
+  res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer' });
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Simple in-memory rate limiter (per-IP buckets)
+const buckets = new Map();
+setInterval(() => buckets.clear(), 60 * 60 * 1000).unref();
+function allow(key, max, windowMs) {
+  const now = Date.now();
+  const b = buckets.get(key) || { n: 0, t: now };
+  if (now - b.t > windowMs) { b.n = 0; b.t = now; }
+  b.n++;
+  buckets.set(key, b);
+  return b.n <= max;
+}
 
 /* ---- Customer API ---- */
 app.get('/api/shop', (req, res) => {
@@ -192,11 +210,17 @@ app.get('/api/shop', (req, res) => {
 });
 
 app.post('/api/customers/lookup', (req, res) => {
+  if (!allow('lookup:' + req.ip, 30, 3600e3)) return res.status(429).json({ error: 'Too many lookups — try again later.' });
   const phone = normPhone(req.body.phone);
   if (phone.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit phone number.' });
   const c = db.customers[phone];
-  const orders = c ? db.orders.filter(o => o.phone === phone).slice(-10).map(publicOrder) : [];
-  res.json({ phone, name: c ? c.name : null, points: c ? c.points : 0, orders });
+  // Privacy: a bare phone number only reveals the star balance. Name and
+  // order history require the device token issued when this phone ordered.
+  if (!c || !req.body.token || req.body.token !== c.token) {
+    return res.json({ phone, points: c ? c.points : 0 });
+  }
+  const orders = db.orders.filter(o => o.phone === phone).slice(-10).map(publicOrder);
+  res.json({ phone, name: c.name, points: c.points, orders });
 });
 
 // Pending carts awaiting Stripe payment: token -> {cart data, expires}
@@ -204,6 +228,7 @@ const pending = new Map();
 setInterval(() => { const now = Date.now(); for (const [k, v] of pending) if (v.expires < now) pending.delete(k); }, 60000).unref();
 
 app.post('/api/orders', async (req, res) => {
+  if (!allow('order:' + req.ip, 60, 3600e3)) return res.status(429).json({ error: 'Too many orders from this connection — try again later.' });
   const { lines, tipPct, pickup } = req.body;
   const phone = normPhone(req.body.phone);
   const name = String(req.body.name || '').slice(0, 40).trim();
@@ -215,7 +240,8 @@ app.post('/api/orders', async (req, res) => {
 
   if (!stripe) { // demo mode: place instantly
     const order = createOrder(data);
-    return res.json({ order: publicOrder(order), points: db.customers[phone].points });
+    const c = db.customers[phone];
+    return res.json({ order: publicOrder(order), points: c.points, token: c.token });
   }
 
   // Stripe mode: create a Checkout Session, finalize after payment
@@ -255,7 +281,8 @@ app.post('/api/orders/finalize', async (req, res) => {
     if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
     pending.delete(req.body.token);
     const order = createOrder(p.data);
-    res.json({ order: publicOrder(order), points: db.customers[p.data.phone].points });
+    const c = db.customers[p.data.phone];
+    res.json({ order: publicOrder(order), points: c.points, token: c.token });
   } catch (e) {
     console.error('finalize error', e.message);
     res.status(502).json({ error: 'Could not verify payment.' });
@@ -275,6 +302,7 @@ function staff(req, res, next) {
   next();
 }
 app.post('/api/staff/login', (req, res) => {
+  if (!allow('pin:' + req.ip, 10, 15 * 60e3)) return res.status(429).json({ error: 'Too many attempts — wait 15 minutes.' });
   if (String(req.body.pin) !== PIN) return res.status(401).json({ error: 'Wrong PIN.' });
   res.json({ ok: true });
 });
@@ -324,6 +352,34 @@ app.post('/api/staff/settings', staff, (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+
+app.get('/privacy', (req, res) => {
+  const shop = db.shop.name;
+  res.type('html').send(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Privacy — ${shop}</title>
+<style>body{font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#2B1E16;background:#F6F1E8;max-width:640px;margin:0 auto;padding:28px 20px}h1{font-size:24px}h2{font-size:17px;margin-top:22px}p,li{color:#5C4B3E}a{color:#2A5F70}</style>
+</head><body>
+<h1>Privacy at ${shop}</h1>
+<p>This ordering app is operated for ${shop}. Here is everything it collects and why — in plain language.</p>
+<h2>What we collect</h2>
+<ul>
+<li><b>Your first name</b> — so the barista can call your order.</li>
+<li><b>Your phone number</b> — it is your rewards account: your star balance is saved to it.</li>
+<li><b>Your orders</b> — what you bought, so rewards and order history work.</li>
+</ul>
+<h2>What we never see</h2>
+<p><b>Your card details.</b> Payments are processed by <a href="https://stripe.com/privacy">Stripe</a> on their secure payment page. Card numbers never touch this app's servers.</p>
+<h2>What we don't do</h2>
+<ul>
+<li>We don't sell or share your information with anyone outside ${shop}.</li>
+<li>We don't send you marketing texts or calls. Your number is used only as your rewards ID.</li>
+<li>We don't use advertising trackers.</li>
+</ul>
+<h2>Your choices</h2>
+<p>Want your data deleted? Ask any staff member or contact the shop, and your rewards account and order history will be removed.</p>
+<p style="margin-top:26px;font-size:13px">Questions: talk to us at the counter, or contact ${shop} at ${db.shop.address}.</p>
+</body></html>`);
+});
 
 app.listen(PORT, () => {
   console.log(`☕ ${db.shop.name} server on http://localhost:${PORT}`);
