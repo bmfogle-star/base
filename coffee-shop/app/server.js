@@ -353,6 +353,33 @@ app.post('/api/staff/settings', staff, (req, res) => {
 
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
+// Splash pour video: fetched once from the asset CDN (unreachable from some
+// dev sandboxes, fine in production), cached on the data volume, then served
+// locally. If unavailable, the app's CSS pour animation is the fallback.
+const SPLASH_VIDEO_URL = process.env.SPLASH_VIDEO_URL || 'https://d8j0ntlcm91z4.cloudfront.net/user_3EpLWxWBo6QlDmwjFC7NjlTBGAZ/hf_20260707_211322_4ec6fe2e-29a3-402b-80b5-eb64f87b17b0.mp4';
+let splashFetching = null;
+app.get('/splash.mp4', async (req, res) => {
+  const cached = path.join(DATA_DIR, 'splash.mp4');
+  if (!fs.existsSync(cached)) {
+    try {
+      splashFetching = splashFetching || (async () => {
+        const r = await fetch(SPLASH_VIDEO_URL);
+        if (!r.ok) throw new Error('upstream ' + r.status);
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+        const buf = Buffer.from(await r.arrayBuffer());
+        fs.writeFileSync(cached + '.tmp', buf);
+        fs.renameSync(cached + '.tmp', cached);
+      })();
+      await splashFetching;
+    } catch (e) {
+      splashFetching = null;
+      console.error('splash video fetch failed:', e.message);
+      return res.status(404).end();
+    }
+  }
+  res.sendFile(cached);
+});
+
 app.get('/privacy', (req, res) => {
   const shop = db.shop.name;
   res.type('html').send(`<!doctype html><html lang="en"><head><meta charset="utf-8">

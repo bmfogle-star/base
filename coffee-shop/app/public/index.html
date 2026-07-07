@@ -219,8 +219,16 @@
   .loading{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
 
   /* ---------- Splash: coffee pour + logo reveal ---------- */
-  #splash{ position:absolute; inset:0; z-index:50; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; transition:opacity .5s ease; }
+  #splash{ position:absolute; inset:0; z-index:50; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; transition:opacity .5s ease; overflow:hidden; }
   #splash.done{ opacity:0; pointer-events:none; }
+  #splash .splash-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0; transition:opacity .7s ease; }
+  #splash.has-video .splash-video{ opacity:1; }
+  #splash.has-video .pour-scene{ display:none; }
+  #splash::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0; transition:opacity .7s ease;
+    background:linear-gradient(rgba(15,13,11,.35), rgba(15,13,11,.12) 42%, rgba(15,13,11,.8)); }
+  #splash.has-video::after{ opacity:1; }
+  .pour-scene{ z-index:1; }
+  .splash-brand{ position:relative; z-index:2; }
   .pour-scene{ position:relative; width:130px; height:150px; }
   .stream{ position:absolute; left:50%; top:0; width:9px; height:70px; margin-left:-4.5px; border-radius:0 0 5px 5px;
     background:linear-gradient(#6F4A2E, #8B5E3C); transform-origin:top;
@@ -247,6 +255,7 @@
 <body>
 <div class="phone" id="phone">
   <div id="splash" aria-hidden="true">
+    <video class="splash-video" src="/splash.mp4" muted playsinline autoplay preload="auto"></video>
     <div class="pour-scene">
       <div class="stream"></div>
       <div class="cup"><div class="cup-in"><div class="coffee"></div></div></div>
@@ -649,8 +658,23 @@ setInterval(pollActive, 5000);
   const q = new URLSearchParams(location.search);
   // Skip the ceremony when returning from the payment page
   if (q.get('finalize') || q.get('canceled')){ el.remove(); return; }
-  const dur = matchMedia('(prefers-reduced-motion: reduce)').matches ? 900 : 2400;
-  setTimeout(()=>{ el.classList.add('done'); setTimeout(()=>el.remove(), 550); }, dur);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dismiss = () => { el.classList.add('done'); setTimeout(()=>el.remove(), 550); };
+  let timer = setTimeout(dismiss, reduced ? 900 : 2400);
+  const v = el.querySelector('.splash-video');
+  if (v){
+    if (reduced){ v.remove(); }
+    else {
+      // Real pour video takes over from the CSS cup once it can play;
+      // if it 404s or stalls, the CSS cup fallback is already running.
+      v.addEventListener('canplay', () => {
+        el.classList.add('has-video');
+        clearTimeout(timer);
+        timer = setTimeout(dismiss, 3000);
+      }, { once: true });
+      v.addEventListener('error', () => v.remove(), { once: true });
+    }
+  }
 })();
 
 /* ---------------- Boot ---------------- */
