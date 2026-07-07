@@ -34,15 +34,16 @@ phones.
 
 ## Founding-customer offer (first 5 shops only)
 
-| | Founding shops | Regular price |
-|---|---|---|
-| Setup (branding, menu, app stores, training) | **$0** | $499 |
-| Monthly | **$99/mo, locked for 12 months** | $149/mo |
-| Cut of your sales | **0%** | 0% |
-| Cancel | Anytime, no contract | Anytime |
+| | The deal |
+|---|---|
+| Setup (branding, menu, staff training) | **$0 — no build fee, ever** |
+| Monthly | **$312/mo** — founding shops lock this rate for 12 months |
+| Cut of your sales | **0%** |
+| Cancel | Anytime, 30 days notice, no contract |
+| Billing starts | Only when your app is live |
 
-If the app doesn't earn its fee back, cancel — no hard feelings. One extra
-order a day covers it.
+If the app doesn't earn its fee back, cancel — no hard feelings. Two or
+three extra orders a day covers it.
 
 ## What happens if you say yes
 

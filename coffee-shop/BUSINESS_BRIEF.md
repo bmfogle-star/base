@@ -23,9 +23,9 @@ shop controls. I'm a non-technical founder; Claude Code builds the software.
 - **Payments:** Stripe. Money goes straight from the customer to the shop's
   own bank; I never hold funds and take 0% of sales. At multi-shop scale:
   Stripe Connect.
-- **Pricing (founding offer, first 5 shops):** $0 setup, $99/mo locked for
-  12 months, cancel anytime, billing starts at launch. Regular price after:
-  $499 setup + $149/mo.
+- **Pricing:** $0 setup (no build fee, ever), $312/mo base. Founding offer
+  (first 5 shops): rate locked for 12 months, cancel anytime, billing starts
+  at launch.
 - **Sales motion:** remote-first — Zoom demos and Loom videos, not walk-ins.
 
 ## What already exists (all built, tested, pushed to my GitHub repo)
@@ -49,7 +49,7 @@ shop controls. I'm a non-technical founder; Claude Code builds the software.
    EIN + business bank account after it's approved.
 4. Buy a domain + branded email (optional but recommended, ~30 min).
 5. Pitch 3–5 shops; goal = signed founding-customer sheets, not perfection.
-6. Decision gate: 3+ shops interested at $99/mo → Claude Code builds their
+6. Decision gate: 3+ shops interested at $312/mo → Claude Code builds their
    branded versions + live Stripe. Fewer → tune pitch/price first.
 
 ## What I might want to talk through with you

@@ -4,8 +4,8 @@ _The questions owners actually ask, in the order they usually ask them.
 Learn the bolded one-liners; the detail underneath is your backup._
 
 ### How much does it cost?
-**"Flat $99 a month for my first five shops — locked for a year — and $0 setup. I take zero percent of your sales."**
-After the founding five: $499 setup + $149/mo. Card processing is Stripe's
+**"Flat $312 a month, zero setup fee — and I take zero percent of your sales. My first five shops lock that rate for a year."**
+Two to three extra orders a day covers it. Card processing is Stripe's
 standard ~2.9% + 30¢ — the same ballpark as any card terminal, paid to Stripe,
 not to me.
 

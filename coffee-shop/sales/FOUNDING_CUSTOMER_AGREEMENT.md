@@ -33,8 +33,9 @@ menu details and completing Stripe's ~10-minute payment onboarding.
 
 ## Founding terms (first 5 shops)
 
-- **$0 setup** (regular $499) and **$99/month, locked for 12 months**
-  (regular $149/month)
+- **$0 setup — no build fee** and **$312/month, locked for 12 months**
+  (the base rate may rise for later shops; founding shops keep this rate
+  for their first year)
 - Billing starts **only when the app goes live**, not today
 - **No long-term contract** — cancel anytime with 30 days' notice
 - Card processing fees (Stripe's standard ~2.9% + 30¢) are paid by the shop,
@@ -44,7 +45,7 @@ menu details and completing Stripe's ~10-minute payment onboarding.
 
 ## Reserving a founding spot
 
-- [ ] **Reserve with a $99 deposit** (applied to the first month; fully
+- [ ] **Reserve with a $100 deposit** (applied to the first month; fully
   refundable any time before launch), **or**
 - [ ] **Reserve with signature only** (spot held for 14 days)
 

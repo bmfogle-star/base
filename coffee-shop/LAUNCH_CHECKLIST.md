@@ -57,7 +57,7 @@ _Work top to bottom. Times are realistic totals, not guesses._
 - [ ] Visit 3–5 shops from your list during their slow window. Buy a coffee.
   Ask for the owner or the best time to catch them.
 - [ ] Run the live demo (90 seconds). Offer the founding deal: **$0 setup,
-  $99/mo locked for 12 months, 0% of sales, billing starts at launch, cancel
+  $312/mo locked for 12 months, 0% of sales, billing starts at launch, cancel
   anytime.**
 - [ ] Goal: **signed founding-customer sheets**, not perfection. A "come back
   Thursday when the owner's in" is a win too — get a name and time.

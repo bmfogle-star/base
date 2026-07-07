@@ -44,9 +44,9 @@ Open the Rewards tab.
 > "The part every owner asks about: payments run through Stripe — the money
 > goes straight from your customer to YOUR bank account, same daily deposit
 > rhythm as your card machine. I never touch it, and I take zero percent of
-> your sales. Flat $99 a month for my first five shops, locked for a year,
-> no setup fee, and billing doesn't even start until you're live. One extra
-> order a day pays for it."
+> your sales. Flat $312 a month, no setup or build fee at all — my first five
+> shops lock that rate for a year — and billing doesn't even start until
+> you're live. Two or three extra orders a day pays for it."
 
 **[2:20 — Close]**
 LIVE ZOOM: paste the app link in chat →

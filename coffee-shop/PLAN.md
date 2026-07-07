@@ -69,17 +69,18 @@ Android first if we start PWA).
 
 ## 5. Pricing (starting hypothesis — validate with first 5 shops)
 
-- **Setup: $499 one-time** (branding, menu entry, app-store submission, staff training)
-- **SaaS: $149/mo** flat (or $99/mo founding-customer rate for the first 5 shops)
+- **Setup: $0** — no build fee, onboarding included (a differentiator vs.
+  Craver-style setup charges)
+- **SaaS: $312/mo base** (founding shops: rate locked for 12 months)
 - Payment processing: shop pays standard Stripe fees (~2.9% + 30¢); we add **0%**
   initially (simpler pitch: "we don't take a cut of your sales")
-- Break-even math for a shop: if the app lifts revenue just **$5–10/day**
-  (one extra order), it pays for itself.
+- Break-even math for a shop: **$10–11/day ≈ 2–3 extra orders a day** and the
+  app pays for itself.
 
 ## 6. Go-to-market (first 90 days)
 
 1. **Weeks 1–2 — Demo & validate:** show the Bluebird demo (this repo) to 5–10
-   local owners. Ask: "Would you pay $99/mo for this with your name on it?"
+   local owners. Ask: "Would you pay $312/mo for this with your name on it?"
    Collect 2–3 letters of intent / deposits before heavy building.
 2. **Weeks 3–8 — Build real MVP** (customer app + dashboard + Stripe + rewards)
    with the first shop as design partner (free or discounted 3 months).
@@ -102,12 +103,12 @@ on your phone. This is a face-to-face local business — that's the moat.
 
 ## 8. Milestones / decision gates
 
-- **Gate 1:** 3+ shops say "yes at $99/mo" after seeing the demo → build MVP.
+- **Gate 1:** 3+ shops say "yes at $312/mo" after seeing the demo → build MVP.
   Fewer than 3 → adjust pitch/price before writing more code.
 - **Gate 2:** Shop #1 does 100+ app orders/month by week 12 → start selling
   #2–5. If not → fix adoption (staff prompts, signage, reward generosity).
-- **Gate 3:** 5 paying shops (~$750 MRR) → build Square integration, raise price
-  to $149–199 for new shops.
+- **Gate 3:** 5 paying shops (~$1,560 MRR) → build Square integration; consider
+  premium tiers (SMS/push marketing tools) above the $312 base.
 
 ## 9. Open questions (revisit with real shop feedback)
 
