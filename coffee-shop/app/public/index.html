@@ -354,7 +354,7 @@ function render(){
   }
   chip.dataset.pts = ME.points;
   chip.textContent = '★ ' + ME.points;
-  const tabs = [ ['home','Home','home'], ['order','Order','cup'], ['rewards','Rewards','star'], ['orders','Orders','bag'] ];
+  const tabs = [ ['home','Home','home'], ['order','Order','cup'], ['rewards','Rewards','star'], ['orders','Cart','bag'] ];
   $('#tabs').innerHTML = tabs.map(([id,label,ic]) =>
     '<button class="'+(S.tab===id?'on':'')+'" data-tab="'+id+'" aria-label="'+label+'">'+icon(ic)+'<span>'+label+'</span></button>').join('');
   const views = { home: viewHome, order: viewOrder, rewards: viewRewards, orders: viewOrders, wallet: viewWallet };
@@ -435,27 +435,39 @@ function viewRewards(){
     ${SHOP.deals.map(d=>'<div class="card deal"><div><div class="t">'+esc(d.t)+'</div><div class="d">'+esc(d.d)+'</div></div></div>').join('')}`;
 }
 const STATUSES = ['Received','Preparing','Ready for pickup'];
-function viewOrders(){
-  if (!ME.orders.length){
-    return '<h1 class="hello serif">Your orders</h1>'
-      + '<div class="empty"><p>No orders yet.<br>Your pickup orders will show up here.</p>'
+function orderCardHtml(o){
+  const items = o.lines.map(l=>l.qty+'× '+(itemById(l.id)?.name || l.id) + (l.redeem?' (reward)':'')).join(', ');
+  const st = Math.min(o.status, 2);
+  const when = new Date(o.placedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ', ' + new Date(o.placedAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  return '<div class="card order-card">'
+    + '<div class="oc-head"><span class="oc-id">#'+o.num+'</span><span class="oc-when">'+when+'</span>'
+    + '<span class="status-pill s'+o.status+'">'+(o.status===3?'Picked up':STATUSES[st])+'</span></div>'
+    + '<div class="oc-items">'+esc(items)+'</div>'
+    + (o.status<3 ? '<div class="oc-items" style="margin-top:2px">Pickup: '+esc(o.pickup||'ASAP')+'</div>' : '')
+    + (o.status<3 ? '<div class="timeline">'+STATUSES.map((s,i)=>'<div class="step'+(i<=st?' done':'')+(i===st&&o.status<2?' now':'')+'"><div class="bar"></div><div class="lbl">'+s+'</div></div>').join('')+'</div>' : '')
+    + '<div class="oc-actions"><button data-reorder="'+o.num+'">Reorder</button></div>'
+    + '<div class="totals"><div class="tr"><span>Paid</span><span class="money">'+fmt(o.total - (o.giftApplied||0))+(o.giftApplied?' <span style="color:var(--star)">(+'+fmt(o.giftApplied)+' gift card)</span>':'')+'</span></div>'
+    + '<div class="tr"><span>Stars</span><span>+'+o.earned+'★'+(o.spent?' · −'+o.spent+'★ redeemed':'')+'</span></div></div>'
+    + '</div>';
+}
+function viewOrders(){ // Cart tab: saved orders on top, live cart below
+  const hasOrders = ME.orders.length > 0;
+  let html = '<h1 class="hello serif">Cart</h1>';
+  if (hasOrders){
+    html += '<h2 class="sect serif" style="margin-top:6px">Your orders</h2>'
+      + ME.orders.slice(-5).reverse().map(orderCardHtml).join('');
+  }
+  if (cartCount()){
+    html += '<h2 class="sect serif" id="cartSection">Your cart</h2>' + cartHTML();
+  } else if (hasOrders){
+    html += '<h2 class="sect serif" id="cartSection">Your cart</h2>'
+      + '<div class="card" style="padding:16px; color:var(--ink-soft); font-size:14.5px">Your cart is empty.</div>'
+      + '<button class="btn ghost" style="margin-top:12px" data-go="order">Start an order</button>';
+  } else {
+    html += '<div class="empty"><p>Nothing here yet.<br>Your cart and pickup orders will live on this page.</p>'
       + '<button class="btn" style="margin-top:18px" data-go="order">Start an order</button></div>';
   }
-  return '<h1 class="hello serif">Your orders</h1>'
-    + ME.orders.slice().reverse().map(o=>{
-      const items = o.lines.map(l=>l.qty+'× '+(itemById(l.id)?.name || l.id) + (l.redeem?' (reward)':'')).join(', ');
-      const st = Math.min(o.status, 2);
-      const when = new Date(o.placedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ', ' + new Date(o.placedAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
-      return '<div class="card order-card">'
-        + '<div class="oc-head"><span class="oc-id">#'+o.num+'</span><span class="oc-when">'+when+'</span>'
-        + '<span class="status-pill s'+o.status+'">'+(o.status===3?'Picked up':STATUSES[st])+'</span></div>'
-        + '<div class="oc-items">'+esc(items)+'</div>'
-        + (o.status<3 ? '<div class="timeline">'+STATUSES.map((s,i)=>'<div class="step'+(i<=st?' done':'')+(i===st&&o.status<2?' now':'')+'"><div class="bar"></div><div class="lbl">'+s+'</div></div>').join('')+'</div>' : '')
-        + '<div class="oc-actions"><button data-reorder="'+o.num+'">Reorder</button></div>'
-        + '<div class="totals"><div class="tr"><span>Paid</span><span class="money">'+fmt(o.total - (o.giftApplied||0))+(o.giftApplied?' <span style="color:var(--star)">(+'+fmt(o.giftApplied)+' gift card)</span>':'')+'</span></div>'
-        + '<div class="tr"><span>Stars</span><span>+'+o.earned+'★'+(o.spent?' · −'+o.spent+'★ redeemed':'')+'</span></div></div>'
-        + '</div>';
-    }).join('');
+  return html;
 }
 
 function viewWallet(){
@@ -534,13 +546,23 @@ function bindItemSheet(sheet){
 }
 
 /* ---------------- Cart & checkout ---------------- */
-let co = { tip: 2, pickup: 0, busy: false, error: '', useGift: false, giftAmt: 25 };
+let co = { tip: 2, pickup: 0, customTime: '', busy: false, error: '', useGift: false, giftAmt: 25 };
 const TIPS = [0, .10, .15, .20];
-const PICKUPS = ['ASAP (5–10 min)', 'In 15 min', 'In 30 min'];
+const PICKUPS = ['ASAP (5–10 min)', 'In 15 min', 'In 30 min', 'Custom time'];
+function fmt12(t){
+  const [h, m] = t.split(':').map(Number);
+  return (((h + 11) % 12) + 1) + ':' + String(m).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
+}
 function openCart(){
-  if (!cartCount()){ toast('Cart is empty'); return; }
   co.error = ''; co.busy = false;
-  drawSheet(cartHTML(), bindCartSheet);
+  S.tab = 'orders'; render();
+  requestAnimationFrame(() => { const el = document.getElementById('cartSection'); if (el) el.scrollIntoView({ behavior: 'smooth' }); });
+}
+function captureCartInputs(){
+  const n = $('#cName'), p = $('#cPhone'), t = $('#pickupTime');
+  if (n) ME.name = n.value;
+  if (p) ME.phone = p.value;
+  if (t) co.customTime = t.value;
 }
 function cartHTML(){
   const sub = cartSubtotal();
@@ -552,8 +574,7 @@ function cartHTML(){
   const due = total - giftApplied;
   const redeemable = SHOP.tiers.filter(t => ME.points - pendingRedeemPts() >= t.pts);
   return `
-    <h3 class="serif">Your order</h3>
-    <div>
+    <div class="card" style="padding:2px 14px">
       ${S.cart.map((l,i)=>{
         const m = itemById(l.id); if (!m) return '';
         return '<div class="line"><div><span class="n">'+l.qty+'× '+esc(m.name)+'</span>'
@@ -568,6 +589,7 @@ function cartHTML(){
     <div class="field"><label for="cPhone">Phone (saves your stars)</label><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-1234" value="${esc(ME.phone)}"></div>
     <div class="opt-group"><div class="opt-label">Pickup time</div>
       <div class="opts">${PICKUPS.map((p,i)=>opt(p, co.pickup===i, 'pickup', i)).join('')}</div></div>
+    ${co.pickup===3 ? '<div class="field"><label for="pickupTime">Pick up at</label><input id="pickupTime" type="time" value="'+esc(co.customTime)+'"></div>' : ''}
     <div class="opt-group"><div class="opt-label">Tip the baristas</div>
       <div class="opts">${TIPS.map((t,i)=>opt(t?Math.round(t*100)+'%':'No tip', co.tip===i, 'tip', i)).join('')}</div></div>
     ${gb > 0 ? '<div class="opt-group"><div class="opt-label">Gift card</div><div class="opts"><button class="opt'+(co.useGift?' on':'')+'" data-giftuse>Use my $'+gb.toFixed(2)+' balance</button></div></div>' : ''}
@@ -581,44 +603,27 @@ function cartHTML(){
     </div>
     ${co.error ? '<div class="err">'+esc(co.error)+'</div>' : ''}
     <button class="btn" id="payBtn" ${co.busy?'disabled':''}>${co.busy?'One moment…':(SHOP.payMode==='stripe' && due > 0 ? 'Continue to payment · '+fmt(due) : 'Place order · '+fmt(due)+(SHOP.payMode==='demo'?' (demo)':''))}</button>
-    <button class="btn ghost" style="margin-top:10px" id="keepBtn">Keep browsing</button>`;
+    <button class="btn ghost" style="margin-top:10px" data-go="order">Add more items</button>`;
 }
-function bindCartSheet(sheet){
-  sheet.addEventListener('click', async e=>{
-    const t = e.target.closest('button'); if(!t) return;
-    // keep typed values across re-renders
-    const nameEl = sheet.querySelector('#cName'), phoneEl = sheet.querySelector('#cPhone');
-    if (nameEl) ME.name = nameEl.value;
-    if (phoneEl) ME.phone = phoneEl.value;
-
-    if (t.dataset.rm!=null){ S.cart.splice(+t.dataset.rm,1); if(!cartCount()){ closeSheet(); render(); return; } }
-    else if (t.dataset.pickup!=null){ co.pickup = +t.dataset.pickup; }
-    else if (t.dataset.tip!=null){ co.tip = +t.dataset.tip; }
-    else if (t.hasAttribute('data-giftuse')){ co.useGift = !co.useGift; }
-    else if (t.hasAttribute('data-open-rewards')){ closeSheet(); S.tab='rewards'; render(); return; }
-    else if (t.id==='keepBtn'){ closeSheet(); render(); return; }
-    else if (t.id==='payBtn'){ await placeOrder(sheet); return; }
-    sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
-    renderFloatCart();
-  });
-}
-async function placeOrder(sheet){
+async function placeOrder(){
   co.error = '';
   const digits = ME.phone.replace(/\D/g,'');
   if (!ME.name.trim()) co.error = 'Add a name for the cup.';
   else if (digits.length < 10) co.error = 'Enter a 10-digit phone number so your stars are saved.';
-  if (co.error){ sheet.innerHTML = '<div class="grab"></div>' + cartHTML(); return; }
-  co.busy = true;
-  sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
+  else if (co.pickup === 3 && !co.customTime) co.error = 'Choose your custom pickup time.';
+  if (co.error){ render(); return; }
+  co.busy = true; render();
   try {
     localStorage.setItem('cust-name', ME.name);
     localStorage.setItem('cust-phone', ME.phone);
-    const resp = await api('/orders', { lines: S.cart, tipPct: TIPS[co.tip], pickup: PICKUPS[co.pickup], name: ME.name, phone: ME.phone, useGift: co.useGift, token: ME.token });
+    const pickupStr = co.pickup === 3 ? 'At ' + fmt12(co.customTime) : PICKUPS[co.pickup];
+    const resp = await api('/orders', { lines: S.cart, tipPct: TIPS[co.tip], pickup: pickupStr, name: ME.name, phone: ME.phone, useGift: co.useGift, token: ME.token });
     if (resp.checkoutUrl){ location.href = resp.checkoutUrl; return; } // Stripe hosted payment page
+    co.busy = false;
     orderPlaced(resp);
   } catch (err) {
     co.busy = false; co.error = err.message;
-    sheet.innerHTML = '<div class="grab"></div>' + cartHTML();
+    render();
   }
 }
 function orderPlaced(resp){
@@ -647,6 +652,7 @@ function closeSheet(){ document.querySelectorAll('.overlay').forEach(e=>e.remove
 
 /* ---------------- Events ---------------- */
 document.addEventListener('click', e=>{
+  if ($('#cName') || $('#pickupTime')) captureCartInputs(); // cart inputs survive any navigation
   const tab = e.target.closest('[data-tab]');
   if (tab){ S.tab = tab.dataset.tab; render(); return; }
   const go = e.target.closest('[data-go]');
@@ -669,6 +675,17 @@ document.addEventListener('click', e=>{
     if (o){ S.cart = S.cart.concat(o.lines.filter(l=>!l.redeem && itemById(l.id)).map(l=>({...l}))); render(); toast('Added to cart'); }
     return;
   }
+
+  /* Cart page actions */
+  if (e.target.closest('#payBtn')){ captureCartInputs(); placeOrder(); return; }
+  const rm2 = e.target.closest('[data-rm]');
+  if (rm2){ captureCartInputs(); S.cart.splice(+rm2.dataset.rm, 1); render(); return; }
+  const pk = e.target.closest('[data-pickup]');
+  if (pk){ captureCartInputs(); co.pickup = +pk.dataset.pickup; render(); return; }
+  const tip = e.target.closest('[data-tip]');
+  if (tip){ captureCartInputs(); co.tip = +tip.dataset.tip; render(); return; }
+  if (e.target.closest('[data-giftuse]')){ captureCartInputs(); co.useGift = !co.useGift; render(); return; }
+  if (e.target.closest('[data-open-rewards]')){ S.tab = 'rewards'; render(); return; }
 
   /* Wallet actions */
   if (e.target.closest('[data-addcard]')){
