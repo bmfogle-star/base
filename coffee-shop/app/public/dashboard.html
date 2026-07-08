@@ -111,6 +111,7 @@ const LOGO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path 
 let PIN = sessionStorage.getItem('staff-pin') || '';
 let view = 'orders';
 let orders = [], menu = [], customers = [], settings = null;
+let instore = { phone: '', cust: null, log: [], error: '' };
 let lastSeen = Date.now();
 let shopName = 'Shop Dashboard';
 
@@ -175,6 +176,7 @@ function renderShell(){
       <div><div class="t">${esc(shopName)}</div><div class="sub">Order dashboard</div></div>
       <nav class="tabs">
         <button data-v="orders" class="${view==='orders'?'on':''}">Orders ${active?'<span class="cnt">'+active+'</span>':''}</button>
+        <button data-v="instore" class="${view==='instore'?'on':''}">In-store</button>
         <button data-v="menu" class="${view==='menu'?'on':''}">Menu</button>
         <button data-v="rewards" class="${view==='rewards'?'on':''}">Rewards</button>
         <button data-v="customers" class="${view==='customers'?'on':''}">Customers</button>
@@ -186,9 +188,10 @@ function renderShell(){
     if (view==='menu') menu = await api('/staff/menu');
     if (view==='customers') customers = await api('/staff/customers');
     if (view==='rewards') settings = await api('/staff/settings');
+    if (view==='instore') instore.log = await api('/staff/instore/log');
     renderShell();
   }));
-  ({ orders: renderOrders, menu: renderMenu, rewards: renderRewards, customers: renderCustomers })[view]();
+  ({ orders: renderOrders, instore: renderInstore, menu: renderMenu, rewards: renderRewards, customers: renderCustomers })[view]();
 }
 
 /* ---------- orders ---------- */
@@ -228,6 +231,79 @@ function orderCard(o){
   </div>`;
 }
 const maskPhone = p => p ? '(•••) •••-' + String(p).slice(-4) : '';
+
+/* ---------- in-store earn & redeem ---------- */
+function renderInstore(){
+  const c = instore.cust;
+  $('#main').innerHTML = `
+    <div class="card set-card">
+      <h3 class="serif">In-store rewards</h3>
+      <p class="hint">Customer gives their phone number — same account as the app. A new number just needs a first name.</p>
+      <div class="set-row">
+        <input id="isPhone" class="wide" type="tel" inputmode="tel" placeholder="(555) 555-1234" value="${esc(instore.phone)}">
+        <button class="save" id="isLookup">Look up</button>
+      </div>
+      ${instore.error ? '<p style="color:var(--bad);font-weight:700;margin-top:10px">'+esc(instore.error)+'</p>' : ''}
+      ${c ? `
+        <div class="set-row" style="margin-top:18px">
+          ${c.known
+            ? '<b style="font-size:18px">'+esc(c.name || '—')+'</b><span class="hint">member</span>'
+            : '<input id="isName" class="wide" placeholder="First name (new member)">'}
+          <span style="margin-left:auto;font-weight:800;color:var(--star);font-size:22px">${c.points}★</span>
+        </div>
+        <div class="set-row">
+          <label for="isAmt" style="font-weight:700">Purchase $</label>
+          <input id="isAmt" class="num" inputmode="decimal" placeholder="0.00">
+          <button class="save" id="isEarn">Add stars</button>
+        </div>
+        <p class="hint" style="margin-top:12px">Redeem a reward in person:</p>
+        <div class="set-row" style="flex-wrap:wrap">
+          ${c.tiers.map((t,i)=>'<button class="save" data-isredeem="'+i+'" '+(t.canRedeem?'':'disabled')+' style="background:'+(t.canRedeem?'var(--good)':'var(--line)')+'; color:'+(t.canRedeem?'#fff':'var(--ink-soft)')+'">'+esc(t.name)+' · '+t.pts+'★</button>').join('')}
+        </div>` : ''}
+    </div>
+    <div class="card set-card" style="margin-top:14px; max-width:760px">
+      <h3 class="serif">Recent in-store activity</h3>
+      <p class="hint">Every manual credit and redemption is logged here for the owner. Limit: 3 credits per number per day.</p>
+      ${instore.log.length ? '<div style="overflow-x:auto"><table><thead><tr><th>When</th><th>Member</th><th class="num">Stars</th><th>Detail</th></tr></thead><tbody>'
+        + instore.log.map(e => '<tr><td>'+new Date(e.ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+'</td><td><b>'+esc(e.name||'—')+'</b> '+maskPhone(e.phone)+'</td><td class="num" style="font-weight:700;color:'+(e.stars>=0?'var(--good)':'var(--star)')+'">'+(e.stars>=0?'+':'')+e.stars+'★</td><td>'+(e.type==='earn' ? '$'+(+e.amount).toFixed(2)+' purchase' : esc(e.item||'reward'))+'</td></tr>').join('')
+        + '</tbody></table></div>' : ''}
+    </div>`;
+  $('#isLookup').addEventListener('click', isLookup);
+  $('#isPhone').addEventListener('keydown', e => { if (e.key === 'Enter') isLookup(); });
+  const earnBtn = $('#isEarn');
+  if (earnBtn){
+    earnBtn.addEventListener('click', isEarn);
+    $('#isAmt').addEventListener('keydown', e => { if (e.key === 'Enter') isEarn(); });
+  }
+  document.querySelectorAll('[data-isredeem]').forEach(b => b.addEventListener('click', () => isRedeem(+b.dataset.isredeem)));
+}
+async function isLookup(){
+  instore.phone = $('#isPhone').value; instore.error = '';
+  try { instore.cust = await api('/staff/instore/lookup', { phone: instore.phone }); }
+  catch(e){ if (e.message !== 'auth'){ instore.error = e.message; instore.cust = null; } }
+  renderInstore();
+}
+async function isEarn(){
+  instore.error = '';
+  const nameEl = $('#isName');
+  try {
+    const r = await api('/staff/instore/earn', { phone: instore.phone, amount: parseFloat($('#isAmt').value), name: nameEl ? nameEl.value : '' });
+    toastMsg((r.name || 'Member') + ' +' + r.stars + '★ — now ' + r.points + '★');
+    instore.log = await api('/staff/instore/log');
+    instore.cust = await api('/staff/instore/lookup', { phone: instore.phone });
+  } catch(e){ if (e.message !== 'auth') instore.error = e.message; }
+  renderInstore();
+}
+async function isRedeem(i){
+  instore.error = '';
+  try {
+    const r = await api('/staff/instore/redeem', { phone: instore.phone, tier: i });
+    toastMsg('Give ' + (r.name || 'member') + ': ' + r.reward + ' — ' + r.points + '★ left');
+    instore.log = await api('/staff/instore/log');
+    instore.cust = await api('/staff/instore/lookup', { phone: instore.phone });
+  } catch(e){ if (e.message !== 'auth') instore.error = e.message; }
+  renderInstore();
+}
 
 /* ---------- menu ---------- */
 function renderMenu(){

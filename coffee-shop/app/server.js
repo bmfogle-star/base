@@ -69,6 +69,7 @@ const SEED = {
   orders: [],       // { num, phone, name, lines, subtotal, tax, tip, total, earned, spent, status, placedAt }
   customers: {},    // phone -> { name, points, giftBalance, orders: [num], createdAt }
   giftcards: {},    // code -> { balance, amount, purchasedBy, createdAt, redeemedBy }
+  creditLog: [],    // in-store earn/redeem audit trail
   seq: 100,
 };
 
@@ -448,6 +449,65 @@ app.post('/api/staff/settings', staff, (req, res) => {
     if (ok) db.shop.tiers = req.body.tiers.map(t => ({ pts: +t.pts, name: String(t.name).slice(0, 60), desc: String(t.desc || '').slice(0, 100), grants: t.grants }));
   }
   saveDb(); res.json({ ok: true });
+});
+
+/* ---- In-store earn & redeem (counter workflow: phone number = account) ---- */
+function logCredit(entry) {
+  db.creditLog = db.creditLog || [];
+  db.creditLog.push(entry);
+  if (db.creditLog.length > 1000) db.creditLog = db.creditLog.slice(-800);
+}
+
+app.post('/api/staff/instore/lookup', staff, (req, res) => {
+  const phone = normPhone(req.body.phone);
+  if (phone.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit phone number.' });
+  const c = db.customers[phone];
+  res.json({
+    phone,
+    known: !!c,
+    name: c ? c.name : '',
+    points: c ? c.points : 0,
+    giftBalance: c ? (c.giftBalance || 0) : 0,
+    tiers: db.shop.tiers.map(t => ({ pts: t.pts, name: t.name, canRedeem: !!c && c.points >= t.pts })),
+  });
+});
+
+app.post('/api/staff/instore/earn', staff, (req, res) => {
+  const phone = normPhone(req.body.phone);
+  if (phone.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit phone number.' });
+  const amount = Math.round(+req.body.amount * 100) / 100;
+  if (!isFinite(amount) || amount <= 0 || amount > 500) return res.status(400).json({ error: 'Enter the purchase amount (up to $500).' });
+  const name = String(req.body.name || '').slice(0, 40).trim();
+  let c = db.customers[phone];
+  if (!c && !name) return res.status(400).json({ error: 'New member — add their first name.' });
+  // Fraud guard: max 3 manual credits per phone per day, logged for the owner
+  const dayAgo = Date.now() - 24 * 3600e3;
+  const todays = (db.creditLog || []).filter(e => e.phone === phone && e.type === 'earn' && e.ts > dayAgo);
+  if (todays.length >= 3) return res.status(429).json({ error: 'Daily in-store credit limit reached for this number.' });
+  if (!c) c = db.customers[phone] = { name, points: 0, orders: [], createdAt: Date.now() };
+  if (name) c.name = name;
+  const stars = Math.floor(amount * db.shop.earnRate);
+  c.points += stars;
+  logCredit({ ts: Date.now(), type: 'earn', phone, name: c.name, amount, stars });
+  saveDb();
+  res.json({ name: c.name, points: c.points, stars });
+});
+
+app.post('/api/staff/instore/redeem', staff, (req, res) => {
+  const phone = normPhone(req.body.phone);
+  const c = db.customers[phone];
+  if (!c) return res.status(404).json({ error: 'No rewards account for that number.' });
+  const tier = db.shop.tiers[+req.body.tier];
+  if (!tier) return res.status(400).json({ error: 'Unknown reward.' });
+  if (c.points < tier.pts) return res.status(400).json({ error: 'Not enough stars for that reward.' });
+  c.points -= tier.pts;
+  logCredit({ ts: Date.now(), type: 'redeem', phone, name: c.name, stars: -tier.pts, item: tier.name });
+  saveDb();
+  res.json({ name: c.name, points: c.points, reward: tier.name });
+});
+
+app.get('/api/staff/instore/log', staff, (req, res) => {
+  res.json((db.creditLog || []).slice(-50).reverse());
 });
 
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
