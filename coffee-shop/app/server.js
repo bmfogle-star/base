@@ -26,6 +26,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || '';
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
+const square = require('./lib/square');
 
 /* ---------------- Seed config (edited later via dashboard / db.json) ------ */
 const SEED = {
@@ -70,6 +71,7 @@ const SEED = {
   customers: {},    // phone -> { name, points, giftBalance, orders: [num], createdAt }
   giftcards: {},    // code -> { balance, amount, purchasedBy, createdAt, redeemedBy }
   creditLog: [],    // in-store earn/redeem audit trail
+  squareSeen: {},   // processed Square payment ids (webhook idempotency)
   seq: 100,
 };
 
@@ -193,7 +195,7 @@ const publicOrder = o => ({
 /* ---------------- App ---------------------------------------------------- */
 const app = express();
 app.set('trust proxy', 1); // Railway/Render terminate TLS in front of us
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '100kb', verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use((req, res, next) => {
   res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer' });
   next();
@@ -265,6 +267,7 @@ app.post('/api/orders', async (req, res) => {
 
   if (!stripe || (giftApplied >= total && giftApplied > 0)) { // demo mode, or gift fully covers it
     const order = createOrder(data);
+    pushOrderToSquare(order);
     const c = db.customers[phone];
     return res.json({ order: publicOrder(order), points: c.points, giftBalance: c.giftBalance || 0, token: c.token });
   }
@@ -312,6 +315,7 @@ app.post('/api/orders/finalize', async (req, res) => {
     if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
     pending.delete(req.body.token);
     const order = createOrder(p.data);
+    pushOrderToSquare(order);
     const c = db.customers[p.data.phone];
     res.json({ order: publicOrder(order), points: c.points, giftBalance: c.giftBalance || 0, token: c.token });
   } catch (e) {
@@ -508,6 +512,135 @@ app.post('/api/staff/instore/redeem', staff, (req, res) => {
 
 app.get('/api/staff/instore/log', staff, (req, res) => {
   res.json((db.creditLog || []).slice(-50).reverse());
+});
+
+/* ---- Square integration (beta) ---- */
+function buildSquarePayload(order) {
+  const lineItems = order.lines.map(l => {
+    const sl = staffLine(l);
+    return {
+      name: sl.itemName + (l.redeem ? ' (reward)' : ''),
+      quantity: l.qty,
+      amountCents: l.redeem ? 0 : Math.round(priceLine(l) / l.qty * 100),
+      note: sl.modsText || undefined,
+    };
+  });
+  if (order.tax > 0) lineItems.push({ name: 'Sales tax', quantity: 1, amountCents: Math.round(order.tax * 100) });
+  if (order.tip > 0) lineItems.push({ name: 'Tip', quantity: 1, amountCents: Math.round(order.tip * 100) });
+  return {
+    referenceId: order.num,
+    recipientName: order.name,
+    pickupNote: order.pickup,
+    sourceName: db.shop.name + ' app',
+    lineItems,
+    totalCents: Math.round(order.total * 100),
+  };
+}
+function pushOrderToSquare(order) {
+  const c = db.shop.square;
+  if (!c || !c.accessToken || !c.pushOrders) return;
+  square.pushOrder(db, buildSquarePayload(order))
+    .then(id => { order.squareOrderId = id; saveDb(); })
+    .catch(e => console.error('square push failed for #' + order.num + ':', e.message));
+}
+
+app.get('/api/staff/square/status', staff, (req, res) => {
+  const c = db.shop.square || {};
+  res.json({
+    connected: !!c.accessToken,
+    env: c.env || 'sandbox',
+    locationId: c.locationId || null,
+    locations: c.locations || [],
+    pushOrders: !!c.pushOrders,
+    autoStars: !!c.autoStars,
+    hasWebhookKey: !!c.webhookKey,
+    lastSync: c.lastSync || null,
+    syncedItems: db.menu.filter(m => m.source === 'square').length,
+  });
+});
+
+app.post('/api/staff/square/connect', staff, async (req, res) => {
+  db.shop.square = db.shop.square || {};
+  const c = db.shop.square;
+  try {
+    if (req.body.disconnect) {
+      db.shop.square = {};
+      saveDb();
+      return res.json({ ok: true });
+    }
+    if (req.body.accessToken) {
+      c.accessToken = String(req.body.accessToken).trim();
+      c.env = req.body.env === 'production' ? 'production' : 'sandbox';
+      if (!req.body.skipVerify) { // skipVerify: local testing only
+        const locs = await square.listLocations(db);
+        c.locations = locs.map(l => ({ id: l.id, name: l.name }));
+        if (locs.length === 1) c.locationId = locs[0].id;
+      }
+    }
+    if (req.body.locationId) c.locationId = String(req.body.locationId);
+    if (req.body.webhookKey !== undefined) c.webhookKey = String(req.body.webhookKey).trim();
+    if (typeof req.body.pushOrders === 'boolean') c.pushOrders = req.body.pushOrders;
+    if (typeof req.body.autoStars === 'boolean') c.autoStars = req.body.autoStars;
+    saveDb();
+    res.json({ ok: true, locations: c.locations || [] });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/staff/square/sync', staff, async (req, res) => {
+  try {
+    const count = await square.syncCatalog(db, saveDb);
+    res.json({ ok: true, count });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Square event notifications: automatic stars for in-person purchases.
+// The barista attaches the customer (phone) to the sale on their Square
+// register exactly as they do today; Square tells us, we award the stars.
+app.post('/square/webhook', async (req, res) => {
+  const c = db.shop.square;
+  if (!c || !c.webhookKey) return res.status(404).end();
+  const url = c.webhookUrl || ((process.env.PUBLIC_URL || '') + '/square/webhook');
+  if (!square.verifyWebhook(c.webhookKey, url, req.rawBody || Buffer.from(''), req.get('x-square-hmacsha256-signature'))) {
+    return res.status(403).end();
+  }
+  res.json({ ok: true }); // ack immediately; process after
+  try {
+    if (!c.autoStars) return;
+    const ev = req.body || {};
+    if (ev.type !== 'payment.created' && ev.type !== 'payment.updated') return;
+    const p = ev.data && ev.data.object && ev.data.object.payment;
+    if (!p || p.status !== 'COMPLETED') return;
+    if (p.source_type === 'EXTERNAL') return;      // our own pushed app orders
+    if (!p.customer_id) return;                    // no member attached to the sale
+    db.squareSeen = db.squareSeen || {};
+    if (db.squareSeen[p.id]) return;               // webhook retries are idempotent
+    db.squareSeen[p.id] = Date.now();
+    const seen = Object.entries(db.squareSeen);
+    if (seen.length > 2000) db.squareSeen = Object.fromEntries(seen.slice(-1500));
+
+    let phone = '';
+    if (c.env !== 'production' && p.customer_id.startsWith('TEST-PHONE-')) {
+      phone = normPhone(p.customer_id.slice(11)); // sandbox test hook
+    } else {
+      const cust = await square.getCustomer(db, p.customer_id);
+      phone = normPhone(cust.phone_number || '');
+    }
+    if (phone.length !== 10) return;
+    const amount = ((p.amount_money && p.amount_money.amount) || 0) / 100;
+    if (amount <= 0) return;
+    let cu = db.customers[phone];
+    if (!cu) cu = db.customers[phone] = { name: '', points: 0, orders: [], createdAt: Date.now() };
+    const stars = Math.floor(amount * db.shop.earnRate);
+    cu.points += stars;
+    logCredit({ ts: Date.now(), type: 'earn', source: 'square', phone, name: cu.name, amount, stars });
+    saveDb();
+  } catch (e) {
+    console.error('square webhook error:', e.message);
+  }
 });
 
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));

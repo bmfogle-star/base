@@ -112,6 +112,7 @@ let PIN = sessionStorage.getItem('staff-pin') || '';
 let view = 'orders';
 let orders = [], menu = [], customers = [], settings = null;
 let instore = { phone: '', cust: null, log: [], error: '' };
+let sqs = null; // Square integration status
 let lastSeen = Date.now();
 let shopName = 'Shop Dashboard';
 
@@ -187,7 +188,7 @@ function renderShell(){
     view = b.dataset.v;
     if (view==='menu') menu = await api('/staff/menu');
     if (view==='customers') customers = await api('/staff/customers');
-    if (view==='rewards') settings = await api('/staff/settings');
+    if (view==='rewards'){ settings = await api('/staff/settings'); sqs = await api('/staff/square/status'); }
     if (view==='instore') instore.log = await api('/staff/instore/log');
     renderShell();
   }));
@@ -350,6 +351,27 @@ function renderRewards(){
       <h3 class="serif">Gift cards</h3>
       <p class="hint">Sell digital gift cards in the customer app ($10 / $25 / $50). Customers buy a code and share it; balances apply at checkout.</p>
       <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="gcEnabled" ${settings.giftCardsEnabled?'checked':''}> Sell gift cards</label></div>
+    </div>
+    <div class="card set-card" style="margin-top:14px">
+      <h3 class="serif">Square integration <span style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em">BETA</span></h3>
+      ${!sqs || !sqs.connected ? `
+        <p class="hint">Connect the shop's Square account: menu syncs from the register, app orders appear on the POS, and in-person sales earn stars automatically.</p>
+        <div class="set-row"><input id="sqToken" class="wide" type="password" placeholder="Square access token (sandbox or production)"></div>
+        <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqProd"> Production account (unchecked = sandbox)</label></div>
+        <button class="save" id="sqConnect">Connect Square</button><span class="saved-note" id="sqNote"></span>
+      ` : `
+        <p class="hint">Connected (${sqs.env}) · ${sqs.syncedItems ? sqs.syncedItems + ' menu items synced' : 'menu not synced yet'}${sqs.lastSync ? ' · last sync ' + new Date(sqs.lastSync).toLocaleString() : ''}</p>
+        ${sqs.locations && sqs.locations.length > 1 ? '<div class="set-row"><label>Location</label><select id="sqLoc">'+sqs.locations.map(l=>'<option value="'+esc(l.id)+'" '+(l.id===sqs.locationId?'selected':'')+'>'+esc(l.name)+'</option>').join('')+'</select></div>' : ''}
+        <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqPush" ${sqs.pushOrders?'checked':''}> Send app orders to the Square register</label></div>
+        <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqStars" ${sqs.autoStars?'checked':''}> Auto-award stars for in-person Square sales</label></div>
+        <div class="set-row"><input id="sqWebhook" class="wide" type="password" placeholder="${sqs.hasWebhookKey ? 'Webhook signature key (saved)' : 'Webhook signature key (for auto-stars)'}"></div>
+        <div class="set-row">
+          <button class="save" id="sqSave">Save</button>
+          <button class="save" id="sqSync" style="background:var(--good)">Sync menu from Square</button>
+          <button class="save" id="sqDisc" style="background:var(--bad)">Disconnect</button>
+          <span class="saved-note" id="sqNote"></span>
+        </div>
+      `}
     </div>`;
   $('#saveSet').addEventListener('click', async () => {
     const tiers = settings.tiers.map((t,i) => ({
@@ -363,6 +385,29 @@ function renderRewards(){
     $('#savedNote').textContent = 'Saved ✓';
     setTimeout(()=>{ const n=$('#savedNote'); if(n) n.textContent=''; }, 2500);
   });
+
+  const sqNote = msg => { const n = $('#sqNote'); if (n) n.textContent = msg; };
+  const sqRefresh = async () => { sqs = await api('/staff/square/status'); renderShell(); };
+  const sqCall = async (body, okMsg) => {
+    try { await api('/staff/square/connect', body); if (okMsg) toastMsg(okMsg); await sqRefresh(); }
+    catch(e){ if (e.message !== 'auth') sqNote(e.message); }
+  };
+  if ($('#sqConnect')) $('#sqConnect').addEventListener('click', () => {
+    sqNote('Connecting…');
+    sqCall({ accessToken: $('#sqToken').value, env: $('#sqProd').checked ? 'production' : 'sandbox' }, 'Square connected');
+  });
+  if ($('#sqSave')) $('#sqSave').addEventListener('click', () => {
+    const body = { pushOrders: $('#sqPush').checked, autoStars: $('#sqStars').checked };
+    const loc = $('#sqLoc'); if (loc) body.locationId = loc.value;
+    const wh = $('#sqWebhook'); if (wh && wh.value.trim()) body.webhookKey = wh.value.trim();
+    sqCall(body, 'Square settings saved');
+  });
+  if ($('#sqSync')) $('#sqSync').addEventListener('click', async () => {
+    sqNote('Syncing menu…');
+    try { const r = await api('/staff/square/sync', {}); toastMsg(r.count + ' items synced from Square'); await sqRefresh(); }
+    catch(e){ if (e.message !== 'auth') sqNote(e.message); }
+  });
+  if ($('#sqDisc')) $('#sqDisc').addEventListener('click', () => sqCall({ disconnect: true }, 'Square disconnected'));
 }
 
 /* ---------- customers ---------- */

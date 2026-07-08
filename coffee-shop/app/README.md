@@ -63,6 +63,32 @@ _Later, at multi-shop scale: switch to Stripe **Connect** (one platform
 account, each shop onboards via a link, charges route to their connected
 account automatically). The checkout code stays nearly identical._
 
+## Square integration (beta)
+
+Configured per shop in Dashboard → Rewards → Square integration:
+
+1. Paste the shop's Square **access token** (sandbox token while testing;
+   production token or OAuth later) → Connect.
+2. Pick the location (auto-selected if the account has one).
+3. Toggles:
+   - **Send app orders to the Square register** — app orders are created in
+     Square as paid pickup orders (note: Square charges 1% for API orders
+     paid outside Square; roadmap is routing payment through Square itself
+     for connected shops, which removes the fee).
+   - **Auto-award stars for in-person Square sales** — when the barista
+     attaches a customer (phone number) to a sale on their Square register,
+     Square notifies `/square/webhook` and stars are credited automatically.
+     Requires the webhook **signature key** (Square Developer Console →
+     Webhooks → subscribe to `payment.created`/`payment.updated`, point at
+     `https://<shop-domain>/square/webhook`).
+4. **Sync menu from Square** pulls items/prices/categories into the app
+   (first pass: names + prices; size/modifier mapping is roadmap).
+
+Status: connector is built and webhook-tested locally (signature
+verification, idempotent retries, app-order de-duplication). Field-level
+verification against Square's live sandbox is required before the first
+production shop connects.
+
 ## Customizing for a real shop
 
 - **Name, address, menu, reward tiers, deals, tax rate:** seeded in
