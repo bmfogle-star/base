@@ -457,7 +457,7 @@ app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 
 // the data volume, then served locally. The app degrades gracefully on 404.
 const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EpLWxWBo6QlDmwjFC7NjlTBGAZ/';
 const MEDIA_URLS = {
-  'splash.mp4': process.env.SPLASH_VIDEO_URL || CDN + 'hf_20260707_223135_aaf8d3e8-2e4b-4568-8ab7-7d7517aae822.mp4',
+  'splash.mp4': process.env.SPLASH_VIDEO_URL || CDN + 'hf_20260708_005624_e711e063-9b56-4e58-bf36-43fb9c4d265f.mp4',
   'menu-latte.webp': CDN + 'hf_20260707_230542_b8fa9218-f6b2-441d-b07a-2640b314117d_min.webp',
   'menu-capp.webp': CDN + 'hf_20260707_230551_4cfb6b7c-19ae-4b2d-8464-31ab6bc81e70_min.webp',
   'menu-mocha.webp': CDN + 'hf_20260707_230618_ee9d22eb-8b2c-41d2-a1bd-df8764e509d1_min.webp',
@@ -477,7 +477,9 @@ const mediaFetching = new Map();
 async function serveCachedMedia(key, res) {
   const url = MEDIA_URLS[key];
   if (!url || !url.startsWith('http')) return res.status(404).end();
-  const cached = path.join(DATA_DIR, 'media-' + key.replace(/[^a-z0-9.-]/gi, '_'));
+  // Cache filename includes a hash of the source URL, so swapping the asset
+  // (e.g. a new splash video) automatically invalidates the old cached copy.
+  const cached = path.join(DATA_DIR, 'media-' + crypto.createHash('md5').update(url).digest('hex').slice(0, 10) + '-' + key.replace(/[^a-z0-9.-]/gi, '_'));
   if (!fs.existsSync(cached)) {
     try {
       if (!mediaFetching.has(key)) mediaFetching.set(key, (async () => {
