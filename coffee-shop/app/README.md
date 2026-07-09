@@ -84,10 +84,13 @@ Configured per shop in Dashboard → Rewards → Square integration:
 4. **Sync menu from Square** pulls items/prices/categories into the app
    (first pass: names + prices; size/modifier mapping is roadmap).
 
-Status: connector is built and webhook-tested locally (signature
-verification, idempotent retries, app-order de-duplication). Field-level
-verification against Square's live sandbox is required before the first
-production shop connects.
+Status: VERIFIED against Square's live sandbox (2026-07-09) — account
+connect, location detection, and paid pickup-order push confirmed via the
+dashboard's "Verify last push" readback. Webhook flow is signature-tested
+locally; live webhook + menu sync still need a sandbox catalog item and a
+webhook subscription to exercise. Remaining roadmap: per-item modifier
+mapping, OAuth "Connect" button, and routing payment through Square for
+connected shops (removes Square's 1% external-payment fee).
 
 ## Customizing for a real shop
 
