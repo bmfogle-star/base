@@ -373,7 +373,8 @@ function renderRewards(){
         </div>
         <div class="set-row"><span class="saved-note" id="sqNote" style="margin-left:0"></span></div>
       `}
-    </div>`;
+    </div>
+    ${settings.dataStore ? '<p class="hint" style="margin:12px 4px 0">Data store: boot #'+settings.dataStore.boots+' since '+new Date(settings.dataStore.firstBoot).toLocaleDateString()+(settings.dataStore.dataDirSet?'':' — ⚠ DATA_DIR not set; settings will not survive redeploys')+'. If this resets to boot #1 after a redeploy, the storage volume is not persisting — fix before launch.</p>' : ''}`;
   $('#saveSet').addEventListener('click', async () => {
     const tiers = settings.tiers.map((t,i) => ({
       pts: +document.querySelector('[data-tf="pts:'+i+'"]').value || t.pts,

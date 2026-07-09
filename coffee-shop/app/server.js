@@ -96,6 +96,46 @@ function saveDb() {
 }
 loadDb();
 
+// Persistence self-check: a boot counter that survives only if storage does.
+db.meta = db.meta || { firstBoot: Date.now(), boots: 0 };
+db.meta.boots += 1;
+saveDb();
+if (!process.env.DATA_DIR) {
+  console.warn('⚠ DATA_DIR is not set — data and API keys will NOT survive redeploys on most hosts. Point DATA_DIR at a mounted volume.');
+}
+console.log(`Data store: boot #${db.meta.boots} since ${new Date(db.meta.firstBoot).toLocaleDateString()}`);
+
+// Belt-and-braces: if the Square config is ever missing (fresh volume, wiped
+// data), restore it from environment variables so integrations self-heal.
+if (process.env.SQUARE_ACCESS_TOKEN && (!db.shop.square || !db.shop.square.accessToken)) {
+  db.shop.square = {
+    accessToken: process.env.SQUARE_ACCESS_TOKEN,
+    env: process.env.SQUARE_ENV === 'production' ? 'production' : 'sandbox',
+    locationId: process.env.SQUARE_LOCATION_ID || undefined,
+    webhookKey: process.env.SQUARE_WEBHOOK_KEY || undefined,
+    pushOrders: process.env.SQUARE_PUSH_ORDERS !== 'false',
+    autoStars: !!process.env.SQUARE_WEBHOOK_KEY,
+  };
+  saveDb();
+  console.log('Square config restored from environment variables.');
+}
+
+// Daily backups of the whole data store (keys, balances, orders, gift cards).
+// Restore = copy a backup over db.json and redeploy.
+function backupDb() {
+  try {
+    const dir = path.join(DATA_DIR, 'backups');
+    fs.mkdirSync(dir, { recursive: true });
+    const stamp = new Date().toISOString().slice(0, 10);
+    const dest = path.join(dir, 'db-' + stamp + '.json');
+    if (!fs.existsSync(dest) && fs.existsSync(DB_FILE)) fs.copyFileSync(DB_FILE, dest);
+    const keep = fs.readdirSync(dir).filter(f => f.startsWith('db-')).sort();
+    while (keep.length > 14) fs.unlinkSync(path.join(dir, keep.shift()));
+  } catch (e) { console.error('backup failed:', e.message); }
+}
+setTimeout(backupDb, 5000);
+setInterval(backupDb, 12 * 3600e3).unref();
+
 /* ---------------- Helpers ------------------------------------------------ */
 const r2 = n => Math.round(n * 100) / 100;
 const normPhone = p => String(p || '').replace(/\D/g, '').slice(-10);
@@ -440,7 +480,11 @@ app.get('/api/staff/customers', staff, (req, res) => {
 });
 app.get('/api/staff/settings', staff, (req, res) => {
   const { earnRate, tiers } = db.shop;
-  res.json({ earnRate, tiers, giftCardsEnabled: !!(db.shop.giftCards && db.shop.giftCards.enabled) });
+  res.json({
+    earnRate, tiers,
+    giftCardsEnabled: !!(db.shop.giftCards && db.shop.giftCards.enabled),
+    dataStore: { boots: db.meta.boots, firstBoot: db.meta.firstBoot, dataDirSet: !!process.env.DATA_DIR },
+  });
 });
 app.post('/api/staff/settings', staff, (req, res) => {
   if (req.body.earnRate != null && +req.body.earnRate >= 0 && +req.body.earnRate <= 20) db.shop.earnRate = +req.body.earnRate;
