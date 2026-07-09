@@ -368,9 +368,10 @@ function renderRewards(){
         <div class="set-row">
           <button class="save" id="sqSave">Save</button>
           <button class="save" id="sqSync" style="background:var(--good)">Sync menu from Square</button>
+          ${sqs.lastPush ? '<button class="save" id="sqVerify" style="background:var(--star)">Verify last push (#'+sqs.lastPush.num+')</button>' : ''}
           <button class="save" id="sqDisc" style="background:var(--bad)">Disconnect</button>
-          <span class="saved-note" id="sqNote"></span>
         </div>
+        <div class="set-row"><span class="saved-note" id="sqNote" style="margin-left:0"></span></div>
       `}
     </div>`;
   $('#saveSet').addEventListener('click', async () => {
@@ -408,6 +409,13 @@ function renderRewards(){
     catch(e){ if (e.message !== 'auth') sqNote(e.message); }
   });
   if ($('#sqDisc')) $('#sqDisc').addEventListener('click', () => sqCall({ disconnect: true }, 'Square disconnected'));
+  if ($('#sqVerify')) $('#sqVerify').addEventListener('click', async () => {
+    sqNote('Asking Square…');
+    try {
+      const v = await api('/staff/square/verify', {});
+      sqNote('Square confirms order #' + v.num + ' exists: state ' + v.state + ', total $' + (v.total != null ? v.total.toFixed(2) : '?') + ', ' + (v.paid ? 'PAID' : 'NOT PAID — this is why it may be hidden on the POS'));
+    } catch(e){ if (e.message !== 'auth') sqNote(e.message); }
+  });
 }
 
 /* ---------- customers ---------- */

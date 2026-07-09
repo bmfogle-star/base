@@ -540,7 +540,12 @@ function pushOrderToSquare(order) {
   const c = db.shop.square;
   if (!c || !c.accessToken || !c.pushOrders) return;
   square.pushOrder(db, buildSquarePayload(order))
-    .then(id => { order.squareOrderId = id; saveDb(); })
+    .then(id => {
+      order.squareOrderId = id;
+      db.lastSquarePush = { num: order.num, squareOrderId: id, ts: Date.now() };
+      saveDb();
+      console.log('square push ok for #' + order.num + ' -> ' + id);
+    })
     .catch(e => console.error('square push failed for #' + order.num + ':', e.message));
 }
 
@@ -556,7 +561,34 @@ app.get('/api/staff/square/status', staff, (req, res) => {
     hasWebhookKey: !!c.webhookKey,
     lastSync: c.lastSync || null,
     syncedItems: db.menu.filter(m => m.source === 'square').length,
+    lastPush: db.lastSquarePush || null,
   });
+});
+
+// Ask Square directly whether our last pushed order exists there
+app.post('/api/staff/square/verify', staff, async (req, res) => {
+  const lp = db.lastSquarePush;
+  if (!lp) return res.status(400).json({ error: 'No order has been pushed to Square yet.' });
+  try {
+    const c = db.shop.square;
+    const base = c.env === 'production' ? 'https://connect.squareup.com' : 'https://connect.squareupsandbox.com';
+    const r = await fetch(base + '/v2/orders/' + encodeURIComponent(lp.squareOrderId), {
+      headers: { 'Authorization': 'Bearer ' + c.accessToken, 'Content-Type': 'application/json' },
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error('Square: ' + (data.errors && data.errors[0] ? (data.errors[0].detail || data.errors[0].code) : 'HTTP ' + r.status));
+    const o = data.order || {};
+    res.json({
+      num: lp.num,
+      squareOrderId: lp.squareOrderId,
+      state: o.state || 'UNKNOWN',
+      total: o.total_money ? o.total_money.amount / 100 : null,
+      paid: !!(o.tenders && o.tenders.length),
+      locationId: o.location_id || null,
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 app.post('/api/staff/square/connect', staff, async (req, res) => {
