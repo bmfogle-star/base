@@ -34,6 +34,31 @@ Also set `PUBLIC_URL=https://yourdomain.com` in Stripe mode (used for the
 payment redirect back to the app) and `DASHBOARD_PIN` to something that isn't
 1234.
 
+**Payment finalization is triple-redundant.** A paid order is created by the
+first of: (1) the customer's redirect back from Stripe, (2) the
+`/stripe/webhook` endpoint (subscribe it to `checkout.session.completed` in
+the Stripe dashboard; set `STRIPE_WEBHOOK_SECRET` to the signing secret —
+optional but recommended), or (3) a built-in reconciler that re-checks
+pending sessions against Stripe every minute. All three are idempotent and
+verify `payment_status === 'paid'` directly with Stripe, and pending
+checkouts persist in the data store — so a customer who pays and then closes
+the tab still gets their order on the board, even across a redeploy and even
+with no webhook configured.
+
+## Store hours
+
+Dashboard → Rewards → **Store hours**: per-day open/close times, a time
+zone, and an on/off switch (default **off** = take orders 24/7, right for
+the demo). When on, the server rejects orders outside hours, and the
+customer app shows "Closed · opens 7 am" with checkout disabled — browsing,
+rewards, and gift-card purchases still work.
+
+## Uptime monitoring
+
+`GET /healthz` returns `200 {ok:true}` only if the data volume is writable,
+`503` otherwise. Point a free UptimeRobot (or similar) monitor at it with a
+5-minute interval per deployed shop.
+
 ## Deploy in ~15 minutes (Railway)
 
 1. Create an account at railway.app (sign in with GitHub).

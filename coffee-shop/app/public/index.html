@@ -615,8 +615,9 @@ function cartHTML(){
       <div class="tr grand"><span>${giftApplied>0?'You pay':'Total'}</span><span class="money">${fmt(due)}</span></div>
       <div class="tr"><span>You'll earn</span><span>+${Math.floor(sub*SHOP.earnRate)}★</span></div>
     </div>
+    ${SHOP.openNow === false ? '<div class="err">'+esc(SHOP.hours)+' — you can browse now and order when the shop opens. Your cart is saved.</div>' : ''}
     ${co.error ? '<div class="err">'+esc(co.error)+'</div>' : ''}
-    <button class="btn" id="payBtn" ${co.busy?'disabled':''}>${co.busy?'One moment…':(SHOP.payMode==='stripe' && due > 0 ? 'Continue to payment · '+fmt(due) : 'Place order · '+fmt(due)+(SHOP.payMode==='demo'?' (demo)':''))}</button>
+    <button class="btn" id="payBtn" ${co.busy || SHOP.openNow === false ?'disabled':''}>${SHOP.openNow === false ? 'Shop is closed' : co.busy?'One moment…':(SHOP.payMode==='stripe' && due > 0 ? 'Continue to payment · '+fmt(due) : 'Place order · '+fmt(due)+(SHOP.payMode==='demo'?' (demo)':''))}</button>
     <button class="btn ghost" style="margin-top:10px" data-go="order">Add more items</button>`;
 }
 async function placeOrder(){

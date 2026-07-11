@@ -44,7 +44,7 @@ const fs = require('fs');
     await cust.waitForSelector('#payBtn', { state: 'detached' });
     await cust.waitForSelector('.order-card');
     const pts1 = await cust.textContent('#ptsChip');
-    console.log('CHECK customer points after order:', pts1.trim(), '(expect ★ 24: subtotal 12.25 → floor(24.5))');
+    console.log('CHECK customer points after order:', pts1.trim(), '(expect ★ 21: latte Med+oat+shot 7.00 + croissant 3.75 = 10.75 → floor(21.5))');
 
     // ---- DASHBOARD: see order, advance status ----
     const dash = await browser.newPage({ viewport: { width: 1100, height: 800 } });
@@ -83,7 +83,7 @@ const fs = require('fs');
     const muffin = await cust.$('[data-item="muffin"]');
     console.log('CHECK muffin hidden after 86:', muffin ? 'STILL VISIBLE (BUG)' : 'yes');
 
-    // place a big order to cross 50 pts (already at 24)
+    // place a big order to build toward 50 pts (at 21)
     await cust.click('[data-cat="Espresso"]');
     await cust.click('[data-item="mocha"]');
     await cust.click('[data-q="1"]'); // qty 2
@@ -93,7 +93,7 @@ const fs = require('fs');
     await cust.waitForSelector('#payBtn', { state: 'detached' });
     await cust.waitForSelector('.order-card');
     const pts2 = await cust.textContent('#ptsChip');
-    console.log('CHECK points after 2nd order:', pts2.trim(), '(expect ★ 47... mocha Med 5.75x2=11.50 → +23 → 47)');
+    console.log('CHECK points after 2nd order:', pts2.trim(), '(expect ★ 44: mocha Med 5.75x2=11.50 → +23 → 44)');
 
     // one more to pass 50
     await cust.click('[data-tab="order"]');
@@ -104,7 +104,7 @@ const fs = require('fs');
     await cust.waitForSelector('#payBtn', { state: 'detached' });
     await cust.waitForSelector('.order-card');
     const pts3 = await cust.textContent('#ptsChip');
-    console.log('CHECK points after 3rd order:', pts3.trim(), '(expect ★ 53)');
+    console.log('CHECK points after 3rd order:', pts3.trim(), '(expect ★ 50: espresso 3.00 → +6)');
 
     // redeem free drip
     await cust.click('[data-tab="rewards"]');
@@ -118,7 +118,7 @@ const fs = require('fs');
     await cust.waitForSelector('#payBtn', { state: 'detached' });
     await cust.waitForSelector('.order-card');
     const pts4 = await cust.textContent('#ptsChip');
-    console.log('CHECK points after redemption:', pts4.trim(), '(expect ★ 3: 53 - 50 + 0 earned)');
+    console.log('CHECK points after redemption:', pts4.trim(), '(expect ★ 0: 50 - 50 + 0 earned)');
 
     // ---- RETURNING CUSTOMER: new browser, same phone, points restored ----
     const ret = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -128,7 +128,7 @@ const fs = require('fs');
     await ret.reload();
     await ret.waitForSelector('[data-tab="order"]');
     const ptsRet = await ret.textContent('#ptsChip');
-    console.log('CHECK returning customer points:', ptsRet.trim(), '(expect ★ 3)');
+    console.log('CHECK returning customer points:', ptsRet.trim(), '(expect ★ 0)');
 
     // ---- GIFT CARDS: buy (demo), redeem on a fresh customer, spend at checkout ----
     await cust.click('[data-tab="home"]');
@@ -177,6 +177,50 @@ const fs = require('fs');
     const custRow = await dash.textContent('tbody tr');
     console.log('CHECK customers tab:', /Jess/.test(custRow) ? 'Jess listed OK' : 'MISSING: ' + custRow);
     await dash.screenshot({ path: 'e2e-7-dash-customers.png' });
+
+    // ---- HEALTH ENDPOINT + STRIPE WEBHOOK ROUTE ----
+    const health = await (await fetch('http://localhost:3456/healthz')).json();
+    console.log('CHECK healthz:', health.ok ? 'ok (boot #' + health.boot + ')' : 'FAILING (BUG)');
+    const wh = await fetch('http://localhost:3456/stripe/webhook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    console.log('CHECK stripe webhook without stripe configured:', wh.status === 404 ? '404 as expected' : 'BUG: HTTP ' + wh.status);
+
+    // ---- SHOP HOURS GATE: close the shop, verify UI + API block orders ----
+    const sapi = (p, body) => fetch('http://localhost:3456/api' + p, {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-staff-pin': '1234' }, body: JSON.stringify(body),
+    }).then(r => r.json());
+    const mkDays = closed => Array.from({ length: 7 }, () => ({ open: closed ? '07:00' : '00:00', close: closed ? '18:00' : '23:59', closed }));
+    await sapi('/staff/settings', { hoursConfig: { enabled: true, tz: 'America/New_York', days: mkDays(true) } });
+    let shopInfo = await (await fetch('http://localhost:3456/api/shop')).json();
+    console.log('CHECK shop reports closed:', shopInfo.openNow === false ? 'yes (' + shopInfo.hours + ')' : 'BUG: still open');
+    const rejected = await (await fetch('http://localhost:3456/api/orders', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: [{ id: 'esp', qty: 1 }], name: 'Late Larry', phone: '5552223333', tipPct: 0 }),
+    })).json();
+    console.log('CHECK order rejected while closed:', rejected.error ? 'yes — "' + rejected.error + '"' : 'BUG: order went through');
+
+    await cust.reload();
+    await cust.waitForSelector('[data-tab="order"]');
+    const hoursTxt = await cust.textContent('#shopHours');
+    console.log('CHECK header shows closed:', /closed/i.test(hoursTxt) ? 'yes (' + hoursTxt.trim() + ')' : 'BUG: ' + hoursTxt);
+    await cust.click('[data-tab="order"]');
+    await cust.click('[data-item="esp"]');
+    await cust.click('#addBtn');
+    await cust.click('.float-cart');
+    const payDisabled = await cust.$eval('#payBtn', b => b.disabled);
+    console.log('CHECK pay button disabled while closed:', payDisabled ? 'yes' : 'BUG: enabled');
+    await cust.screenshot({ path: 'e2e-8-cust-closed.png' });
+
+    // reopen 24/7 and confirm ordering works again
+    await sapi('/staff/settings', { hoursConfig: { enabled: true, tz: 'America/New_York', days: mkDays(false) } });
+    shopInfo = await (await fetch('http://localhost:3456/api/shop')).json();
+    console.log('CHECK shop open again:', shopInfo.openNow ? 'yes' : 'BUG: still closed');
+    await cust.reload();
+    await cust.waitForSelector('[data-tab="order"]');
+    await cust.click('[data-tab="orders"]');
+    await cust.click('#payBtn');
+    await cust.waitForSelector('#payBtn', { state: 'detached' });
+    await cust.waitForSelector('.order-card');
+    console.log('CHECK order placed after reopening: yes');
 
     console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'NO JS ERRORS');
   } finally {

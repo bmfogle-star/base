@@ -10,6 +10,7 @@
  * Env vars:
  *   PORT           (default 3000)
  *   STRIPE_SECRET_KEY   enables real payments when set
+ *   STRIPE_WEBHOOK_SECRET  optional signing secret for /stripe/webhook
  *   DASHBOARD_PIN  staff login PIN (default 1234 — CHANGE FOR A REAL SHOP)
  *   PUBLIC_URL     public base URL, needed for Stripe redirects
  *   DATA_DIR       where db.json lives (default ./data)
@@ -47,6 +48,21 @@ const SEED = {
       { ic: '🕑', t: 'Happy Hour 2–4 pm',    d: '$1 off any cold drink, every weekday' },
       { ic: '🎂', t: 'Birthday drink on us', d: 'Any handcrafted drink free during your birthday week' },
     ],
+    // Ordering hours gate. enabled:false = take orders 24/7 (right for the
+    // demo shop); a real shop turns it on in Dashboard -> Rewards -> Store hours.
+    hoursConfig: {
+      enabled: false,
+      tz: 'America/New_York',
+      days: [ // Sunday .. Saturday
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+        { open: '07:00', close: '18:00', closed: false },
+      ],
+    },
     sizes:  [ { n: 'Small', d: 0 }, { n: 'Medium', d: 0.5 }, { n: 'Large', d: 0.9 } ],
     milks:  [ { n: 'Whole', d: 0 }, { n: '2%', d: 0 }, { n: 'Oat', d: 0.75 }, { n: 'Almond', d: 0.75 } ],
     extras: [ { n: 'Extra shot', d: 1 }, { n: 'Vanilla', d: 0.6 }, { n: 'Caramel', d: 0.6 }, { n: 'Honey', d: 0.5 } ],
@@ -72,6 +88,7 @@ const SEED = {
   giftcards: {},    // code -> { balance, amount, purchasedBy, createdAt, redeemedBy }
   creditLog: [],    // in-store earn/redeem audit trail
   squareSeen: {},   // processed Square payment ids (webhook idempotency)
+  pendingCheckouts: {}, // token -> Stripe checkout awaiting finalization (survives restarts)
   seq: 100,
 };
 
@@ -83,6 +100,7 @@ function loadDb() {
   // additive migrations: pick up new seed fields
   for (const k of Object.keys(SEED)) if (db[k] === undefined) db[k] = SEED[k];
   if (!db.shop.giftCards) db.shop.giftCards = JSON.parse(JSON.stringify(SEED.shop.giftCards));
+  if (!db.shop.hoursConfig) db.shop.hoursConfig = JSON.parse(JSON.stringify(SEED.shop.hoursConfig));
 }
 let saveTimer = null;
 function saveDb() {
@@ -140,6 +158,37 @@ setInterval(backupDb, 12 * 3600e3).unref();
 const r2 = n => Math.round(n * 100) / 100;
 const normPhone = p => String(p || '').replace(/\D/g, '').slice(-10);
 function itemById(id) { return db.menu.find(m => m.id === id); }
+
+/* ---- Shop hours ---- */
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const toMins = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '')); return m && +m[1] < 24 && +m[2] < 60 ? +m[1] * 60 + +m[2] : null; };
+const fmt12h = mins => { const h = Math.floor(mins / 60), mm = mins % 60; return (((h + 11) % 12) + 1) + (mm ? ':' + String(mm).padStart(2, '0') : '') + (h >= 12 ? ' pm' : ' am'); };
+function shopLocalNow(tz) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+  const get = t => (parts.find(p => p.type === t) || {}).value;
+  return { day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday')), mins: +get('hour') * 60 + +get('minute') };
+}
+// Are we taking orders right now, and what should the header say?
+function hoursState() {
+  const cfg = db.shop.hoursConfig;
+  if (!cfg || !cfg.enabled) return { open: true, label: db.shop.hours };
+  let now;
+  try { now = shopLocalNow(cfg.tz); } catch (e) { return { open: true, label: db.shop.hours }; } // bad tz: fail open, never block sales
+  const today = cfg.days[now.day] || {};
+  const o = toMins(today.open), c = toMins(today.close);
+  if (!today.closed && o != null && c != null && now.mins >= o && now.mins < c) {
+    return { open: true, label: 'Open · closes ' + fmt12h(c) };
+  }
+  for (let i = 0; i < 7; i++) { // find the next opening
+    const d = cfg.days[(now.day + i) % 7] || {};
+    const od = toMins(d.open);
+    if (d.closed || od == null || toMins(d.close) == null) continue;
+    if (i === 0 && now.mins >= od) continue; // today's opening already passed
+    const when = i === 0 ? '' : i === 1 ? ' tomorrow' : ' ' + DAY_NAMES[(now.day + i) % 7];
+    return { open: false, label: 'Closed · opens ' + fmt12h(od) + when };
+  }
+  return { open: false, label: 'Closed' };
+}
 
 function priceLine(l) {
   const it = itemById(l.id);
@@ -256,9 +305,10 @@ function allow(key, max, windowMs) {
 
 /* ---- Customer API ---- */
 app.get('/api/shop', (req, res) => {
-  const { name, address, hours, earnRate, tiers, deals, sizes, milks, extras, taxRate } = db.shop;
+  const { name, address, earnRate, tiers, deals, sizes, milks, extras, taxRate } = db.shop;
+  const hs = hoursState();
   res.json({
-    name, address, hours, earnRate, tiers, deals, sizes, milks, extras, taxRate,
+    name, address, hours: hs.label, openNow: hs.open, earnRate, tiers, deals, sizes, milks, extras, taxRate,
     giftCards: db.shop.giftCards || { enabled: false, amounts: [] },
     payMode: stripe ? 'stripe' : 'demo',
     menu: db.menu.filter(m => m.available),
@@ -279,9 +329,69 @@ app.post('/api/customers/lookup', (req, res) => {
   res.json({ phone, name: c.name, points: c.points, giftBalance: c.giftBalance || 0, orders });
 });
 
-// Pending carts awaiting Stripe payment: token -> {cart data, expires}
-const pending = new Map();
-setInterval(() => { const now = Date.now(); for (const [k, v] of pending) if (v.expires < now) pending.delete(k); }, 60000).unref();
+/*
+ * Stripe checkouts awaiting finalization live in db.pendingCheckouts (on the
+ * volume), so a paid session can never be lost to a restart. Three separate
+ * paths can finalize a payment, all idempotent:
+ *   1. the customer's redirect back from Stripe (fast path, as before),
+ *   2. POST /stripe/webhook (checkout.session.completed),
+ *   3. a background reconciler that re-checks unpaid sessions every minute.
+ * Every path re-fetches the session from Stripe and requires
+ * payment_status === 'paid' before creating anything — nothing trusts the
+ * caller, so #2 and #3 are safe even without a webhook signing secret.
+ */
+db.pendingCheckouts = db.pendingCheckouts || {};
+const finalizing = new Map(); // token -> in-flight promise (dedupes redirect/webhook/reconciler races)
+
+async function finalizeCheckout(token) {
+  if (finalizing.has(token)) return finalizing.get(token);
+  const job = (async () => {
+    const p = db.pendingCheckouts[token];
+    if (!p) return { error: 'expired' };
+    if (p.done) return { done: p.done, kind: p.kind };
+    const session = await stripe.checkout.sessions.retrieve(p.sessionId);
+    if (session.payment_status !== 'paid') return { error: 'unpaid' };
+    if (p.kind === 'gift') {
+      const code = genGiftCode();
+      db.giftcards[code] = { balance: p.amount, amount: p.amount, purchasedBy: p.phone, createdAt: Date.now() };
+      p.done = { code, amount: p.amount, at: Date.now() };
+    } else {
+      const order = createOrder(p.data);
+      pushOrderToSquare(order);
+      p.done = { num: order.num, phone: p.data.phone, at: Date.now() };
+    }
+    saveDb();
+    return { done: p.done, kind: p.kind };
+  })().finally(() => finalizing.delete(token));
+  finalizing.set(token, job);
+  return job;
+}
+
+// Backup finalizer: if the customer paid but never made it back to the app
+// (closed the tab, lost signal) and no webhook fired, the order still lands
+// on the shop's board within ~a minute.
+async function reconcilePending() {
+  if (!stripe) return;
+  const now = Date.now();
+  for (const [token, p] of Object.entries(db.pendingCheckouts)) {
+    if (p.done) continue;
+    const age = now - (p.createdAt || 0);
+    if (age < 90e3 || age > 24 * 3600e3) continue; // give the redirect a head start; Stripe sessions expire in 24h
+    try { await finalizeCheckout(token); }
+    catch (e) { console.error('reconcile failed for a pending checkout:', e.message); }
+  }
+}
+setTimeout(() => reconcilePending(), 15e3);
+setInterval(() => reconcilePending(), 60e3).unref();
+
+// Sweep finished/abandoned checkout records after 24h
+setInterval(() => {
+  const now = Date.now(); let dirty = false;
+  for (const [t, p] of Object.entries(db.pendingCheckouts)) {
+    if (now - (p.createdAt || 0) > 24 * 3600e3) { delete db.pendingCheckouts[t]; dirty = true; }
+  }
+  if (dirty) saveDb();
+}, 3600e3).unref();
 
 app.post('/api/orders', async (req, res) => {
   if (!allow('order:' + req.ip, 60, 3600e3)) return res.status(429).json({ error: 'Too many orders from this connection — try again later.' });
@@ -289,6 +399,8 @@ app.post('/api/orders', async (req, res) => {
   const phone = normPhone(req.body.phone);
   const name = String(req.body.name || '').slice(0, 40).trim();
   if (phone.length !== 10 || !name) return res.status(400).json({ error: 'Name and a 10-digit phone number are required.' });
+  const hs = hoursState();
+  if (!hs.open) return res.status(400).json({ error: 'The shop is closed right now — ' + (hs.label === 'Closed' ? 'check back during open hours' : hs.label.slice(9).toLowerCase()) + '. Your cart is saved.' });
   const tp = [0, 0.10, 0.15, 0.20].includes(+tipPct) ? +tipPct : 0;
   const priced = priceCart(lines, db.customers[phone]);
   if (priced.error) return res.status(400).json({ error: priced.error });
@@ -336,10 +448,12 @@ app.post('/api/orders', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: items,
+      metadata: { token, kind: 'order' },
       success_url: `${base}/?finalize=${token}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/?canceled=1`,
     });
-    pending.set(token, { data, sessionId: session.id, expires: Date.now() + 30 * 60 * 1000 });
+    db.pendingCheckouts[token] = { kind: 'order', data, sessionId: session.id, createdAt: Date.now() };
+    saveDb();
     res.json({ checkoutUrl: session.url });
   } catch (e) {
     console.error('stripe error', e.message);
@@ -348,15 +462,18 @@ app.post('/api/orders', async (req, res) => {
 });
 
 app.post('/api/orders/finalize', async (req, res) => {
-  const p = pending.get(String(req.body.token || ''));
-  if (!p || p.type) return res.status(404).json({ error: 'Order session expired — please try again.' });
+  const token = String(req.body.token || '');
+  const p = db.pendingCheckouts[token];
+  if (!stripe || !p || p.kind !== 'order') return res.status(404).json({ error: 'Order session expired — please try again.' });
   try {
-    const session = await stripe.checkout.sessions.retrieve(p.sessionId);
-    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
-    pending.delete(req.body.token);
-    const order = createOrder(p.data);
-    pushOrderToSquare(order);
-    const c = db.customers[p.data.phone];
+    const r = await finalizeCheckout(token);
+    if (r.error === 'expired') return res.status(404).json({ error: 'Order session expired — please try again.' });
+    if (r.error === 'unpaid') return res.status(402).json({ error: 'Payment not completed.' });
+    // The webhook or reconciler may have finalized first — either way the
+    // order exists now; return it to the customer's device.
+    const order = db.orders.find(o => o.num === r.done.num);
+    const c = db.customers[r.done.phone];
+    if (!order || !c) return res.status(404).json({ error: 'Order not found.' });
     res.json({ order: publicOrder(order), points: c.points, giftBalance: c.giftBalance || 0, token: c.token });
   } catch (e) {
     console.error('finalize error', e.message);
@@ -385,10 +502,12 @@ app.post('/api/giftcards/buy', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: amount * 100, product_data: { name: db.shop.name + ' digital gift card' } } }],
+      metadata: { token, kind: 'gift' },
       success_url: `${base}/?giftfinalize=${token}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/?canceled=1`,
     });
-    pending.set(token, { type: 'gift', amount, phone, sessionId: session.id, expires: Date.now() + 30 * 60 * 1000 });
+    db.pendingCheckouts[token] = { kind: 'gift', amount, phone, sessionId: session.id, createdAt: Date.now() };
+    saveDb();
     res.json({ checkoutUrl: session.url });
   } catch (e) {
     console.error('gift stripe error', e.message);
@@ -397,16 +516,14 @@ app.post('/api/giftcards/buy', async (req, res) => {
 });
 
 app.post('/api/giftcards/finalize', async (req, res) => {
-  const p = pending.get(String(req.body.token || ''));
-  if (!p || p.type !== 'gift') return res.status(404).json({ error: 'Purchase session expired.' });
+  const token = String(req.body.token || '');
+  const p = db.pendingCheckouts[token];
+  if (!stripe || !p || p.kind !== 'gift') return res.status(404).json({ error: 'Purchase session expired.' });
   try {
-    const session = await stripe.checkout.sessions.retrieve(p.sessionId);
-    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
-    pending.delete(req.body.token);
-    const code = genGiftCode();
-    db.giftcards[code] = { balance: p.amount, amount: p.amount, purchasedBy: p.phone, createdAt: Date.now() };
-    saveDb();
-    res.json({ code, amount: p.amount });
+    const r = await finalizeCheckout(token);
+    if (r.error === 'expired') return res.status(404).json({ error: 'Purchase session expired.' });
+    if (r.error === 'unpaid') return res.status(402).json({ error: 'Payment not completed.' });
+    res.json({ code: r.done.code, amount: r.done.amount });
   } catch (e) {
     res.status(502).json({ error: 'Could not verify payment.' });
   }
@@ -427,6 +544,30 @@ app.post('/api/giftcards/redeem', (req, res) => {
   card.balance = 0; card.redeemedBy = phone; card.redeemedAt = Date.now();
   saveDb();
   res.json({ giftBalance: c.giftBalance, token: c.token });
+});
+
+// Stripe event notifications — backup finalization path. Configure in the
+// Stripe dashboard: Developers -> Webhooks -> endpoint https://<domain>/stripe/webhook
+// with event checkout.session.completed; set STRIPE_WEBHOOK_SECRET to the
+// signing secret. Works unsigned too: the event is only a hint, because
+// finalizeCheckout re-fetches the session from Stripe and requires
+// payment_status === 'paid' before creating anything.
+app.post('/stripe/webhook', async (req, res) => {
+  if (!stripe) return res.status(404).end();
+  let event = req.body || {};
+  const secret = process.env.STRIPE_WEBHOOK_SECRET || '';
+  if (secret) {
+    try { event = stripe.webhooks.constructEvent(req.rawBody, req.get('stripe-signature'), secret); }
+    catch (e) { return res.status(400).end(); }
+  }
+  res.json({ received: true }); // ack immediately; process after
+  try {
+    if (event.type !== 'checkout.session.completed') return;
+    const meta = (event.data && event.data.object && event.data.object.metadata) || {};
+    if (meta.token && db.pendingCheckouts[meta.token]) await finalizeCheckout(meta.token);
+  } catch (e) {
+    console.error('stripe webhook error:', e.message);
+  }
 });
 
 app.get('/api/orders/:num', (req, res) => {
@@ -483,6 +624,8 @@ app.get('/api/staff/settings', staff, (req, res) => {
   res.json({
     earnRate, tiers,
     giftCardsEnabled: !!(db.shop.giftCards && db.shop.giftCards.enabled),
+    hoursConfig: db.shop.hoursConfig,
+    openNow: hoursState().open,
     dataStore: { boots: db.meta.boots, firstBoot: db.meta.firstBoot, dataDirSet: !!process.env.DATA_DIR },
   });
 });
@@ -495,6 +638,24 @@ app.post('/api/staff/settings', staff, (req, res) => {
   if (Array.isArray(req.body.tiers)) {
     const ok = req.body.tiers.every(t => t && +t.pts > 0 && t.name && itemById(t.grants));
     if (ok) db.shop.tiers = req.body.tiers.map(t => ({ pts: +t.pts, name: String(t.name).slice(0, 60), desc: String(t.desc || '').slice(0, 100), grants: t.grants }));
+  }
+  if (req.body.hoursConfig && typeof req.body.hoursConfig === 'object') {
+    const hc = req.body.hoursConfig;
+    let tzOk = false;
+    try { new Intl.DateTimeFormat('en-US', { timeZone: String(hc.tz) }); tzOk = true; } catch (e) {}
+    if (!tzOk) return res.status(400).json({ error: 'Unknown time zone.' });
+    const daysOk = Array.isArray(hc.days) && hc.days.length === 7 && hc.days.every(d => {
+      if (!d) return false;
+      if (d.closed) return true;
+      const o = toMins(d.open), c = toMins(d.close);
+      return o != null && c != null && c > o;
+    });
+    if (!daysOk) return res.status(400).json({ error: 'Each open day needs an opening time before its closing time.' });
+    db.shop.hoursConfig = {
+      enabled: !!hc.enabled,
+      tz: String(hc.tz),
+      days: hc.days.map(d => ({ open: toMins(d.open) != null ? d.open : '07:00', close: toMins(d.close) != null ? d.close : '18:00', closed: !!d.closed })),
+    };
   }
   saveDb(); res.json({ ok: true });
 });
@@ -771,6 +932,18 @@ async function serveCachedMedia(key, res) {
 }
 app.get('/splash.mp4', (req, res) => serveCachedMedia('splash.mp4', res));
 app.get('/img/menu/:id', (req, res) => serveCachedMedia('menu-' + String(req.params.id).replace(/[^a-z0-9]/gi, '') + '.webp', res));
+
+// Uptime monitoring target (UptimeRobot etc.). Verifies the data volume is
+// actually writable — a dead disk should page the owner, not just a dead port.
+app.get('/healthz', (req, res) => {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(path.join(DATA_DIR, '.healthcheck'), String(Date.now()));
+    res.json({ ok: true, uptimeSec: Math.floor(process.uptime()), boot: db.meta.boots });
+  } catch (e) {
+    res.status(503).json({ ok: false, error: 'storage' });
+  }
+});
 
 app.get('/privacy', (req, res) => {
   const shop = db.shop.name;

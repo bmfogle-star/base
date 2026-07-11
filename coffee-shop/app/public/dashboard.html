@@ -360,6 +360,22 @@ function renderRewards(){
       <p class="hint">Sell digital gift cards in the customer app ($10 / $25 / $50). Customers buy a code and share it; balances apply at checkout.</p>
       <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="gcEnabled" ${settings.giftCardsEnabled?'checked':''}> Sell gift cards</label></div>
     </div>
+    ${settings.hoursConfig ? `
+    <div class="card set-card" style="margin-top:14px">
+      <h3 class="serif">Store hours</h3>
+      <p class="hint">When on, the app stops taking pickup orders outside these hours — customers can still browse, and the app shows when you reopen. Leave off to take orders anytime.</p>
+      <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="hcEnabled" ${settings.hoursConfig.enabled?'checked':''}> Only take orders during open hours</label></div>
+      <div class="set-row"><label for="hcTz">Time zone</label><select id="hcTz">${['America/New_York','America/Chicago','America/Denver','America/Phoenix','America/Los_Angeles','America/Anchorage','Pacific/Honolulu'].concat(['America/New_York','America/Chicago','America/Denver','America/Phoenix','America/Los_Angeles','America/Anchorage','Pacific/Honolulu'].includes(settings.hoursConfig.tz)?[]:[settings.hoursConfig.tz]).map(z=>'<option '+(z===settings.hoursConfig.tz?'selected':'')+'>'+esc(z)+'</option>').join('')}</select></div>
+      ${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((n,i)=>{const d=settings.hoursConfig.days[i]||{};return `
+      <div class="set-row"><label style="min-width:88px">${n}</label>
+        <input type="time" data-hc="open:${i}" value="${esc(d.open||'07:00')}" ${d.closed?'disabled':''}>
+        <span style="color:var(--ink-soft)">to</span>
+        <input type="time" data-hc="close:${i}" value="${esc(d.close||'18:00')}" ${d.closed?'disabled':''}>
+        <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" data-hc="closed:${i}" ${d.closed?'checked':''}> Closed</label>
+      </div>`;}).join('')}
+      <button class="save" id="saveHours">Save hours</button><span class="saved-note" id="hoursNote"></span>
+      ${settings.hoursConfig.enabled && settings.openNow === false ? '<p class="hint" style="margin-top:8px">The app is currently showing customers the shop as closed.</p>' : ''}
+    </div>` : ''}
     <div class="card set-card" style="margin-top:14px">
       <h3 class="serif">Square integration <span style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em">BETA</span></h3>
       ${!sqs || !sqs.connected ? `
@@ -395,6 +411,27 @@ function renderRewards(){
     $('#savedNote').textContent = 'Saved ✓';
     setTimeout(()=>{ const n=$('#savedNote'); if(n) n.textContent=''; }, 2500);
   });
+
+  if ($('#saveHours')) {
+    document.querySelectorAll('[data-hc^="closed:"]').forEach(cb => cb.addEventListener('change', () => {
+      const i = cb.dataset.hc.split(':')[1];
+      document.querySelector('[data-hc="open:'+i+'"]').disabled = cb.checked;
+      document.querySelector('[data-hc="close:'+i+'"]').disabled = cb.checked;
+    }));
+    $('#saveHours').addEventListener('click', async () => {
+      const days = [0,1,2,3,4,5,6].map(i => ({
+        open: document.querySelector('[data-hc="open:'+i+'"]').value || '07:00',
+        close: document.querySelector('[data-hc="close:'+i+'"]').value || '18:00',
+        closed: document.querySelector('[data-hc="closed:'+i+'"]').checked,
+      }));
+      try {
+        await api('/staff/settings', { hoursConfig: { enabled: $('#hcEnabled').checked, tz: $('#hcTz').value, days } });
+        settings = await api('/staff/settings');
+        $('#hoursNote').textContent = 'Saved ✓';
+        setTimeout(()=>{ const n=$('#hoursNote'); if(n) n.textContent=''; }, 2500);
+      } catch(e){ if (e.message !== 'auth') $('#hoursNote').textContent = e.message; }
+    });
+  }
 
   const sqNote = msg => { const n = $('#sqNote'); if (n) n.textContent = msg; };
   const sqRefresh = async () => { sqs = await api('/staff/square/status'); renderShell(); };

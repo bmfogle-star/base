@@ -21,6 +21,11 @@ _Work top to bottom. Times are realistic totals, not guesses._
   charge). Open `URL/dashboard` on a laptop/tablet → enter your PIN → the
   order should be sitting there. Tap it through Preparing → Ready and watch
   your phone update.
+- [ ] **Uptime alerts (~5 min, free):** sign up at **uptimerobot.com** →
+  Add Monitor → type HTTP(s) → URL `https://your-url/healthz` → check
+  interval 5 min → alert to your email (add SMS if offered). If the app or
+  its storage ever goes down you'll know before the shop calls you. Do this
+  again for each shop you launch.
 
 ## Step 2 — Tonight: make it pitch-ready (~30 min)
 
@@ -72,5 +77,14 @@ _Work top to bottom. Times are realistic totals, not guesses._
   and configure their deployment.
 - [ ] Set `STRIPE_SECRET_KEY` + `PUBLIC_URL` on their Railway service → real
   payments on. Test with one real $3 order, refund it from Stripe.
+- [ ] (I do this) In their Stripe dashboard: Developers → Webhooks → add
+  endpoint `https://their-url/stripe/webhook` for `checkout.session.completed`,
+  and set `STRIPE_WEBHOOK_SECRET` on Railway. The app already has a built-in
+  backup that catches paid orders within a minute either way, but the webhook
+  makes it instant.
+- [ ] (I do this) Set their real store hours in Dashboard → Rewards → Store
+  hours and turn on "Only take orders during open hours".
+- [ ] Add an UptimeRobot monitor for their URL (`/healthz`), alerts to you
+  and the owner.
 - [ ] Print their QR table tents, prop up the counter tablet on
   `/dashboard`, train staff (15 min), launch.

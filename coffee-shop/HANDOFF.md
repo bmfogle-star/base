@@ -94,9 +94,24 @@ security headers, server-side pricing.
 
 ## Remaining work (priority order)
 
-1. **Pre-launch hardening (promised, not built):** Stripe webhook backup for
-   order finalization (redirect-only today — CRITICAL before real money);
-   shop-hours gate (app takes orders 24/7 today); uptime monitoring.
+1. **Pre-launch hardening — BUILT 2026-07-11 (was: promised, not built).**
+   Stripe finalization no longer depends on the customer's redirect: pending
+   checkouts persist on the volume, `/stripe/webhook` handles
+   `checkout.session.completed` (optional `STRIPE_WEBHOOK_SECRET` for
+   signature checks), and a background reconciler re-checks unpaid sessions
+   every minute — a paid order lands on the shop's board even if the
+   customer closes the tab and no webhook is configured. All three paths
+   re-fetch the session from Stripe and require `paid` + are idempotent, so
+   the unsigned webhook is safe. Shop-hours gate: Dashboard → Rewards →
+   Store hours (per-day open/close, time zone, OFF by default so the demo
+   stays orderable 24/7); when on, the server rejects orders while closed
+   and the app shows "Closed · opens …" with the pay button disabled.
+   `/healthz` returns 200 only if the data volume is writable (503
+   otherwise) — founder creates the free UptimeRobot monitor against it
+   (now in LAUNCH_CHECKLIST). Tested: hours gate + healthz + webhook
+   routing are in the e2e suite (demo mode). NOT yet exercised against real
+   Stripe: live webhook delivery and a paid checkout round-trip — run one
+   sk_test transaction when a Stripe key first goes in.
 2. Live-verify Square webhook + menu sync (needs sandbox catalog item).
 3. Per-shop onboarding: clone service per shop, SEED config from their
    menu/brand, their Stripe/Square keys. See `app/README.md` deploy guide.
