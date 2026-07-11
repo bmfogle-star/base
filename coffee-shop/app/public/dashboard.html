@@ -28,7 +28,7 @@
 
   /* login */
   .login{ max-width:360px; margin:18vh auto 0; padding:0 20px; text-align:center; }
-  .login .logo{ width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 12px 24px -12px rgba(22,48,74,.5); display:inline-grid; place-items:center; }
+  .login .logo{ width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1.5px rgba(216,180,94,.6), 0 12px 24px -12px rgba(22,48,74,.5); display:inline-grid; place-items:center; }
   .login h1{ font-size:24px; margin-top:14px; color:var(--bird-deep); }
   .login p{ color:var(--ink-soft); font-size:14px; margin-top:4px; }
   .login input{ width:100%; margin-top:18px; padding:14px; font-size:22px; text-align:center; letter-spacing:.4em; border:1px solid var(--ctl); border-radius:12px; background:var(--card); }
@@ -38,9 +38,9 @@
 
   /* shell */
   header.top{ display:flex; align-items:center; gap:12px; padding:14px 20px;
-    background:var(--bird-deep); color:#fff;
+    background:var(--bird-deep); color:#fff; border-bottom:2px solid #D9A94E;
     position:sticky; top:0; z-index:5; }
-  header.top .logo{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:grid; place-items:center; }
+  header.top .logo{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1px rgba(216,180,94,.55); display:grid; place-items:center; }
   header.top .t{ font-weight:700; font-size:17px; }
   header.top .sub{ font-size:12px; color:rgba(255,255,255,.65); }
   .tabs{ margin-left:auto; display:flex; gap:6px; }
@@ -87,6 +87,7 @@
   /* settings */
   .set-card{ padding:20px; max-width:640px; }
   .set-card h3{ font-size:17px; color:var(--bird-deep); }
+  .set-card h3::after{ content:""; display:block; width:26px; height:3px; border-radius:2px; background:linear-gradient(90deg, #E8B45C, #D9A94E); margin-top:6px; }
   .set-card .hint{ font-size:13px; color:var(--ink-soft); margin-top:3px; }
   .set-row{ display:flex; align-items:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
   .set-row label{ font-weight:600; font-size:14px; }
