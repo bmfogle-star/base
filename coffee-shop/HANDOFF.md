@@ -119,6 +119,15 @@ security headers, server-side pricing.
    (Star/Epson), OAuth, Postgres at scale, push/SMS marketing (opt-in only —
    TCPA), App Store builds (Capacitor exists in repo root from old project).
 
+## Installed AI tooling
+
+The **UI/UX Pro Max** skill (v2.6.2, MIT, from the founder's fork
+`bmfogle-star/ui-ux-pro-max-skill`) is installed at repo-root
+`.claude/skills/` — design-system/style/palette/typography guidance that
+Claude Code loads automatically. Update with `npm i -g ui-ux-pro-max-cli &&
+uipro init --ai claude` from the repo root. Its search scripts need Python 3
+(stdlib only, no network).
+
 ## Business docs (all in `coffee-shop/`)
 
 `PLAN.md` (plan/competitors/gates) · `LAUNCH_CHECKLIST.md` (founder to-dos:
