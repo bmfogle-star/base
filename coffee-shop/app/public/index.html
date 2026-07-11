@@ -14,8 +14,8 @@
     color-scheme: dark;
     --bg:#0F0D0B; --paper:#14110E; --card:#1D1915; --line:#2B2620;
     --ink:#F3EDE2; --ink-soft:#A79B8B;
-    --bird:#3F8DA3; --bird-deep:#245666; --bird-tint:rgba(79,163,184,.15);
-    --accent-text:#7CC4D6;
+    --bird:#2F5D8A; --bird-deep:#1B3A5C; --bird-tint:rgba(74,124,180,.16);
+    --accent-text:#9CC0E8;
     --star:#E8B45C; --star-tint:rgba(232,180,92,.14);
     --good:#63BD87; --bad:#E67E5A;
     --radius:14px;
@@ -34,14 +34,14 @@
 
   .phone{ width:100%; max-width:480px; margin:0 auto; height:100dvh;
     background:
-      radial-gradient(circle at 85% 4%, rgba(79,163,184,.10), transparent 42%),
+      radial-gradient(circle at 85% 4%, rgba(74,124,180,.12), transparent 42%),
       radial-gradient(circle at 8% 32%, rgba(232,180,92,.05), transparent 38%),
       var(--paper);
     position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 0 60px rgba(0,0,0,.6); }
   .demo-ribbon{ background:#241E17; color:#D9CDBB; font-size:11.5px; letter-spacing:.04em; text-align:center; padding:6px 10px; border-bottom:1px solid var(--line); }
   .demo-ribbon b{ color:#F3C878; font-weight:600; }
   header.app{ display:flex; align-items:center; gap:10px; padding:12px 16px 10px; background:var(--paper); border-bottom:1px solid var(--line); }
-  .logo{ width:40px; height:40px; border-radius:12px; background:var(--bird); display:grid; place-items:center; flex:none; }
+  .logo{ width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 4px 10px -4px rgba(0,0,0,.6); display:grid; place-items:center; flex:none; }
   .brand .name{ font-size:19px; font-weight:600; letter-spacing:.01em; }
   .brand .status{ font-size:12.5px; color:var(--good); font-weight:600; }
   .brand .status .dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--good); margin-right:4px; }
@@ -110,7 +110,7 @@
   .quick .card{ padding:14px; display:flex; flex-direction:column; gap:2px; text-align:left; }
   .quick .t{ font-weight:700; }
   .quick .d{ font-size:12.5px; color:var(--ink-soft); }
-  .deal{ padding:13px 14px; display:flex; gap:12px; align-items:center; }
+  .deal{ padding:13px 16px; display:flex; gap:12px; align-items:center; border-left:3px solid var(--star); }
   .deal + .deal{ margin-top:8px; }
   .deal .ic{ flex:none; width:40px; height:40px; border-radius:11px; background:var(--star-tint); display:grid; place-items:center; font-size:19px; }
   .deal .t{ font-weight:700; font-size:14.5px; }
@@ -120,8 +120,8 @@
   .menu-item:active{ background:rgba(255,255,255,.045); }
   .menu-item + .menu-item{ border-top:1px solid var(--line); }
   .thumb{ flex:none; width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:28px;
-    background:radial-gradient(circle at 30% 25%, rgba(124,196,214,.28) 0%, rgba(63,141,163,.10) 72%);
-    box-shadow:inset 0 0 0 1px rgba(124,196,214,.14), inset 0 -9px 12px -9px rgba(0,0,0,.4); }
+    background:radial-gradient(circle at 30% 25%, rgba(156,192,232,.26) 0%, rgba(47,93,138,.10) 72%);
+    box-shadow:inset 0 0 0 1px rgba(156,192,232,.14), inset 0 -9px 12px -9px rgba(0,0,0,.4); }
   .thumb.warm{ background:radial-gradient(circle at 30% 25%, rgba(232,180,92,.26) 0%, rgba(232,180,92,.08) 72%);
     box-shadow:inset 0 0 0 1px rgba(232,180,92,.16), inset 0 -9px 12px -9px rgba(0,0,0,.4); }
   .thumb{ overflow:hidden; }
@@ -138,22 +138,30 @@
   @keyframes sheetup{ from{ transform:translateY(48px); opacity:.4; } }
   @media (prefers-reduced-motion: reduce){ .overlay,.sheet{ animation:none; } }
   .item-art{ width:88px; height:88px; border-radius:28px; display:grid; place-items:center; font-size:46px; margin:4px auto 14px;
-    background:radial-gradient(circle at 30% 25%, rgba(124,196,214,.30) 0%, rgba(63,141,163,.10) 75%);
-    box-shadow:inset 0 0 0 1px rgba(124,196,214,.15), 0 16px 28px -14px rgba(0,0,0,.7); }
+    background:radial-gradient(circle at 30% 25%, rgba(156,192,232,.28) 0%, rgba(47,93,138,.10) 75%);
+    box-shadow:inset 0 0 0 1px rgba(156,192,232,.15), 0 16px 28px -14px rgba(0,0,0,.7); }
   .item-art.warm{ background:radial-gradient(circle at 30% 25%, rgba(232,180,92,.28) 0%, rgba(232,180,92,.08) 75%);
     box-shadow:inset 0 0 0 1px rgba(232,180,92,.16), 0 16px 28px -14px rgba(0,0,0,.7); }
   .item-art{ overflow:hidden; }
 
   /* ---------- Wallet & gift cards ---------- */
   .wallet-cta{ margin-top:10px; padding:14px; display:flex; flex-direction:column; gap:2px; text-align:left; width:100%; }
+  .wallet-cta .t{ font-weight:700; }
+  .wallet-cta .d{ font-size:12.5px; color:var(--ink-soft); }
   .pay-row{ display:flex; align-items:center; gap:10px; padding:13px 14px; }
   .pay-row + .pay-row{ border-top:1px solid var(--line); }
   .pay-row .pc-brand{ font-weight:700; }
   .pay-row .rm{ margin-left:auto; color:var(--bad); font-weight:600; font-size:12.5px; }
   .pay-row .code{ font-weight:700; letter-spacing:.06em; margin-left:auto; font-variant-numeric:tabular-nums; }
-  .gift-balance{ padding:18px; display:flex; align-items:baseline; gap:10px; }
-  .gift-balance .gb-amt{ font-size:32px; font-weight:800; color:var(--star); }
-  .gift-balance .gb-lbl{ color:var(--ink-soft); font-size:13px; }
+  .gift-balance{ padding:20px 18px; display:flex; flex-direction:column; gap:2px; border:none; border-radius:20px;
+    background:
+      radial-gradient(140% 180% at 110% -30%, rgba(255,255,255,.14) 0%, transparent 45%),
+      repeating-radial-gradient(circle at 115% 135%, rgba(255,255,255,.05) 0 2px, transparent 2px 15px),
+      linear-gradient(135deg, #6E5220, #A87F35 70%);
+    box-shadow:0 18px 32px -18px rgba(168,127,53,.55); position:relative; overflow:hidden; }
+  .gift-balance .gb-eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,248,235,.85); }
+  .gift-balance .gb-amt{ font-size:34px; font-weight:800; color:#FFF6E6; }
+  .gift-balance .gb-lbl{ color:rgba(255,248,235,.8); font-size:13px; }
   .grab{ width:44px; height:5px; border-radius:3px; background:var(--line); margin:4px auto 12px; }
   .sheet h3{ font-size:22px; }
   .sheet .desc{ color:var(--ink-soft); font-size:14px; margin-top:3px; }
@@ -245,7 +253,7 @@
   .splash-brand{ display:flex; flex-direction:column; align-items:center; gap:12px; opacity:0;
     animation:brandin .65s cubic-bezier(.2,1.5,.32,1) .45s forwards; }
   @keyframes brandin{ from{ opacity:0; transform:scale(1.8); filter:blur(8px); } 60%{ filter:blur(0); } to{ opacity:1; transform:scale(1); } }
-  .splash-brand .slogo{ width:66px; height:66px; border-radius:19px; background:var(--bird); display:grid; place-items:center; box-shadow:0 16px 30px -12px rgba(0,0,0,.7); }
+  .splash-brand .slogo{ width:66px; height:66px; border-radius:19px; background:linear-gradient(135deg,#24486F,#152C46); display:grid; place-items:center; box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 16px 30px -12px rgba(0,0,0,.7); }
   .splash-name{ font-size:21px; color:var(--ink); letter-spacing:.02em; }
   @media (prefers-reduced-motion: reduce){
     .splash-brand{ animation:none; opacity:1; }
@@ -257,7 +265,7 @@
   <div id="splash" aria-hidden="true">
     <video class="splash-video" src="/splash.mp4" muted playsinline autoplay preload="auto"></video>
     <div class="splash-brand">
-      <div class="slogo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z" fill="#F6F1E8"/><circle cx="16.6" cy="10.6" r=".8" fill="#2A5F70"/></svg></div>
+      <div class="slogo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M2.8 16.2c2.6 1.9 6 2.8 9.2 2.3 4-.6 6.8-3 7.6-6.2l2.1-.9-2-.7c-.4-1.9-1.9-3.2-4-3.4.9 1 1.3 2.2 1.2 3.5-1.6-2.6-4.6-4-8-3.3 1.6.7 2.8 1.9 3.4 3.5-2.7-1.5-6.2-1.2-9.5.9 1.9-.1 3.6.4 4.9 1.4-1.8.5-3.5 1.5-4.9 2.9Z" fill="#F6F1E8"/><circle cx="17.1" cy="10.3" r=".75" fill="#152C46"/></svg></div>
       <div class="splash-name serif">Bluebird Coffee Co.</div>
     </div>
   </div>
@@ -265,8 +273,8 @@
   <header class="app">
     <div class="logo" aria-hidden="true">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z" fill="#F6F1E8"/>
-        <circle cx="16.6" cy="10.6" r=".8" fill="#2A5F70"/>
+        <path d="M2.8 16.2c2.6 1.9 6 2.8 9.2 2.3 4-.6 6.8-3 7.6-6.2l2.1-.9-2-.7c-.4-1.9-1.9-3.2-4-3.4.9 1 1.3 2.2 1.2 3.5-1.6-2.6-4.6-4-8-3.3 1.6.7 2.8 1.9 3.4 3.5-2.7-1.5-6.2-1.2-9.5.9 1.9-.1 3.6.4 4.9 1.4-1.8.5-3.5 1.5-4.9 2.9Z" fill="#F6F1E8"/>
+        <circle cx="17.1" cy="10.3" r=".75" fill="#152C46"/>
       </svg>
     </div>
     <div class="brand">
@@ -377,11 +385,13 @@ function viewHome(){
   const prev = nt ? (SHOP.tiers[SHOP.tiers.indexOf(nt)-1]?.pts || 0) : (SHOP.tiers[SHOP.tiers.length-1]?.pts || 1);
   const pct = nt ? Math.min(100, Math.max(0, Math.round((ME.points - prev) / (nt.pts - prev) * 100))) : 100;
   const avail = SHOP.tiers.filter(t=>t.pts<=ME.points).length;
+  const h = new Date().getHours();
+  const daypart = h < 11 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   return `
-    <h1 class="hello serif">${ME.name ? 'Welcome back, ' + esc(ME.name.split(' ')[0]) : 'Welcome'}</h1>
+    <h1 class="hello serif">${ME.name ? daypart + ', ' + esc(ME.name.split(' ')[0]) : daypart}</h1>
     <p class="sub">Order ahead — skip the line at ${esc(SHOP.address)}.</p>
     <div class="reward-card">
-      <svg class="rc-bird" width="120" height="120" viewBox="0 0 24 24" fill="#fff"><path d="M4 14c2.5.5 5-1 6-3.5C11 8 13 6.5 15.5 7c-1 .5-1.5 1.2-1.7 2.2 2.2-.3 4 .6 4.7 2.3l2 .8-2.2.9c-.6 3-3.2 5-6.6 5-3.8 0-6.6-1.8-7.7-4.2Z"/></svg>
+      <svg class="rc-bird" width="120" height="120" viewBox="0 0 24 24" fill="#fff"><path d="M2.8 16.2c2.6 1.9 6 2.8 9.2 2.3 4-.6 6.8-3 7.6-6.2l2.1-.9-2-.7c-.4-1.9-1.9-3.2-4-3.4.9 1 1.3 2.2 1.2 3.5-1.6-2.6-4.6-4-8-3.3 1.6.7 2.8 1.9 3.4 3.5-2.7-1.5-6.2-1.2-9.5.9 1.9-.1 3.6.4 4.9 1.4-1.8.5-3.5 1.5-4.9 2.9Z"/></svg>
       <div class="rc-label">${esc(SHOP.name)} Rewards</div>
       <div class="rc-balance">${ME.points} <small>★</small></div>
       <div class="meter" role="progressbar" aria-valuenow="${ME.points}" aria-valuemin="0" aria-valuemax="${nt?nt.pts:ME.points}"><i style="width:${pct}%"></i></div>
@@ -486,7 +496,11 @@ function viewWallet(){
     ${SHOP.payMode==='demo' ? '<button class="btn ghost" style="margin-top:10px" data-addcard>Add card (demo)</button>' : ''}
 
     <h2 class="sect serif">Gift card balance</h2>
-    <div class="card gift-balance"><span class="gb-amt money">$${(ME.giftBalance||0).toFixed(2)}</span><span class="gb-lbl">applies automatically at checkout when you choose it</span></div>
+    <div class="card gift-balance">
+      <span class="gb-eyebrow">${esc(SHOP.name)} gift balance</span>
+      <span class="gb-amt money">$${(ME.giftBalance||0).toFixed(2)}</span>
+      <span class="gb-lbl">applies at checkout whenever you choose</span>
+    </div>
     ${!phoneOk ? '<div class="field"><label for="walletPhone">Your phone (your balance saves to it)</label><input id="walletPhone" type="tel" inputmode="tel" placeholder="(555) 555-1234"></div>' : ''}
     <div class="field"><label for="giftCode">Have a gift card code?</label><input id="giftCode" placeholder="BB-XXXX-XXXX" autocapitalize="characters" autocomplete="off"></div>
     <button class="btn ghost" style="margin-top:10px" data-redeemcode>Redeem code</button>
