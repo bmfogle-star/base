@@ -1,7 +1,7 @@
 # HANDOFF SHEET — white-label coffee shop app business
 
 _Paste this into any AI assistant (or hand it to a developer) to continue the
-work with full context. Last updated: 2026-07-10. Everything described here
+work with full context. Last updated: 2026-07-11. Everything described here
 is committed and pushed._
 
 ## Who/what this is
@@ -55,13 +55,25 @@ to shop owners starts now. AI assistants do the engineering.
   `npm i -D playwright-core` + Chromium path in `CHROMIUM`). Covers ordering,
   dashboard round-trip, rewards earn/redeem, gift cards cross-customer,
   sold-out, returning customers. RUN IT BEFORE EVERY COMMIT.
-- **Design system:** dark premium theme, tokens at top of each HTML file.
-  Brand: navy swallow logo (gradient #24486F->#152C46), dark blue accent
-  (--bird #2F5D8A), cream text, gold ONLY for stars/rewards/gifts. NO emojis
-  anywhere except the shop logo. Menu photos are AI-generated (Higgsfield),
-  served via server-side cached-media routes (`/img/menu/:id`, `/splash.mp4`
-  — URLs hash-busted, cached on volume). Splash: full-frame ice filling with
-  vanilla latte + logo splash-in (~0.5s), skipped after payment redirects.
+- **Design system (REDESIGNED 2026-07-11, founder-approved):** Amex-style
+  light premium theme, modeled on the American Express app at the founder's
+  direction — white cards on cool light-gray (#EBEEF2), hairline dividers,
+  one soft elevation, deep-navy hero card for the star balance, underline
+  category tabs, full-round navy CTA pills, small uppercase field labels,
+  restrained gold accents (logo keyline ring, section-heading rules, rewards
+  keyline, cart count badge, dashboard top-bar edge). Dashboard matches:
+  deep-navy top bar over light workspace, same tokens at the top of each
+  HTML file. Brand unchanged: navy swallow logo (gradient #24486F->#152C46),
+  primary --bird #2F5D8A / --bird-deep #16304A, gold ONLY for stars/rewards/
+  gifts (darkened to ~#8A6420 wherever it's text on light). NO emojis
+  anywhere except the shop logo. Headings are bold sans now (the .serif
+  class is kept but renders bold sans). Menu photos are AI-generated
+  (Higgsfield) for the OLD dark theme — check them against the white cards
+  and regenerate lighter versions if they clash; served via server-side
+  cached-media routes (`/img/menu/:id`, `/splash.mp4` — URLs hash-busted,
+  cached on volume). Splash kept dark: full-frame ice-pour video + logo
+  splash-in, skipped after payment redirects. The UI/UX Pro Max skill at
+  `.claude/skills/` was used for the redesign — keep using it for UI work.
 
 ## Feature inventory (all live, all e2e-tested)
 
