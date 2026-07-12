@@ -764,6 +764,8 @@ app.get('/api/staff/square/status', staff, (req, res) => {
     pushOrders: !!c.pushOrders,
     autoStars: !!c.autoStars,
     hasWebhookKey: !!c.webhookKey,
+    autoStarsReady: !!(c.webhookKey && c.autoStars),
+    rewardDiscounts: (c.rewardDiscounts || []).length,
     lastSync: c.lastSync || null,
     syncedItems: db.menu.filter(m => m.source === 'square').length,
     lastPush: db.lastSquarePush || null,
@@ -825,6 +827,34 @@ app.post('/api/staff/square/connect', staff, async (req, res) => {
   }
 });
 
+// One-tap in-person rewards setup: creates the payment webhook subscription
+// via Square's API (no dev-console visit) and plants the reward discounts in
+// the shop's Square catalog for register redemptions.
+app.post('/api/staff/square/autostars', staff, async (req, res) => {
+  try {
+    const c = db.shop.square;
+    if (!c || !c.accessToken) return res.status(400).json({ error: 'Connect Square first.' });
+    const base = process.env.PUBLIC_URL;
+    if (!base) return res.status(400).json({ error: 'PUBLIC_URL must be set on the server (the app\'s public https address) before enabling auto-stars.' });
+    const url = base.replace(/\/$/, '') + '/square/webhook';
+    const sub = await square.createWebhookSubscription(db, url);
+    if (sub.signature_key) c.webhookKey = sub.signature_key;
+    c.webhookUrl = url;
+    c.subscriptionId = sub.id || null;
+    c.autoStars = true;
+    const discounts = await square.ensureRewardDiscounts(db, saveDb);
+    saveDb();
+    res.json({
+      ok: true,
+      webhookReady: !!c.webhookKey,
+      discounts: discounts.length,
+      note: c.webhookKey ? null : 'Subscription created but Square did not return the signature key — paste it manually from Developer Console → Webhooks.',
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 app.post('/api/staff/square/sync', staff, async (req, res) => {
   try {
     const count = await square.syncCatalog(db, saveDb);
@@ -868,12 +898,38 @@ app.post('/square/webhook', async (req, res) => {
     }
     if (phone.length !== 10) return;
     const amount = ((p.amount_money && p.amount_money.amount) || 0) / 100;
-    if (amount <= 0) return;
     let cu = db.customers[phone];
     if (!cu) cu = db.customers[phone] = { name: '', points: 0, orders: [], createdAt: Date.now() };
-    const stars = Math.floor(amount * db.shop.earnRate);
-    cu.points += stars;
-    logCredit({ ts: Date.now(), type: 'earn', source: 'square', phone, name: cu.name, amount, stars });
+
+    // Earn on what they paid
+    if (amount > 0) {
+      const stars = Math.floor(amount * db.shop.earnRate);
+      cu.points += stars;
+      logCredit({ ts: Date.now(), type: 'earn', source: 'square', phone, name: cu.name, amount, stars });
+    }
+
+    // Register redemptions: "LB Reward: <tier>" discounts applied on the
+    // Square sale deduct the matching stars automatically.
+    let discountNames = [];
+    if (c.env !== 'production' && Array.isArray(p.test_discounts)) {
+      discountNames = p.test_discounts; // sandbox test hook
+    } else if (p.order_id) {
+      try {
+        const ord = await square.getOrder(db, p.order_id);
+        discountNames = (ord.discounts || []).map(d => d.name).filter(Boolean);
+      } catch (e) { console.error('square order fetch:', e.message); }
+    }
+    for (const dn of discountNames) {
+      if (!dn.startsWith('LB Reward: ')) continue;
+      const tier = db.shop.tiers.find(t => 'LB Reward: ' + t.name === dn);
+      if (!tier) continue;
+      if (cu.points >= tier.pts) {
+        cu.points -= tier.pts;
+        logCredit({ ts: Date.now(), type: 'redeem', source: 'square', phone, name: cu.name, stars: -tier.pts, item: tier.name });
+      } else {
+        logCredit({ ts: Date.now(), type: 'flag', source: 'square', phone, name: cu.name, stars: 0, item: 'Register gave "' + tier.name + '" without enough stars' });
+      }
+    }
     saveDb();
   } catch (e) {
     console.error('square webhook error:', e.message);

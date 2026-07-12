@@ -93,11 +93,15 @@ security headers, server-side pricing.
 - Connect via access token in dashboard panel; **VERIFIED against Square's
   live sandbox:** account connect, location detect, paid pickup-order push
   (confirmed via panel's "Verify last push" readback).
-- Webhook auto-stars for counter sales (barista attaches customer phone on
-  their Square register -> our `/square/webhook` credits stars): built +
-  signature/idempotency tested locally; needs a live webhook subscription
-  (Square dev console -> point at `https://<domain>/square/webhook`, paste
-  signature key into dashboard panel) to verify end-to-end.
+- In-person rewards via Square: ONE-TAP setup button (dashboard -> Rewards ->
+  Square) creates the payment webhook subscription via Square's API and
+  plants "LB Reward: <tier>" DISCOUNT objects in the shop's Square catalog.
+  Earning: attached-customer sales auto-credit stars. Redemption: barista
+  applies the LB Reward discount on the register; webhook detects it and
+  deducts stars (insufficient balance -> flagged in audit log, never
+  negative). All webhook logic tested locally (signature, idempotency,
+  earn+redeem math, flags); needs PUBLIC_URL env set and one live click of
+  the setup button to verify against real Square sandbox.
 - Known: Square charges **1% on API orders paid externally** -> roadmap is
   routing app payments through Square for connected shops. Also roadmap:
   menu-sync modifier mapping, OAuth "Connect" button. A sandbox token is

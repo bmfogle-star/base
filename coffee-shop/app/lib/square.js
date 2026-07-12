@@ -146,6 +146,68 @@ async function pushOrder(db, payload) {
   return sqOrder.id;
 }
 
+async function getOrder(db, orderId) {
+  return (await sq(db, 'GET', '/v2/orders/' + encodeURIComponent(orderId))).order || {};
+}
+
+/*
+ * Create (or reuse) a webhook subscription for payment events pointing at
+ * our /square/webhook endpoint. Returns the subscription (with signature_key
+ * when Square provides it).
+ */
+async function createWebhookSubscription(db, notificationUrl) {
+  const listed = await sq(db, 'GET', '/v2/webhooks/subscriptions').catch(() => ({}));
+  const existing = (listed.subscriptions || []).find(s => s.notification_url === notificationUrl);
+  if (existing) return existing;
+  const resp = await sq(db, 'POST', '/v2/webhooks/subscriptions', {
+    idempotency_key: 'lb-sub-' + Buffer.from(notificationUrl).toString('hex').slice(0, 24),
+    subscription: {
+      name: 'LocalBrew rewards',
+      notification_url: notificationUrl,
+      event_types: ['payment.created', 'payment.updated'],
+    },
+  });
+  return resp.subscription || {};
+}
+
+/*
+ * Plant one Square catalog DISCOUNT per reward tier, named "LB Reward: <tier>".
+ * Baristas apply these at the register like any Square discount; our webhook
+ * recognizes the name and deducts the stars. Idempotent by name.
+ */
+async function ensureRewardDiscounts(db, saveDb) {
+  const existing = [];
+  let cursor = '';
+  do {
+    const page = await sq(db, 'GET', '/v2/catalog/list?types=DISCOUNT' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''));
+    for (const o of page.objects || []) {
+      if (o.type === 'DISCOUNT' && o.discount_data) existing.push({ id: o.id, name: o.discount_data.name });
+    }
+    cursor = page.cursor || '';
+  } while (cursor);
+
+  const made = [];
+  for (const t of db.shop.tiers) {
+    const name = 'LB Reward: ' + t.name;
+    let found = existing.find(e => e.name === name);
+    if (!found) {
+      const resp = await sq(db, 'POST', '/v2/catalog/object', {
+        idempotency_key: 'lb-disc-' + t.pts + '-' + name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 30),
+        object: {
+          type: 'DISCOUNT',
+          id: '#lbdisc' + t.pts,
+          discount_data: { name, discount_type: 'VARIABLE_AMOUNT' },
+        },
+      });
+      found = { id: (resp.catalog_object || {}).id, name };
+    }
+    made.push({ name, id: found.id, pts: t.pts });
+  }
+  db.shop.square.rewardDiscounts = made;
+  saveDb();
+  return made;
+}
+
 function verifyWebhook(signatureKey, notificationUrl, rawBody, signature) {
   if (!signatureKey || !signature) return false;
   const expected = crypto.createHmac('sha256', signatureKey)
@@ -156,4 +218,4 @@ function verifyWebhook(signatureKey, notificationUrl, rawBody, signature) {
   } catch (e) { return false; }
 }
 
-module.exports = { cfg, listLocations, getCustomer, syncCatalog, pushOrder, verifyWebhook };
+module.exports = { cfg, listLocations, getCustomer, syncCatalog, pushOrder, verifyWebhook, getOrder, createWebhookSubscription, ensureRewardDiscounts };

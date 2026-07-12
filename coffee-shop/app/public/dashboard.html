@@ -386,8 +386,14 @@ function renderRewards(){
         <p class="hint">Connected (${sqs.env}) · ${sqs.syncedItems ? sqs.syncedItems + ' menu items synced' : 'menu not synced yet'}${sqs.lastSync ? ' · last sync ' + new Date(sqs.lastSync).toLocaleString() : ''}</p>
         ${sqs.locations && sqs.locations.length > 1 ? '<div class="set-row"><label>Location</label><select id="sqLoc">'+sqs.locations.map(l=>'<option value="'+esc(l.id)+'" '+(l.id===sqs.locationId?'selected':'')+'>'+esc(l.name)+'</option>').join('')+'</select></div>' : ''}
         <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqPush" ${sqs.pushOrders?'checked':''}> Send app orders to the Square register</label></div>
+        <div class="set-row">
+          <button class="save" id="sqAuto" style="background:var(--star); color:#17130F">${sqs.autoStarsReady ? 'In-person rewards: ON — re-run setup' : 'Enable in-person rewards (one tap)'}</button>
+        </div>
+        <p class="hint">${sqs.autoStarsReady
+          ? 'Counter sales with a customer attached earn stars automatically' + (sqs.rewardDiscounts ? ', and ' + sqs.rewardDiscounts + ' "LB Reward" discounts are in the Square catalog for register redemptions.' : '.')
+          : 'Sets up the payment webhook and plants "LB Reward" discounts in the Square catalog — staff attach a customer and apply reward discounts right on the register.'}</p>
         <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqStars" ${sqs.autoStars?'checked':''}> Auto-award stars for in-person Square sales</label></div>
-        <div class="set-row"><input id="sqWebhook" class="wide" type="password" placeholder="${sqs.hasWebhookKey ? 'Webhook signature key (saved)' : 'Webhook signature key (for auto-stars)'}"></div>
+        <div class="set-row"><input id="sqWebhook" class="wide" type="password" placeholder="${sqs.hasWebhookKey ? 'Webhook signature key (saved)' : 'Webhook signature key (manual fallback)'}"></div>
         <div class="set-row">
           <button class="save" id="sqSave">Save</button>
           <button class="save" id="sqSync" style="background:var(--good)">Sync menu from Square</button>
@@ -454,6 +460,15 @@ function renderRewards(){
     catch(e){ if (e.message !== 'auth') sqNote(e.message); }
   });
   if ($('#sqDisc')) $('#sqDisc').addEventListener('click', () => sqCall({ disconnect: true }, 'Square disconnected'));
+  if ($('#sqAuto')) $('#sqAuto').addEventListener('click', async () => {
+    sqNote('Setting up webhook + reward discounts…');
+    try {
+      const r = await api('/staff/square/autostars', {});
+      toastMsg('In-person rewards ready: webhook ' + (r.webhookReady ? 'active' : 'NEEDS KEY') + ', ' + r.discounts + ' reward discounts in Square');
+      if (r.note) sqNote(r.note); else sqNote('');
+      await sqRefresh();
+    } catch(e){ if (e.message !== 'auth') sqNote(e.message); }
+  });
   if ($('#sqVerify')) $('#sqVerify').addEventListener('click', async () => {
     sqNote('Asking Square…');
     try {
