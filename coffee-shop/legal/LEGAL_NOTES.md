@@ -4,6 +4,25 @@ _Plain-language guide to staying out of trouble. **Not legal advice** — when
 real money starts flowing, spend ~$200–400 having a small-business lawyer
 review your founding agreement and these basics. Cheap insurance._
 
+## Founder security habits (the part only YOU can do)
+
+1. **Turn on 2FA everywhere, today:** Railway, GitHub, Square, Stripe, your
+   email, Facebook. Account takeover of YOU is the single most realistic
+   attack on this business — one hijacked email resets everything else.
+2. **Use a password manager** (1Password/Bitwarden/Apple Passwords); unique
+   password per service. Never reuse the dashboard PIN across shops.
+3. **API key rules:** production keys go ONLY into Railway Variables or the
+   shop dashboard — never into chat messages, texts, email, screenshots, or
+   documents. Sandbox/test keys are low-risk; live keys are money. If a live
+   key ever leaks anywhere, rotate it immediately (both Stripe and Square
+   have a "roll key" button) — rotating takes 2 minutes and costs nothing.
+4. **Change DASHBOARD_PIN from anything guessable** before a real shop
+   launches; each shop gets its own PIN.
+5. **Lock your devices** (the MacBook and phone hold logged-in sessions to
+   everything).
+6. **When an employee/contractor ever needs access, give them their own
+   login, never yours** — and remove it when they leave.
+
 ## What the app collects — and deliberately does NOT
 
 Collected (the minimum for the product to work):
