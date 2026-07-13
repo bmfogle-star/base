@@ -390,8 +390,8 @@ function renderRewards(){
           <button class="save" id="sqAuto" style="background:var(--star); color:#17130F">${sqs.autoStarsReady ? 'In-person rewards: ON — re-run setup' : 'Enable in-person rewards (one tap)'}</button>
         </div>
         <p class="hint">${sqs.autoStarsReady
-          ? 'Counter sales with a customer attached earn stars automatically' + (sqs.rewardDiscounts ? ', and ' + sqs.rewardDiscounts + ' "LB Reward" discounts are in the Square catalog for register redemptions.' : '.')
-          : 'Sets up the payment webhook and plants "LB Reward" discounts in the Square catalog — staff attach a customer and apply reward discounts right on the register.'}</p>
+          ? 'Counter sales with a customer attached earn stars automatically, register taps on app orders update the customer\'s phone live' + (sqs.rewardDiscounts ? ', and ' + sqs.rewardDiscounts + ' "LB Reward" discounts are in the Square catalog for register redemptions.' : '.')
+          : 'Sets up the Square webhook (auto-stars for counter sales + live order-status updates from register taps) and plants "LB Reward" discounts in the Square catalog for register redemptions.'}</p>
         <div class="set-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="sqStars" ${sqs.autoStars?'checked':''}> Auto-award stars for in-person Square sales</label></div>
         <div class="set-row"><input id="sqWebhook" class="wide" type="password" placeholder="${sqs.hasWebhookKey ? 'Webhook signature key (saved)' : 'Webhook signature key (manual fallback)'}"></div>
         <div class="set-row">

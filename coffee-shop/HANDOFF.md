@@ -102,6 +102,16 @@ security headers, server-side pricing.
   negative). All webhook logic tested locally (signature, idempotency,
   earn+redeem math, flags); needs PUBLIC_URL env set and one live click of
   the setup button to verify against real Square sandbox.
+- LIVE ORDER-STATUS SYNC (added at founder request): webhook also subscribes
+  to `order.updated` + `order.fulfillment.updated`; register taps on pushed
+  app orders (in progress/ready/picked up) mirror onto the customer's phone
+  via the existing 5s status poll. Mapping PROPOSED/RESERVED/PREPARED/
+  COMPLETED -> status 0-3, forward-only (monotonic = idempotent + never rolls
+  back our own dashboard taps; CANCELED ignored — refunds live in Square).
+  Setup button PUT-upgrades existing subscriptions missing the new event
+  types, so already-connected shops just re-tap it once. Tested locally
+  (scratchpad sqstatus-test.js pattern: full 0->3 progression, stale/bad-sig/
+  unknown-order/terminal cases, payment-webhook regression).
 - Known: Square charges **1% on API orders paid externally** -> roadmap is
   routing app payments through Square for connected shops. Also roadmap:
   menu-sync modifier mapping, OAuth "Connect" button. A sandbox token is

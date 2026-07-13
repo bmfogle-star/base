@@ -754,6 +754,40 @@ function pushOrderToSquare(order) {
     .catch(e => console.error('square push failed for #' + order.num + ':', e.message));
 }
 
+// Live status sync: when baristas work an app order on their Square register
+// (in progress / ready / picked up), Square notifies us and we mirror the
+// state so the customer's phone updates in real time — Square shops never
+// need our dashboard for the order flow. Status only moves forward, so
+// webhook retries and out-of-order events are harmless, and a tap on our own
+// dashboard is never rolled back by a stale Square event.
+const SQ_FULFILL_STATUS = { PROPOSED: 0, RESERVED: 1, PREPARED: 2, COMPLETED: 3 };
+async function syncSquareOrderStatus(c, ev) {
+  const obj = (ev.data && ev.data.object) || {};
+  const upd = obj.order_fulfillment_updated || obj.order_updated || obj.order || {};
+  let o = null;
+  if (c.env !== 'production' && upd.test_order_ref) {
+    o = db.orders.find(x => x.num === +upd.test_order_ref); // sandbox test hook
+  } else {
+    const sqId = upd.order_id || upd.id;
+    if (sqId) o = db.orders.find(x => x.squareOrderId === sqId);
+  }
+  if (!o || o.status >= 3) return;
+  let state = '';
+  if (c.env !== 'production' && upd.test_fulfillment_state) {
+    state = upd.test_fulfillment_state; // sandbox test hook
+  } else if (Array.isArray(upd.fulfillment_update) && upd.fulfillment_update.length) {
+    state = upd.fulfillment_update[upd.fulfillment_update.length - 1].new_state || '';
+  } else {
+    const ord = await square.getOrder(db, o.squareOrderId);
+    const f = (ord.fulfillments || [])[0];
+    state = (f && f.state) || (ord.state === 'COMPLETED' ? 'COMPLETED' : '');
+  }
+  const st = SQ_FULFILL_STATUS[state]; // CANCELED etc. map to undefined → ignored
+  if (st === undefined || st <= o.status) return;
+  o.status = st;
+  saveDb();
+}
+
 app.get('/api/staff/square/status', staff, (req, res) => {
   const c = db.shop.square || {};
   res.json({
@@ -864,9 +898,12 @@ app.post('/api/staff/square/sync', staff, async (req, res) => {
   }
 });
 
-// Square event notifications: automatic stars for in-person purchases.
-// The barista attaches the customer (phone) to the sale on their Square
-// register exactly as they do today; Square tells us, we award the stars.
+// Square event notifications. Two jobs:
+//  1. Automatic stars for in-person purchases — the barista attaches the
+//     customer (phone) to the sale on their Square register exactly as they
+//     do today; Square tells us, we award the stars.
+//  2. Live order-status sync — register taps on app orders (in progress /
+//     ready / picked up) mirror straight onto the customer's phone.
 app.post('/square/webhook', async (req, res) => {
   const c = db.shop.square;
   if (!c || !c.webhookKey) return res.status(404).end();
@@ -876,8 +913,12 @@ app.post('/square/webhook', async (req, res) => {
   }
   res.json({ ok: true }); // ack immediately; process after
   try {
-    if (!c.autoStars) return;
     const ev = req.body || {};
+    if (ev.type === 'order.updated' || ev.type === 'order.fulfillment.updated') {
+      await syncSquareOrderStatus(c, ev); // register taps → live app status
+      return;
+    }
+    if (!c.autoStars) return;
     if (ev.type !== 'payment.created' && ev.type !== 'payment.updated') return;
     const p = ev.data && ev.data.object && ev.data.object.payment;
     if (!p || p.status !== 'COMPLETED') return;

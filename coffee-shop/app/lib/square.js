@@ -155,16 +155,29 @@ async function getOrder(db, orderId) {
  * our /square/webhook endpoint. Returns the subscription (with signature_key
  * when Square provides it).
  */
+const WEBHOOK_EVENTS = ['payment.created', 'payment.updated', 'order.updated', 'order.fulfillment.updated'];
+
 async function createWebhookSubscription(db, notificationUrl) {
   const listed = await sq(db, 'GET', '/v2/webhooks/subscriptions').catch(() => ({}));
   const existing = (listed.subscriptions || []).find(s => s.notification_url === notificationUrl);
-  if (existing) return existing;
+  if (existing) {
+    // Upgrade older subscriptions that are missing newer event types
+    const have = existing.event_types || [];
+    const missing = WEBHOOK_EVENTS.filter(t => !have.includes(t));
+    if (missing.length) {
+      const upd = await sq(db, 'PUT', '/v2/webhooks/subscriptions/' + encodeURIComponent(existing.id), {
+        subscription: { event_types: WEBHOOK_EVENTS },
+      }).catch(() => null);
+      if (upd && upd.subscription) return { ...existing, ...upd.subscription };
+    }
+    return existing;
+  }
   const resp = await sq(db, 'POST', '/v2/webhooks/subscriptions', {
     idempotency_key: 'lb-sub-' + Buffer.from(notificationUrl).toString('hex').slice(0, 24),
     subscription: {
       name: 'LocalBrew rewards',
       notification_url: notificationUrl,
-      event_types: ['payment.created', 'payment.updated'],
+      event_types: WEBHOOK_EVENTS,
     },
   });
   return resp.subscription || {};
