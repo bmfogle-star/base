@@ -3,7 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from './db.js';
 
-const SECRET = process.env.JWT_SECRET || 'dev-only-insecure-secret';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) throw new Error('JWT_SECRET must be set — refusing to start with an insecure default.');
 // Stay logged in for 90 days; refreshed on each use so active users never
 // have to log in again (only after 90 days of inactivity).
 const TOKEN_TTL = '90d';

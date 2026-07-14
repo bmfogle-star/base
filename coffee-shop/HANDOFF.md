@@ -87,6 +87,21 @@ gift-card settings, **In-store tab** (earn/redeem by phone at counter, 3
 credits/phone/day cap, owner audit log), customer list, Square panel.
 Security: phone-lookup privacy (device tokens), rate limits, /privacy page,
 security headers, server-side pricing.
+50-POINT SECURITY AUDIT PASSED 2026-07-14 (founder-requested): no secrets in
+repo or git history, 0 npm vulnerabilities, XSS escaping verified across
+both frontends, webhooks signature-checked, no cookies (CSRF/cookie flags
+N/A), no SQL (injection N/A). Fixes shipped that day: staff PIN
+brute-force lockout on EVERY staff endpoint (failure-only counter, shared
+15-min lockout, timing-safe compare — previously only the login route was
+limited); CSP + HSTS + Permissions-Policy headers; /api/orders/:num now
+returns status-only to strangers (full receipt requires the customer
+device token — order numbers are sequential/guessable); global JSON
+404 + error handler (no stack traces to clients); legacy non-deployed
+scaffolds (backend/ JWT default secret, server/ auth-off-when-unset) now
+fail closed. Verified: 13-case attack-simulation test + webhook tests +
+full e2e green. Founder-side items remain: DASHBOARD_PIN must not be 1234
+on Railway, UptimeRobot on /healthz, 2FA everywhere, wipe demo data before
+launch season.
 
 ## Square integration (KEY DIFFERENTIATOR — beta, partially verified)
 

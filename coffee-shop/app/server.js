@@ -286,7 +286,16 @@ const app = express();
 app.set('trust proxy', 1); // Railway/Render terminate TLS in front of us
 app.use(express.json({ limit: '100kb', verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use((req, res, next) => {
-  res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer' });
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    // Everything the app loads is same-origin (media is proxied through
+    // /splash.mp4 and /img/menu/*), so lock the page down to 'self'.
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
+  });
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -301,6 +310,18 @@ function allow(key, max, windowMs) {
   b.n++;
   buckets.set(key, b);
   return b.n <= max;
+}
+// Failure-only counters (for PIN guessing: correct-PIN traffic never counts)
+function strike(key, windowMs) {
+  const now = Date.now();
+  const b = buckets.get(key) || { n: 0, t: now };
+  if (now - b.t > windowMs) { b.n = 0; b.t = now; }
+  b.n++;
+  buckets.set(key, b);
+}
+function struckOut(key, max, windowMs) {
+  const b = buckets.get(key);
+  return !!b && Date.now() - b.t <= windowMs && b.n >= max;
 }
 
 /* ---- Customer API ---- */
@@ -573,18 +594,39 @@ app.post('/stripe/webhook', async (req, res) => {
 app.get('/api/orders/:num', (req, res) => {
   const o = db.orders.find(o => o.num === +req.params.num);
   if (!o) return res.status(404).json({ error: 'Order not found.' });
-  res.json(publicOrder(o));
+  // Order numbers are sequential and guessable, so the full receipt is only
+  // returned to the device that placed the order (its customer token).
+  // Anyone else gets just the pickup status — all the status poll needs.
+  const c = db.customers[o.phone];
+  if (c && c.token && String(req.query.t || '') === c.token) return res.json(publicOrder(o));
+  res.json({ num: o.num, status: o.status, pickup: o.pickup, placedAt: o.placedAt });
 });
 
 /* ---- Staff API (PIN auth) ---- */
+function pinOk(supplied) {
+  const a = Buffer.from(String(supplied || ''));
+  const b = Buffer.from(String(PIN));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+// Wrong PINs count toward one shared 15-minute lockout whether they hit the
+// login screen or any staff endpoint directly — the PIN can't be
+// brute-forced by skipping the login route.
 function staff(req, res, next) {
-  const tok = req.get('x-staff-pin');
-  if (tok !== PIN) return res.status(401).json({ error: 'Wrong PIN.' });
+  const key = 'pinfail:' + req.ip;
+  if (struckOut(key, 10, 15 * 60e3)) return res.status(429).json({ error: 'Too many attempts — wait 15 minutes.' });
+  if (!pinOk(req.get('x-staff-pin'))) {
+    strike(key, 15 * 60e3);
+    return res.status(401).json({ error: 'Wrong PIN.' });
+  }
   next();
 }
 app.post('/api/staff/login', (req, res) => {
-  if (!allow('pin:' + req.ip, 10, 15 * 60e3)) return res.status(429).json({ error: 'Too many attempts — wait 15 minutes.' });
-  if (String(req.body.pin) !== PIN) return res.status(401).json({ error: 'Wrong PIN.' });
+  const key = 'pinfail:' + req.ip;
+  if (struckOut(key, 10, 15 * 60e3)) return res.status(429).json({ error: 'Too many attempts — wait 15 minutes.' });
+  if (!pinOk(req.body.pin)) {
+    strike(key, 15 * 60e3);
+    return res.status(401).json({ error: 'Wrong PIN.' });
+  }
   res.json({ ok: true });
 });
 app.get('/api/staff/orders', staff, (req, res) => {
@@ -1068,6 +1110,17 @@ app.get('/privacy', (req, res) => {
 <p>Want your data deleted? Ask any staff member or contact the shop, and your rewards account and order history will be removed.</p>
 <p style="margin-top:26px;font-size:13px">Questions: talk to us at the counter, or contact ${shop} at ${db.shop.address}.</p>
 </body></html>`);
+});
+
+// Unmatched API paths get a clean JSON 404, and the final error handler
+// never leaks stack traces or internals to the client (bad JSON bodies,
+// unexpected throws — the details stay in the server log).
+app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const bad = err.status === 400 || err.statusCode === 400 || err.type === 'entity.parse.failed';
+  if (!bad) console.error('unhandled error:', err.message);
+  res.status(bad ? 400 : 500).json({ error: bad ? 'Bad request.' : 'Something went wrong on our end.' });
 });
 
 app.listen(PORT, () => {

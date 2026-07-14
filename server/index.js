@@ -19,11 +19,14 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 // Simple shared-secret auth so randoms can't spin up bots on your server.
+// Fails closed: with no BOT_API_TOKEN configured, every request is rejected
+// rather than letting the server run wide open.
 const API_TOKEN = process.env.BOT_API_TOKEN || '';
+if (!API_TOKEN) console.error('BOT_API_TOKEN is not set — rejecting all API requests until it is.');
 app.use((req, res, next) => {
   if (req.path === '/health') return next();
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  if (API_TOKEN && token !== API_TOKEN) return res.status(401).json({ error: 'Unauthorized' });
+  if (!API_TOKEN || token !== API_TOKEN) return res.status(401).json({ error: 'Unauthorized' });
   next();
 });
 
