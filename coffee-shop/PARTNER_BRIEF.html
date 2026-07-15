@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LocalBrew-Dev — Partner Briefing</title>
+<style>
+  @page { margin: 18mm 17mm; }
+  body { font: 11pt/1.55 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1A2B3C; max-width: 760px; margin: 0 auto; padding: 24px; }
+  .head { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #16304A; padding-bottom: 14px; }
+  .mark { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg,#24486F,#152C46); display: grid; place-items: center; flex: none; }
+  h1 { font-size: 19pt; color: #16304A; }
+  .tag { color: #5D6B7A; font-size: 10pt; }
+  h2 { font-size: 13pt; color: #16304A; margin: 24px 0 6px; border-bottom: 2px solid #E8B45C; padding-bottom: 4px; }
+  p, li, td { font-size: 10.5pt; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 3px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { border: 1px solid #C9D2DB; padding: 6px 9px; text-align: left; }
+  th { background: #EAF1F8; font-size: 9.5pt; }
+  .box { background: #F4F7FA; border: 1px solid #C9D2DB; border-radius: 8px; padding: 12px 16px; margin: 10px 0; }
+  .warn { background: #FBF3E1; border-color: #E8B45C; }
+  .small { font-size: 9pt; color: #5D6B7A; }
+  b.n { color: #16304A; }
+  a { color: #2F5D8A; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="mark"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M2.8 16.2c2.6 1.9 6 2.8 9.2 2.3 4-.6 6.8-3 7.6-6.2l2.1-.9-2-.7c-.4-1.9-1.9-3.2-4-3.4.9 1 1.3 2.2 1.2 3.5-1.6-2.6-4.6-4-8-3.3 1.6.7 2.8 1.9 3.4 3.5-2.7-1.5-6.2-1.2-9.5.9 1.9-.1 3.6.4 4.9 1.4-1.8.5-3.5 1.5-4.9 2.9Z" fill="#F6F1E8"/></svg></div>
+  <div>
+    <h1>Partner Briefing</h1>
+    <div class="tag">LocalBrew-Dev · Everything you need to know in one read · July 2026</div>
+  </div>
+</div>
+
+<h2>The business in one paragraph</h2>
+<p>LocalBrew-Dev gives independent coffee shops their own branded mobile ordering and rewards app — the experience Starbucks customers get, for shops that could never afford to build it. Customers scan a QR code at the register, add the shop's app to their phone in one tap, order ahead, and earn stars they redeem for free drinks. The shop pays a flat monthly fee; we take zero percent of sales.</p>
+
+<h2>The product (it's built and live)</h2>
+<p>Try it yourself right now — the demo shop is fictional "Bluebird Coffee Co.":</p>
+<table>
+  <tr><th>What</th><th>Where</th></tr>
+  <tr><td>Customer app (what shoppers see)</td><td><b>base-production-175d.up.railway.app</b></td></tr>
+  <tr><td>Staff dashboard (what the shop sees)</td><td>same address + <b>/dashboard</b> (ask for the PIN — never text it)</td></tr>
+</table>
+<ul>
+  <li><b class="n">Customers get:</b> full menu with photos, order-ahead with pickup times, star rewards, digital gift cards, live order status on their phone.</li>
+  <li><b class="n">Shops get:</b> a live order board, one-tap sold-out control, their own reward rules, a counter workflow where a phone number is the loyalty account, and a customer list showing their best regulars.</li>
+  <li><b class="n">The killer feature — Square:</b> for shops on Square (most of them), our app plugs into the register they already own. App orders appear on their register, counter purchases earn stars automatically, baristas redeem rewards as a normal register discount, and register taps update the customer's phone live. No new tablets, no new workflow, no retraining.</li>
+</ul>
+
+<h2>The money</h2>
+<table>
+  <tr><th>Item</th><th>Terms</th></tr>
+  <tr><td>Price to shops</td><td><b>$0 setup, $312/month flat</b>, 0% of sales, cancel anytime with 30 days notice</td></tr>
+  <tr><td>Founding offer (first 5 shops)</td><td>Rate locked for 12 months; billing starts only when their app launches</td></tr>
+  <tr><td>Our cost per shop</td><td>Roughly <b>$6/month</b> (hosting + domain) — the margin funds our time and service</td></tr>
+  <tr><td>Sales money flow</td><td>Customer pays through the shop's own Stripe account, straight to the shop's bank. <b>We never touch or hold their money</b> — that is a legal line we do not cross.</td></tr>
+</table>
+
+<h2>Where things stand today</h2>
+<ul>
+  <li>Product built, deployed, and covered by an automated test suite that runs before every update.</li>
+  <li>Square integration verified against Square's live sandbox (orders pushed to a real test register).</li>
+  <li>A 50-point security audit passed July 2026; independent hardening applied the same day.</li>
+  <li>Sales kit ready: one-pager, FAQ, demo script, cold-outreach templates, Facebook posts, owner intake sheet, and a lawyer-ready service agreement.</li>
+  <li><b class="n">Now in progress:</b> pitching the first founding shops. Target: 5 signed at the founding rate.</li>
+</ul>
+
+<h2>How a shop goes live (the machine we run)</h2>
+<ol>
+  <li><b>Sign</b> — service agreement (DocuSign-ready). Billing does not start yet.</li>
+  <li><b>Intake</b> — owner fills one sheet: menu, logo, hours, reward rules (30–45 min, remote).</li>
+  <li><b>Build</b> — their branded app is assembled and tested in 3–5 days.</li>
+  <li><b>Connect</b> — their Stripe (payments to their bank) and Square (register link), guided remotely.</li>
+  <li><b>Launch</b> — staff training call, QR signs at the register, a real $3 test order placed and refunded while they watch. Billing starts this day.</li>
+</ol>
+
+<h2>Ground rules (protect the business)</h2>
+<div class="box warn">
+  <b>Never put API keys or passwords in a text, email, or chat.</b> Live keys go only into the hosting dashboard, and key handoffs use one-time self-destructing links (onetimesecret.com). If a key ever leaks, it gets rotated the same day.
+</div>
+<ul>
+  <li>Turn on two-factor authentication on every account tied to the business (email, GitHub, Stripe, Square, Railway, Facebook).</li>
+  <li>We are a software vendor, never the merchant of record — shop sales, sales tax, and refunds live in the shop's own Stripe/Square.</li>
+  <li>Customer data is deliberately minimal: first name, phone number, order history. No card numbers ever touch our servers (Stripe handles those).</li>
+  <li>Menu wording, prices, and allergy claims are the shop's responsibility — we publish what they provide.</li>
+</ul>
+
+<h2>Want hands-on access?</h2>
+<p>The whole business — code, documents, and a continuously updated memory file — lives in a private GitHub repository. An AI assistant (Claude) is set up on it that knows everything in this brief and much more: it builds features, fixes issues, drafts sales copy, and updates the live app on request. If you want that access instead of just this document, you need a free GitHub account plus a Claude subscription, and an invite to the repository. Ask and it takes two minutes to set up.</p>
+
+<p class="small" style="margin-top:24px">Prepared July 2026. The live product and numbers move fast — when in doubt, ask for a fresh copy of this brief.</p>
+
+</body>
+</html>
