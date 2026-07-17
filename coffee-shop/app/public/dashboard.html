@@ -18,16 +18,26 @@
     --shadow-card:0 1px 2px rgba(26,43,60,.05), 0 8px 24px -18px rgba(26,43,60,.22);
   }
   *{ box-sizing:border-box; margin:0; }
-  body{ background:var(--paper); color:var(--ink); font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  body{ color:var(--ink); font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(70% 40% at 108% -5%, rgba(47,93,138,.13), transparent 60%),
+      radial-gradient(55% 35% at -12% 22%, rgba(232,180,92,.11), transparent 55%),
+      var(--paper);
+    background-attachment:fixed; }
   .serif{ font-weight:700; letter-spacing:-.01em; }
   button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; touch-action:manipulation; }
   input{ font:inherit; }
   button:focus-visible, input:focus-visible{ outline:3px solid var(--bird); outline-offset:2px; border-radius:6px; }
   .money{ font-variant-numeric:tabular-nums; }
-  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-card); }
+  .card{ background:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.8); border-radius:var(--radius);
+    box-shadow:var(--shadow-card), inset 0 1px 0 rgba(255,255,255,.9); }
 
   /* login */
-  .login{ max-width:360px; margin:18vh auto 0; padding:0 20px; text-align:center; }
+  .login{ width:min(380px, calc(100% - 32px)); margin:16vh auto 0; padding:34px 26px 30px; text-align:center;
+    background:rgba(255,255,255,.62); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid rgba(255,255,255,.8); border-radius:24px;
+    box-shadow:0 20px 44px -22px rgba(22,48,74,.35), inset 0 1px 0 rgba(255,255,255,.9); }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){ .login{ background:rgba(255,255,255,.96); } }
   .login .logo{ width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1.5px rgba(216,180,94,.6), 0 12px 24px -12px rgba(22,48,74,.5); display:inline-grid; place-items:center; }
   .login h1{ font-size:24px; margin-top:14px; color:var(--bird-deep); }
   .login p{ color:var(--ink-soft); font-size:14px; margin-top:4px; }
@@ -38,8 +48,10 @@
 
   /* shell */
   header.top{ display:flex; align-items:center; gap:12px; padding:14px 20px;
-    background:var(--bird-deep); color:#fff; border-bottom:2px solid #D9A94E;
+    background:rgba(22,48,74,.88); backdrop-filter:blur(16px) saturate(170%); -webkit-backdrop-filter:blur(16px) saturate(170%);
+    color:#fff; border-bottom:2px solid #D9A94E;
     position:sticky; top:0; z-index:5; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){ header.top{ background:var(--bird-deep); } }
   header.top .logo{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#24486F,#152C46); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1px rgba(216,180,94,.55); display:grid; place-items:center; }
   header.top .t{ font-weight:700; font-size:17px; }
   header.top .sub{ font-size:12px; color:rgba(255,255,255,.65); }
@@ -103,7 +115,10 @@
   td{ padding:11px 16px; border-bottom:1px solid var(--line); font-size:15px; }
   td.num{ text-align:right; font-variant-numeric:tabular-nums; }
   th.num{ text-align:right; }
-  .toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:var(--bird-deep); color:#fff; padding:11px 18px; border-radius:999px; font-size:14px; font-weight:600; z-index:30; box-shadow:0 10px 24px -8px rgba(22,48,74,.5); }
+  .toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    background:rgba(22,48,74,.8); backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
+    border:1px solid rgba(255,255,255,.18);
+    color:#fff; padding:11px 18px; border-radius:999px; font-size:14px; font-weight:600; z-index:30; box-shadow:0 10px 24px -8px rgba(22,48,74,.5); }
 </style>
 </head>
 <body>

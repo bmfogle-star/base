@@ -74,6 +74,19 @@ to shop owners starts now. AI assistants do the engineering.
   cached on volume). Splash kept dark: full-frame ice-pour video + logo
   splash-in, skipped after payment redirects. The UI/UX Pro Max skill at
   `.claude/skills/` was used for the redesign — keep using it for UI work.
+  LIQUID GLASS PASS 2026-07-14 (founder-requested, via UI/UX Pro Max):
+  translucent blurred surfaces (backdrop-filter blur 14-26px + saturate
+  160-180%) on: customer header, floating pill tab dock (inset, radius 28,
+  active tab = white pill), sticky category chip-row, bottom sheet + blurred
+  scrim, toasts, float-cart; ambient navy/gold radial auras behind content
+  (.phone / dashboard body backgrounds) so glass has something to refract;
+  cards at rgba(255,255,255,.86) WITHOUT blur (list perf); hero reward card
+  got glass sheen (::before radial highlight); spring easing token
+  --spring:cubic-bezier(.22,1.1,.3,1); @supports fallbacks to solid
+  surfaces for no-backdrop-filter browsers; NO external fonts (CSP blocks
+  them — system stack stays). Dashboard: glass navy top bar, glass login
+  card, glass toasts. Contrast preserved (ink on >=86% white). All e2e
+  green after the pass.
 
 ## Feature inventory (all live, all e2e-tested)
 
