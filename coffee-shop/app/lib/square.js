@@ -175,7 +175,7 @@ async function createWebhookSubscription(db, notificationUrl) {
   const resp = await sq(db, 'POST', '/v2/webhooks/subscriptions', {
     idempotency_key: 'lb-sub-' + Buffer.from(notificationUrl).toString('hex').slice(0, 24),
     subscription: {
-      name: 'LocalBrew rewards',
+      name: 'Nova rewards',
       notification_url: notificationUrl,
       event_types: WEBHOOK_EVENTS,
     },

@@ -39,7 +39,8 @@ words are the deliverable.
   locked 12 months. Billing starts at launch, never before.
 - Brand: navy/dark-blue premium look (Amex-style light theme in-app), navy
   swallow logo. **No emojis anywhere in the product UI** except a shop's
-  own logo. LocalBrew-Dev's own logo: navy/gold circular badge.
+  own logo. Nova App Development's own logo: navy/gold circular badge
+  with a gold nova starburst.
 - Key differentiator: Square integration — orders push to the shop's
   existing register, counter sales auto-earn stars, register discounts
   redeem rewards, register taps update the customer's phone live. Owners
@@ -47,8 +48,8 @@ words are the deliverable.
 - API keys: live keys go ONLY into Railway Variables or the dashboard,
   never into chat/text/email (one-time links via onetimesecret.com for
   handoff). Sandbox keys are fine in chat.
-- Money flows customer → shop's own Stripe → shop's bank. LocalBrew-Dev
-  never holds funds.
+- Money flows customer → shop's own Stripe → shop's bank. Nova App
+  Development never holds funds.
 - Always verify work with the e2e suite before pushing; pushes to the
   deploy branch go live on Railway automatically.
 

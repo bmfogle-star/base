@@ -1,10 +1,14 @@
 # HANDOFF SHEET — white-label coffee shop app business
 
 **COMPANY NAME: Nova App Development** (founder renamed it 2026-07-17;
-previously LocalBrew-Dev — sales/legal docs and the partner brief still say
-LocalBrew-Dev and need a rebrand pass once the founder confirms scope).
-Logo: navy/gold circular badge with gold nova starburst (IG pfp generated
-2026-07-17 via Higgsfield).
+previously LocalBrew-Dev). Rebrand pass done 2026-07-17: partner brief,
+intake sheet, CLAUDE.md, and the Square webhook subscription display name
+("Nova rewards") all updated. Internal identifiers deliberately kept:
+the "LB Reward: <tier>" Square discount names (the webhook matches on
+that prefix — renaming would break live reward redemption) and the
+`lb-sub-` idempotency key prefix. Logo: navy/gold circular badge with
+gold nova starburst (IG pfp generated 2026-07-17 via Higgsfield).
+Instagram bio written 2026-07-17 (see sales notes / chat).
 
 _Paste this into any AI assistant (or hand it to a developer) to continue the
 work with full context. Last updated: 2026-07-11. Everything described here
