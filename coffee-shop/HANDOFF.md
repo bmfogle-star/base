@@ -1,5 +1,11 @@
 # HANDOFF SHEET — white-label coffee shop app business
 
+**COMPANY NAME: Nova App Development** (founder renamed it 2026-07-17;
+previously LocalBrew-Dev — sales/legal docs and the partner brief still say
+LocalBrew-Dev and need a rebrand pass once the founder confirms scope).
+Logo: navy/gold circular badge with gold nova starburst (IG pfp generated
+2026-07-17 via Higgsfield).
+
 _Paste this into any AI assistant (or hand it to a developer) to continue the
 work with full context. Last updated: 2026-07-11. Everything described here
 is committed and pushed._
