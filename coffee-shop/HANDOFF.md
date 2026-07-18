@@ -10,6 +10,17 @@ that prefix — renaming would break live reward redemption) and the
 gold nova starburst (IG pfp generated 2026-07-17 via Higgsfield).
 Instagram bio written 2026-07-17 (see sales notes / chat).
 
+**Email outreach kit (added 2026-07-17):** shops the founder DM'd asked to
+be emailed, so `sales/EMAIL_TEMPLATES.md` now holds 4 templates (warm
+follow-up with demo link + one-pager attached, single nudge, demo booking,
+post-demo recap) plus deliverability rules — manual sends only, 10–15/day,
+no automation (a Discord-sourced Python bulk-mailer was evaluated and
+rejected 2026-07-17: spam risk, wrong stack, needless credential exposure).
+`sales/ONE_PAGER.{md,html,pdf}` rewritten for Nova branding + current
+facts (Square sync = no tablets, PWA = no app store, 1–2 week launch);
+INTAKE_SHEET.pdf regenerated. Founder currently emails from Gmail; a
+custom-domain address is recommended before heavy outreach.
+
 _Paste this into any AI assistant (or hand it to a developer) to continue the
 work with full context. Last updated: 2026-07-11. Everything described here
 is committed and pushed._
