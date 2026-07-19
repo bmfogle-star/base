@@ -21,6 +21,21 @@ facts (Square sync = no tablets, PWA = no app store, 1–2 week launch);
 INTAKE_SHEET.pdf regenerated. Founder currently emails from Gmail; a
 custom-domain address is recommended before heavy outreach.
 
+**Louisville lead campaign (2026-07-19):** founder's market is Louisville,
+KY. `sales/LEAD_TRACKER.csv` now holds a researched, ranked top-20 (250+
+Google reviews preferred, no-own-app required; Quills and Heine Brothers
+disqualified for having apps — useful as the "even the local chain has an
+app" pitch line). `sales/OUTREACH_LOUISVILLE.md` holds 9 ready-to-send
+personalized emails + 5 Instagram DM scripts on the founder-approved
+template: personal opener, built-into-existing-register line (softened for
+known Toast/Clover shops), demo link + dashboard reply-hook ("reply
+'dashboard' for the code" — send PIN via onetimesecret only), NO pricing
+in email, no "I'm local" claims (founder is not in Louisville). Outreach
+account: novadevelopment313@gmail.com (fresh — pace 4-5 sends/day).
+IG: @novawebappdev. Indiana metro leads held for a later wave. Next city
+TBD from founder. Gmail is connected to Claude via connector (drafts
+staging pending reconnect).
+
 _Paste this into any AI assistant (or hand it to a developer) to continue the
 work with full context. Last updated: 2026-07-11. Everything described here
 is committed and pushed._
