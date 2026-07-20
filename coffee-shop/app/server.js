@@ -28,6 +28,7 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || '';
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 const square = require('./lib/square');
+const outreach = require('./lib/outreach');
 
 /* ---------------- Seed config (edited later via dashboard / db.json) ------ */
 const SEED = {
@@ -709,6 +710,9 @@ function logCredit(entry) {
   if (db.creditLog.length > 1000) db.creditLog = db.creditLog.slice(-800);
 }
 
+// Founder-only: sales outreach queue status (inert unless OUTREACH_ENABLED=1)
+app.get('/api/staff/outreach', staff, (req, res) => res.json(outreach.status()));
+
 app.post('/api/staff/instore/lookup', staff, (req, res) => {
   const phone = normPhone(req.body.phone);
   if (phone.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit phone number.' });
@@ -1127,4 +1131,5 @@ app.listen(PORT, () => {
   console.log(`☕ ${db.shop.name} server on http://localhost:${PORT}`);
   console.log(`   Customer app: /    Dashboard: /dashboard (PIN ${PIN === '1234' ? '1234 — CHANGE THIS' : 'set'})`);
   console.log(`   Payments: ${stripe ? 'STRIPE (' + (STRIPE_KEY.startsWith('sk_live') ? 'LIVE' : 'test') + ')' : 'demo mode (no real charges)'}`);
+  outreach.start();
 });

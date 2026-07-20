@@ -32,9 +32,23 @@ known Toast/Clover shops), demo link + dashboard reply-hook ("reply
 'dashboard' for the code" — send PIN via onetimesecret only), NO pricing
 in email, no "I'm local" claims (founder is not in Louisville). Outreach
 account: novadevelopment313@gmail.com (fresh — pace 4-5 sends/day).
-IG: @novawebappdev. Indiana metro leads held for a later wave. Next city
-TBD from founder. Gmail is connected to Claude via connector (drafts
-staging pending reconnect).
+IG: @novawebappdev. Indiana metro leads held for a later wave. Gmail
+connector proved flaky (enabledInChat kept dropping), so on 2026-07-20 an
+**autonomous outreach engine** was built INTO the product server:
+`app/lib/outreach.js` + `app/outreach/queue.json` (61 NYC emails). Inert
+unless Railway vars OUTREACH_ENABLED=1 + GMAIL_USER + GMAIL_APP_PASSWORD
+are set; OUTREACH_DAILY_CAP (default 5) controls pace; weekdays 9-5 ET,
+adaptive gaps, random skips, sent-state deduped on the /data volume so
+redeploys never double-send. Status: GET /api/staff/outreach (staff PIN).
+Adding a campaign = edit queue.json, test, push. Unit test pattern in
+session scratchpad (14 checks: order, cap, dedup, weekend/evening blocks).
+Founder was warned on record: >20/day on fresh plain Gmail = spam-flag
+risk; he wants ~100/day which requires the custom-domain + warmed-inboxes
+setup he deferred until client #3. Louisville: first 5 emails SENT 7/19
+(logged in tracker); nudges due ~7/22-23. NYC top-100 tracker:
+sales/LEAD_TRACKER_NYC.csv; all 61 emails also in OUTREACH_NYC_ALL.md and
+a self-serve Apps Script loader (nyc-draft-loader.gs.txt) exists for
+manual drafts.
 
 _Paste this into any AI assistant (or hand it to a developer) to continue the
 work with full context. Last updated: 2026-07-11. Everything described here
