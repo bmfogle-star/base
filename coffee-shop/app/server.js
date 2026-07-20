@@ -1132,4 +1132,7 @@ app.listen(PORT, () => {
   console.log(`   Customer app: /    Dashboard: /dashboard (PIN ${PIN === '1234' ? '1234 — CHANGE THIS' : 'set'})`);
   console.log(`   Payments: ${stripe ? 'STRIPE (' + (STRIPE_KEY.startsWith('sk_live') ? 'LIVE' : 'test') + ')' : 'demo mode (no real charges)'}`);
   outreach.start();
+  setTimeout(() => {
+    require('./lib/draftloader').run().catch(err => console.error('[drafts] failed:', err.message));
+  }, 5000);
 });

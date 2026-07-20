@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+    "imapflow": "^1.4.7",
     "nodemailer": "^6.10.1",
     "stripe": "^16.0.0"
   }
