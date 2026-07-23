@@ -1,18 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#15803d"/>
-      <stop offset="1" stop-color="#14532d"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="19" y1="10" x2="40" y2="54" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#e6c878"/>
-      <stop offset="0.5" stop-color="#c9a45a"/>
-      <stop offset="1" stop-color="#a9802f"/>
+      <stop stop-color="#1a7a43"/>
+      <stop offset="1" stop-color="#0f5132"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
-  <!-- S formed around a lightning bolt -->
-  <path d="M40 12c-3-2-8-3-13-3-9 0-15 5-15 12 0 6 5 9 11 11l-9 21h17l3-7c8-1 13-6 13-13 0-6-5-9-11-11l9-10h-9z"
-        fill="#ffffff" opacity="0.14"/>
-  <path d="M37 10 19 35h11l-4 19 19-27H33l8-17z" fill="url(#gold)"/>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- yard lines -->
+  <g stroke="#ffffff" stroke-opacity="0.28" stroke-width="2">
+    <line x1="8" y1="16" x2="56" y2="16"/>
+    <line x1="8" y1="48" x2="56" y2="48"/>
+  </g>
+  <!-- football -->
+  <g transform="rotate(-32 32 32)">
+    <ellipse cx="32" cy="32" rx="19" ry="11.5" fill="#7a3b12" stroke="#ffffff" stroke-width="2"/>
+    <line x1="20" y1="32" x2="44" y2="32" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+    <g stroke="#ffffff" stroke-width="2.2" stroke-linecap="round">
+      <line x1="26" y1="29" x2="26" y2="35"/>
+      <line x1="30" y1="29" x2="30" y2="35"/>
+      <line x1="34" y1="29" x2="34" y2="35"/>
+      <line x1="38" y1="29" x2="38" y2="35"/>
+    </g>
+  </g>
 </svg>
