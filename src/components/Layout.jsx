@@ -5,9 +5,9 @@ import NavIcon from './NavIcon';
 const navItems = [
   { id: 'home', label: 'Home', icon: 'home' },
   { id: 'playbook', label: 'Playbook', icon: 'playbook' },
+  { id: 'film', label: 'Film', icon: 'whistle' },
   { id: 'study', label: 'Study', icon: 'study' },
   { id: 'coach', label: 'Ask', icon: 'ask' },
-  { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
 export default function Layout({ page, onNav, children }) {
@@ -40,6 +40,12 @@ export default function Layout({ page, onNav, children }) {
             ))}
           </nav>
         )}
+
+        {/* Settings gear (keeps the bottom bar to 5 tabs) */}
+        <button onClick={() => onNav('settings')} aria-label="Settings"
+          className={`p-1.5 rounded-md flex-shrink-0 ${page === 'settings' ? 'text-yard' : 'text-white/70 hover:text-white'}`}>
+          <NavIcon name="settings" size={22} active={page === 'settings'} />
+        </button>
       </header>
 
       {/* Page content */}

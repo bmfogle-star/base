@@ -5,6 +5,7 @@ import Playbook from './pages/Playbook';
 import PlayDetail from './pages/PlayDetail';
 import PlayEditor from './pages/PlayEditor';
 import Study from './pages/Study';
+import Film from './pages/Film';
 import CoachAI from './pages/CoachAI';
 import PlaybookSettings from './pages/PlaybookSettings';
 import { usePlays } from './hooks/usePlays';
@@ -116,6 +117,10 @@ export default function App() {
           singlePlayId={studyId}
           onExit={() => { setStudyId(null); setPage(studyId ? 'detail' : 'home'); }}
         />
+      )}
+
+      {page === 'film' && (
+        <Film plays={plays} />
       )}
 
       {page === 'coach' && (

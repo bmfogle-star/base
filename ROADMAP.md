@@ -23,9 +23,17 @@ steps, works offline.
 | Coach vs Player mode | ✅ Built (role toggle in profile) |
 | **AI position coach** — coach programs it per position; players ask about assignments & "what-if" situations | ✅ Built (Anthropic SDK, coach brings an API key) |
 | **Quizzes** — multiple-choice, auto-built from the playbook | ✅ Built (in the Study hub, scored) |
+| **Film review** — clips of plays/assignments done right, with coach notes, indicators & coaching points | ✅ Built (Film room: Hudl/YouTube links + on-device upload, tags, coaching notes) |
 | **Modules / install units** — group plays into weekly installs; progress tracking | 🔜 Next |
-| **Film review** — clips of plays/assignments done right, with coach notes, indicators & coaching points | 🔜 Next |
 | **Quick notes + sketch pad** — fast text notes and a freeform drawing to capture an indicator | 🔜 Next |
+
+### Hudl note
+Hudl has **no open self-serve API** for third-party apps to pull a team's film
+(their "API" is Hudl IQ / StatsBomb *data*, enterprise-only). So the Film room
+is source-agnostic: paste a Hudl/YouTube/Vimeo link or upload the clip file
+(stored on-device via IndexedDB, plays offline). True one-click Hudl account
+sync would require a partnership/data agreement with Hudl — a business step, not
+a code change; if that lands, real sync drops into this same Film model.
 | Team sync / roster (coach pushes the book to players' phones) | 🔮 Later (needs a backend) |
 
 ## Design principles (do not break)
