@@ -3,90 +3,112 @@
 /* Enable class-based dark mode (toggle .dark on <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Register gold as a real theme color so text-/bg-/border-/ring-gold and
-   their /opacity variants all work natively — identical in light & dark. */
+/* Athletic identity palette. `yard` = the first-down / scrimmage yellow used as
+   the energy accent; `turf` = the brand field green. `gold` is kept as an alias
+   of `yard` so any legacy utility still resolves. */
 @theme {
-  --color-gold: #c2a14d;
+  --color-yard: #ffce3a;
+  --color-gold: #ffce3a;
+  --color-turf: #16a34a;
 }
 
 :root {
-  --brand: #0f5132;        /* deep, rich green */
-  --brand-strong: #0b3d2e;
-  --ink: #0c1b14;          /* near-black with a green tint */
+  --brand: #12833c;
+  --brand-strong: #0c5c2a;
+  --ink: #0a1512;
+  --page: #e9ece6;
+  --surface: #ffffff;
 }
 
-* {
-  box-sizing: border-box;
+.dark {
+  --brand: #2fbd57;
+  --brand-strong: #1c8f3f;
+  --ink: #eef3ef;
+  --page: #070b09;      /* stadium at night */
+  --surface: #10160f;
+  --color-yard: #ffd64d;
+  --color-gold: #ffd64d;
+  --color-turf: #34d36a;
 }
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
+  font-family: 'Barlow Semi Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
-  background: #f5f6f4;
+  font-weight: 500;
+  background: var(--page);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+.dark body { color-scheme: dark; }
 
-.dark body {
-  background: #0a0a0a;
-  color: #f5f5f5;
-  color-scheme: dark;
-}
+#root { width: 100%; min-height: 100svh; }
 
-/* Brighter gold on dark for contrast — cascades to every gold utility
-   (text/bg/border/ring + all /opacity variants reference var(--color-gold)). */
-.dark {
-  --color-gold: #d2af63;
-}
-
-#root {
-  width: 100%;
-  min-height: 100svh;
-}
-
-/* Amex-style headings — clean Franklin-Gothic sans, tight & confident */
+/* Headings: condensed, tight, athletic (not the display face — that's reserved
+   for the wordmark and scoreboard numbers). */
 h1, h2, h3 {
-  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  font-family: 'Barlow Semi Condensed', sans-serif;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
-/* Brand wordmark + display text */
+/* Scoreboard / jersey display face — big numbers, the wordmark, hero counts. */
 .font-display {
-  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: 'Anton', 'Barlow Semi Condensed', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-/* Respect device safe areas (notch / home indicator) in the native app.
-   These insets are 0 in a normal browser, so they're harmless on the web. */
+/* Chalkboard label — small, uppercase, tracked-out section headers. */
+.chalk {
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+/* Safe-area insets (native app notch / home indicator). */
 .app-header { padding-top: max(0.75rem, env(safe-area-inset-top)); }
 .app-bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
 
-/* ── Amex-inspired engraved background pattern ── */
+/* ── Turf background: faint mow-stripes + a hint of yard lines ── */
 .app-bg {
-  background-color: #f3f5f2;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%230f5132' stroke-opacity='0.05'%3E%3Ccircle cx='0' cy='0' r='40'/%3E%3Ccircle cx='80' cy='0' r='40'/%3E%3Ccircle cx='0' cy='80' r='40'/%3E%3Ccircle cx='80' cy='80' r='40'/%3E%3Ccircle cx='40' cy='40' r='40'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 80px 80px;
+  background-color: var(--page);
+  background-image:
+    repeating-linear-gradient(90deg, rgba(18,131,60,0.05) 0 2px, transparent 2px 46px),
+    repeating-linear-gradient(0deg, rgba(18,131,60,0.035) 0 1px, transparent 1px 80px);
 }
 .dark .app-bg {
-  background-color: #080808;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23d2af63' stroke-opacity='0.045'%3E%3Ccircle cx='0' cy='0' r='40'/%3E%3Ccircle cx='80' cy='0' r='40'/%3E%3Ccircle cx='0' cy='80' r='40'/%3E%3Ccircle cx='80' cy='80' r='40'/%3E%3Ccircle cx='40' cy='40' r='40'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 80px 80px;
+  background-color: var(--page);
+  background-image:
+    repeating-linear-gradient(90deg, rgba(52,211,106,0.06) 0 2px, transparent 2px 46px),
+    repeating-linear-gradient(0deg, rgba(52,211,106,0.04) 0 1px, transparent 1px 80px);
 }
 
-/* Guilloché texture overlay for the hero/membership card */
-.card-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.10'%3E%3Ccircle cx='0' cy='0' r='45'/%3E%3Ccircle cx='90' cy='0' r='45'/%3E%3Ccircle cx='0' cy='90' r='45'/%3E%3Ccircle cx='90' cy='90' r='45'/%3E%3Ccircle cx='45' cy='45' r='45'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 90px 90px;
+/* Chalkboard hero surface — dark slate with a faint chalk grid. */
+.chalkboard {
+  background-color: #0c2018;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+  background-size: 18px 18px;
 }
 
-/* Soft Amex-style card elevation */
+/* A yard-line rule (yellow first-down line). */
+.yardline { box-shadow: inset 0 -3px 0 var(--color-yard); }
+
+/* Crisp athletic card — hard edge, minimal shadow (no luxury glow). */
 .card-elevate {
-  box-shadow: 0 1px 2px rgba(12, 27, 20, 0.04), 0 6px 20px -8px rgba(12, 27, 20, 0.10);
+  box-shadow: 0 1px 0 rgba(10,21,18,0.04), 0 10px 24px -18px rgba(10,21,18,0.35);
 }
 .dark .card-elevate {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5), 0 12px 28px -20px rgba(0,0,0,0.8);
+}
+
+/* Kept for compatibility with hero markup that references it. */
+.card-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+  background-size: 16px 16px;
 }

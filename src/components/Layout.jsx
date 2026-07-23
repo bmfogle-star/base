@@ -1,13 +1,13 @@
 import { Fragment } from 'react';
 import { isNativeApp } from '../lib/platform';
-import Emoji from './Emoji';
+import NavIcon from './NavIcon';
 
 const navItems = [
-  { id: 'home', label: 'Home', emoji: '🏠' },
-  { id: 'playbook', label: 'Playbook', emoji: '📋' },
-  { id: 'study', label: 'Study', emoji: '🧠' },
-  { id: 'coach', label: 'Ask', emoji: '💬' },
-  { id: 'settings', label: 'Settings', emoji: '⚙️' },
+  { id: 'home', label: 'Home', icon: 'home' },
+  { id: 'playbook', label: 'Playbook', icon: 'playbook' },
+  { id: 'study', label: 'Study', icon: 'study' },
+  { id: 'coach', label: 'Ask', icon: 'ask' },
+  { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
 export default function Layout({ page, onNav, children }) {
@@ -15,28 +15,26 @@ export default function Layout({ page, onNav, children }) {
 
   return (
     <div className="flex flex-col min-h-screen app-bg">
-      {/* Top bar */}
-      <header className="app-header bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-gray-200/70 dark:border-neutral-800 px-4 py-3 flex items-center justify-between gap-4 sticky top-0 z-40">
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Playbook" className="w-8 h-8 rounded-lg" />
-          <span className="font-display font-semibold text-gray-900 dark:text-neutral-100 text-xl tracking-tight">Playbook</span>
+      {/* Top bar — dark bench with a yellow yard-line under it */}
+      <header className="app-header sticky top-0 z-40 bg-[#0c2018] text-white px-4 py-3 flex items-center justify-between gap-4 yardline">
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="w-8 h-8 rounded-md" />
+          <span className="font-display text-2xl leading-none tracking-wide">PLAYBOOK</span>
         </div>
 
         {/* Desktop nav — equal segments across the top bar (web only) */}
         {!native && (
-          <nav className="hidden md:flex flex-1 items-stretch justify-end max-w-lg ml-auto">
-            {navItems.map(({ id, label, emoji }, i) => (
+          <nav className="hidden md:flex flex-1 items-stretch justify-end max-w-xl ml-auto">
+            {navItems.map(({ id, label, icon }, i) => (
               <Fragment key={id}>
-                {i > 0 && <span className="self-center h-6 w-px bg-gray-200 dark:bg-neutral-700" />}
+                {i > 0 && <span className="self-center h-6 w-px bg-white/15" />}
                 <button
                   onClick={() => onNav(id)}
-                  className={`flex-1 flex items-center justify-center gap-2 mx-1.5 my-1 px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                    page === id
-                      ? 'bg-green-50 dark:bg-green-950/50 text-green-800 dark:text-green-300 shadow-sm'
-                      : 'text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
+                  className={`flex-1 flex items-center justify-center gap-2 mx-1 my-0.5 px-3 py-2 rounded-md chalk text-xs transition-colors ${
+                    page === id ? 'bg-green-500 text-[#0c2018]' : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <Emoji e={emoji} size="1em" /> {label}
+                  <NavIcon name={icon} size={18} active={page === id} /> {label}
                 </button>
               </Fragment>
             ))}
@@ -50,19 +48,22 @@ export default function Layout({ page, onNav, children }) {
       </main>
 
       {/* Bottom tab bar — always in the native app, mobile-only on the web */}
-      <nav className={`app-bottom-nav ${native ? 'flex' : 'flex md:hidden'} fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border-t border-gray-200/70 dark:border-neutral-800 z-40`}>
-        {navItems.map(({ id, label, emoji }) => (
-          <button
-            key={id}
-            onClick={() => onNav(id)}
-            className={`flex-1 flex flex-col items-center py-2.5 gap-0.5 text-[11px] font-semibold transition-colors ${
-              page === id ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-neutral-400'
-            }`}
-          >
-            <Emoji e={emoji} size="1.35em" style={page === id ? undefined : { opacity: 0.55 }} />
-            {label}
-          </button>
-        ))}
+      <nav className={`app-bottom-nav ${native ? 'flex' : 'flex md:hidden'} fixed bottom-0 left-0 right-0 bg-[#0c2018] text-white z-40`}>
+        {navItems.map(({ id, label, icon }) => {
+          const on = page === id;
+          return (
+            <button
+              key={id}
+              onClick={() => onNav(id)}
+              className="flex-1 flex flex-col items-center pt-2 pb-2.5 gap-1 relative"
+            >
+              {/* active indicator bar */}
+              <span className={`absolute top-0 h-0.5 w-8 rounded-full transition-colors ${on ? 'bg-yard' : 'bg-transparent'}`} />
+              <span className={on ? 'text-green-400' : 'text-white/55'}><NavIcon name={icon} size={22} active={on} /></span>
+              <span className={`chalk text-[10px] ${on ? 'text-white' : 'text-white/55'}`}>{label}</span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

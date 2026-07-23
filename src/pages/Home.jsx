@@ -5,11 +5,12 @@ import { getProgress } from '../data/playbook';
 import { isDue, masteryLabel, masteryScore } from '../lib/srs';
 import Emoji from '../components/Emoji';
 
-function Stat({ value, label, emoji }) {
+function Stat({ value, label, tone = 'ink' }) {
+  const color = tone === 'turf' ? 'text-turf' : 'text-gray-900 dark:text-neutral-100';
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-2xl p-3 text-center card-elevate border border-gray-100 dark:border-neutral-800">
-      <div className="text-2xl font-display text-gray-900 dark:text-neutral-100">{value}</div>
-      <div className="text-[11px] font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wide">{emoji} {label}</div>
+    <div className="bg-white dark:bg-neutral-900 rounded-xl p-3 text-center card-elevate border border-gray-100 dark:border-neutral-800">
+      <div className={`text-4xl leading-none font-display ${color}`}>{value}</div>
+      <div className="chalk text-[10px] text-gray-500 dark:text-neutral-400 mt-1">{label}</div>
     </div>
   );
 }
@@ -38,45 +39,43 @@ export default function Home({ plays, profile, onStudy, onOpen, onAdd, onBrowse 
   return (
     <div className="pb-6">
       <div className="mb-4">
-        <p className="text-sm text-gray-500 dark:text-neutral-400">{name ? `Let's get to work, ${name}.` : 'Welcome to your playbook.'}</p>
-        <h1 className="text-2xl font-display text-gray-900 dark:text-neutral-100">
-          {profile?.position ? `${profile.position} · ` : ''}{plays.length} play{plays.length !== 1 ? 's' : ''} to master
+        <p className="chalk text-[11px] text-turf mb-0.5">{name ? `Let’s get to work, ${name}` : 'Welcome to your playbook'}</p>
+        <h1 className="font-display text-3xl leading-none text-gray-900 dark:text-neutral-100 tracking-wide">
+          {profile?.position ? `${profile.position} · ` : ''}{plays.length} PLAY{plays.length !== 1 ? 'S' : ''} TO MASTER
         </h1>
       </div>
 
-      {/* Hero study card */}
-      <div className="rounded-3xl p-5 mb-5 card-elevate text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0f5132, #146536 60%, #1a7a43)' }}>
-        <div className="card-pattern absolute inset-0 opacity-60" />
-        <div className="relative">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold uppercase tracking-widest text-green-200">Daily reps</span>
-            <span className="text-xs font-semibold text-green-100">{stats.overall}% mastered</span>
-          </div>
-          <div className="text-3xl font-display mb-0.5">{stats.due} play{stats.due !== 1 ? 's' : ''} due</div>
-          <p className="text-sm text-green-100 mb-4">Spaced repetition resurfaces the plays you're about to forget.</p>
-          <div className="h-2 rounded-full bg-white/20 overflow-hidden mb-4">
-            <div className="h-full bg-gold rounded-full" style={{ width: `${stats.overall}%` }} />
-          </div>
-          <button onClick={onStudy}
-            className="w-full bg-white text-green-800 font-bold py-3 rounded-xl hover:bg-green-50">
-            {stats.due > 0 ? '🧠 Start today’s reps' : '🧠 Study anyway'}
-          </button>
+      {/* Scoreboard hero */}
+      <div className="rounded-2xl p-5 mb-5 chalkboard text-white relative overflow-hidden border border-white/10 yardline">
+        <div className="flex items-center justify-between mb-2">
+          <span className="chalk text-[11px] text-green-300">Daily reps</span>
+          <span className="chalk text-[11px] text-white/60">{stats.overall}% mastered</span>
         </div>
+        <div className="flex items-end gap-3 mb-3">
+          <span className="font-display text-6xl leading-[0.85] text-yard">{stats.due}</span>
+          <span className="chalk text-sm text-white/80 pb-1">play{stats.due !== 1 ? 's' : ''} due</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-white/15 overflow-hidden mb-4">
+          <div className="h-full bg-green-400 rounded-full" style={{ width: `${stats.overall}%` }} />
+        </div>
+        <button onClick={onStudy}
+          className="w-full bg-green-500 hover:bg-green-400 text-[#0c2018] font-display text-lg tracking-wide py-2.5 rounded-lg">
+          {stats.due > 0 ? 'START TODAY’S REPS' : 'STUDY ANYWAY'}
+        </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2.5 mb-5">
-        <Stat value={stats.mastered} label="Mastered" emoji="🏆" />
-        <Stat value={stats.learning} label="Learning" emoji="📈" />
-        <Stat value={stats.newCount} label="New" emoji="✨" />
+        <Stat value={stats.mastered} label="Mastered" tone="turf" />
+        <Stat value={stats.learning} label="Learning" />
+        <Stat value={stats.newCount} label="New" />
       </div>
 
       {/* Quick access (starred) */}
       {starred.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-neutral-400">⭐ Quick access</h2>
+            <h2 className="chalk text-xs text-gray-500 dark:text-neutral-400">⭐ Quick access</h2>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
             {starred.map(p => (
@@ -101,8 +100,8 @@ export default function Home({ plays, profile, onStudy, onOpen, onAdd, onBrowse 
             <button key={c} onClick={() => onBrowse(c)}
               className="bg-white dark:bg-neutral-900 rounded-2xl p-3 card-elevate border border-gray-100 dark:border-neutral-800 text-left">
               <div className="text-xl">{m.emoji}</div>
-              <div className="text-lg font-bold text-gray-900 dark:text-neutral-100">{count}</div>
-              <div className="text-[11px] font-semibold text-gray-500 dark:text-neutral-400">{m.label}</div>
+              <div className="text-2xl font-display leading-none text-gray-900 dark:text-neutral-100">{count}</div>
+              <div className="chalk text-[10px] text-gray-500 dark:text-neutral-400">{m.label}</div>
             </button>
           );
         })}
@@ -111,7 +110,7 @@ export default function Home({ plays, profile, onStudy, onOpen, onAdd, onBrowse 
       {/* Recently added */}
       {recent.length > 0 && (
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-neutral-400 mb-2">Recently added</h2>
+          <h2 className="chalk text-xs text-gray-500 dark:text-neutral-400 mb-2">Recently added</h2>
           <div className="space-y-2">
             {recent.map(p => (
               <button key={p.id} onClick={() => onOpen(p.id)}

@@ -101,9 +101,9 @@ export default function Playbook({ plays, onOpen, onAdd, initialCategory }) {
       ) : (
         CATEGORY_ORDER.filter(c => grouped[c]?.length).map(c => (
           <div key={c} className="mb-6">
-            <h2 className={`text-sm font-bold uppercase tracking-wide mb-2.5 ${categoryMeta(c).color}`}>
+            <h2 className={`chalk text-sm mb-2.5 flex items-center gap-1.5 ${categoryMeta(c).color}`}>
               {categoryMeta(c).emoji} {categoryMeta(c).label}
-              <span className="text-gray-400 dark:text-neutral-500 ml-1.5 font-semibold">{grouped[c].length}</span>
+              <span className="font-display text-base text-gray-400 dark:text-neutral-500">{grouped[c].length}</span>
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {grouped[c].map(p => <PlayCard key={p.id} play={p} onOpen={onOpen} />)}
