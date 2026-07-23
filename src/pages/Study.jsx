@@ -3,6 +3,7 @@ import { DiagramView } from '../components/FieldDiagram';
 import { categoryMeta, CATEGORY_ORDER } from '../lib/playmeta';
 import { getPlayProgress, setPlayProgress } from '../data/playbook';
 import { schedule, isDue, gradePreview, masteryLabel } from '../lib/srs';
+import Quiz from './Quiz';
 import Emoji from '../components/Emoji';
 
 const GRADES = [
@@ -23,6 +24,7 @@ function answerFor(play, posFocus) {
 }
 
 function SessionSetup({ plays, profile, onStart, onExit }) {
+  const [mode, setMode] = useState('flashcards');
   const [scope, setScope] = useState('due');
   const [cat, setCat] = useState('all');
   const [posFocus, setPosFocus] = useState(profile?.position || 'all');
@@ -42,8 +44,22 @@ function SessionSetup({ plays, profile, onStart, onExit }) {
         <button onClick={onExit} className="text-sm font-semibold text-gray-500 dark:text-neutral-400">Close</button>
       </div>
 
-      <p className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-2">What to study</p>
+      <p className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-2">How to study</p>
       <div className="grid grid-cols-2 gap-2 mb-4">
+        <button onClick={() => setMode('flashcards')}
+          className={`p-3 rounded-xl border text-left ${mode === 'flashcards' ? 'bg-green-700 text-white border-green-700' : 'bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-700'}`}>
+          <div className="font-bold">🃏 Flashcards</div>
+          <div className={`text-xs ${mode === 'flashcards' ? 'text-green-100' : 'text-gray-500 dark:text-neutral-400'}`}>Recall + spaced repetition</div>
+        </button>
+        <button onClick={() => setMode('quiz')}
+          className={`p-3 rounded-xl border text-left ${mode === 'quiz' ? 'bg-green-700 text-white border-green-700' : 'bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-700'}`}>
+          <div className="font-bold">📝 Quiz</div>
+          <div className={`text-xs ${mode === 'quiz' ? 'text-green-100' : 'text-gray-500 dark:text-neutral-400'}`}>Multiple choice, scored</div>
+        </button>
+      </div>
+
+      <p className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-2">{mode === 'quiz' ? 'Quiz from' : 'What to study'}</p>
+      <div className={`grid grid-cols-2 gap-2 mb-4 ${mode === 'quiz' ? 'hidden' : ''}`}>
         <button onClick={() => setScope('due')}
           className={`p-3 rounded-xl border text-left ${scope === 'due' ? 'bg-green-700 text-white border-green-700' : 'bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-700'}`}>
           <div className="font-bold">Due for review</div>
@@ -80,8 +96,8 @@ function SessionSetup({ plays, profile, onStart, onExit }) {
         </>
       )}
 
-      <button onClick={() => onStart({ scope, cat, posFocus })}
-        className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3.5 rounded-xl">Start studying</button>
+      <button onClick={() => onStart({ mode, scope, cat, posFocus })}
+        className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3.5 rounded-xl">{mode === 'quiz' ? 'Start quiz' : 'Start studying'}</button>
     </div>
   );
 }
@@ -230,5 +246,8 @@ export default function Study({ plays, profile, singlePlayId, onExit }) {
   }
 
   const sessionPlays = config.single ? plays.filter(p => p.id === config.single) : plays;
+  if (config.mode === 'quiz') {
+    return <Quiz plays={sessionPlays} config={config} onExit={onExit} />;
+  }
   return <Flashcard plays={sessionPlays} config={config} onExit={onExit} />;
 }

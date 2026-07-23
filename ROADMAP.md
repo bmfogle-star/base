@@ -19,13 +19,13 @@ steps, works offline.
 | Assignments broken down by position | ✅ Built |
 | Flashcards + spaced repetition | ✅ Built |
 | Drill your own position | ✅ Built |
-| Offline / installable on phones | ✅ PWA (service worker: in progress) |
+| Offline / installable on phones | ✅ PWA + service worker (works with no signal) |
 | Coach vs Player mode | ✅ Built (role toggle in profile) |
 | **AI position coach** — coach programs it per position; players ask about assignments & "what-if" situations | ✅ Built (Anthropic SDK, coach brings an API key) |
-| **Quizzes** — multiple-choice / matching, auto-built from the playbook | 🔜 Next |
+| **Quizzes** — multiple-choice, auto-built from the playbook | ✅ Built (in the Study hub, scored) |
 | **Modules / install units** — group plays into weekly installs; progress tracking | 🔜 Next |
-| **Film review** — clips of plays/assignments done right, with coach notes, indicators & coaching points | 🔜 Planned |
-| **Quick notes + sketch pad** — fast text notes and a freeform drawing to capture an indicator | 🔜 Planned |
+| **Film review** — clips of plays/assignments done right, with coach notes, indicators & coaching points | 🔜 Next |
+| **Quick notes + sketch pad** — fast text notes and a freeform drawing to capture an indicator | 🔜 Next |
 | Team sync / roster (coach pushes the book to players' phones) | 🔮 Later (needs a backend) |
 
 ## Design principles (do not break)
