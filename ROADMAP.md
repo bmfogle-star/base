@@ -20,8 +20,8 @@ steps, works offline.
 | Flashcards + spaced repetition | ✅ Built |
 | Drill your own position | ✅ Built |
 | Offline / installable on phones | ✅ PWA (service worker: in progress) |
-| Coach vs Player mode | 🔜 Next |
-| **AI position coach** — coach programs it per position; players ask about assignments & "what-if" situations | 🔜 Next (uses the Anthropic SDK, coach brings an API key) |
+| Coach vs Player mode | ✅ Built (role toggle in profile) |
+| **AI position coach** — coach programs it per position; players ask about assignments & "what-if" situations | ✅ Built (Anthropic SDK, coach brings an API key) |
 | **Quizzes** — multiple-choice / matching, auto-built from the playbook | 🔜 Next |
 | **Modules / install units** — group plays into weekly installs; progress tracking | 🔜 Next |
 | **Film review** — clips of plays/assignments done right, with coach notes, indicators & coaching points | 🔜 Planned |

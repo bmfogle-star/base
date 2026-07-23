@@ -5,6 +5,7 @@ import Playbook from './pages/Playbook';
 import PlayDetail from './pages/PlayDetail';
 import PlayEditor from './pages/PlayEditor';
 import Study from './pages/Study';
+import CoachAI from './pages/CoachAI';
 import PlaybookSettings from './pages/PlaybookSettings';
 import { usePlays } from './hooks/usePlays';
 import { getProfile } from './data/playbook';
@@ -117,8 +118,12 @@ export default function App() {
         />
       )}
 
+      {page === 'coach' && (
+        <CoachAI plays={plays} onGoToSettings={() => setPage('settings')} />
+      )}
+
       {page === 'settings' && (
-        <PlaybookSettings onChanged={() => setProfile(getProfile())} />
+        <PlaybookSettings plays={plays} onChanged={() => setProfile(getProfile())} />
       )}
     </Layout>
   );

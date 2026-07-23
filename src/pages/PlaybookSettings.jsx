@@ -1,18 +1,37 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { getProfile, saveProfile, exportData, importData } from '../data/playbook';
 import { POSITIONS } from '../lib/playmeta';
 import { getTheme, setTheme } from '../lib/theme';
+import { getAISettings, saveAISettings, getKnowledge, saveKnowledge, MODELS } from '../lib/aiCoach';
 import Emoji from '../components/Emoji';
 
 const inputCls = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 outline-none focus:border-green-500';
 
-export default function PlaybookSettings({ onChanged }) {
+export default function PlaybookSettings({ plays = [], onChanged }) {
   const [profile, setProfile] = useState(() => getProfile());
   const [theme, setThemeState] = useState(() => getTheme());
   const [saved, setSaved] = useState(false);
+  const [ai, setAi] = useState(() => getAISettings());
+  const [knowledge, setKnowledge] = useState(() => getKnowledge());
+  const [aiSaved, setAiSaved] = useState(false);
   const fileRef = useRef(null);
 
   const set = (patch) => setProfile(p => ({ ...p, ...patch }));
+
+  const playbookPositions = useMemo(() => (
+    [...new Set(plays.flatMap(p => (p.positions || []).map(x => x.pos)).filter(Boolean))].sort()
+  ), [plays]);
+
+  function saveAI() {
+    saveAISettings(ai);
+    saveKnowledge(knowledge);
+    setAiSaved(true);
+    setTimeout(() => setAiSaved(false), 1500);
+  }
+  const setPosNote = (pos, text) =>
+    setKnowledge(k => ({ ...k, positions: { ...k.positions, [pos]: text } }));
+
+  const isCoach = profile.role === 'coach';
 
   function persist() {
     saveProfile(profile);
@@ -58,6 +77,17 @@ export default function PlaybookSettings({ onChanged }) {
       {/* Player profile */}
       <section className="bg-white dark:bg-neutral-900 rounded-2xl p-4 card-elevate border border-gray-100 dark:border-neutral-800 mb-4">
         <h2 className="font-bold text-gray-900 dark:text-neutral-100 mb-3">👤 Your profile</h2>
+        <div className="mb-3">
+          <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1.5 block">I am a…</span>
+          <div className="grid grid-cols-2 gap-2">
+            {[['player', '🏈 Player'], ['coach', '📋 Coach']].map(([r, label]) => (
+              <button key={r} onClick={() => set({ role: r })}
+                className={`py-2.5 rounded-xl font-semibold border ${profile.role === r || (!profile.role && r === 'player') ? 'bg-green-700 text-white border-green-700' : 'bg-white dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 border-gray-200 dark:border-neutral-700'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="block mb-3">
           <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1 block">Name</span>
           <input className={inputCls} value={profile.name} onChange={e => set({ name: e.target.value })} placeholder="Your name" />
@@ -100,6 +130,66 @@ export default function PlaybookSettings({ onChanged }) {
             </button>
           ))}
         </div>
+      </section>
+
+      {/* AI Position Coach */}
+      <section className="bg-white dark:bg-neutral-900 rounded-2xl p-4 card-elevate border border-gray-100 dark:border-neutral-800 mb-4">
+        <h2 className="font-bold text-gray-900 dark:text-neutral-100 mb-1">💬 AI Position Coach</h2>
+        <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">
+          {isCoach
+            ? 'Program the AI coach with your team’s philosophy, terminology, and each position’s rules. Players can then ask it about their assignments any time.'
+            : 'This is usually set up by a coach. It lets you ask an AI coach about your plays. If you’re a coach, switch your role above to set it up.'}
+        </p>
+
+        <label className="block mb-3">
+          <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1 block">Anthropic API key</span>
+          <input className={inputCls} type="password" value={ai.apiKey}
+            onChange={e => setAi(a => ({ ...a, apiKey: e.target.value }))} placeholder="sk-ant-..." autoComplete="off" />
+          <span className="text-xs text-gray-400 dark:text-neutral-500 mt-1 block">
+            Get one at console.anthropic.com. Stored only on this device. Costs a fraction of a cent per question.
+          </span>
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1 block">Answer quality</span>
+          <select className={inputCls} value={ai.model} onChange={e => setAi(a => ({ ...a, model: e.target.value }))}>
+            {MODELS.map(m => <option key={m.id} value={m.id}>{m.label} — {m.note}</option>)}
+          </select>
+        </label>
+
+        <label className="block mb-3">
+          <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1 block">Team philosophy</span>
+          <textarea className={`${inputCls} min-h-[64px] resize-y`} value={knowledge.philosophy}
+            onChange={e => setKnowledge(k => ({ ...k, philosophy: e.target.value }))}
+            placeholder="How we play: e.g. spread offense, tempo, run-first, aggressive defense…" />
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1 block">Terminology & calls</span>
+          <textarea className={`${inputCls} min-h-[64px] resize-y`} value={knowledge.terminology}
+            onChange={e => setKnowledge(k => ({ ...k, terminology: e.target.value }))}
+            placeholder="Words the AI should know: e.g. 'Rip/Liz' = strong-side call, 'Green' = tempo…" />
+        </label>
+
+        {playbookPositions.length > 0 && (
+          <div className="mb-4">
+            <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1.5 block">Notes per position</span>
+            <div className="space-y-2">
+              {playbookPositions.map(pos => (
+                <div key={pos}>
+                  <span className="text-xs font-bold text-green-700 dark:text-green-400">{pos}</span>
+                  <textarea className={`${inputCls} min-h-[44px] resize-y mt-0.5`} value={knowledge.positions?.[pos] || ''}
+                    onChange={e => setPosNote(pos, e.target.value)}
+                    placeholder={`Rules / reads / reminders for ${pos}…`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button onClick={saveAI} className="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded-xl text-sm">
+          {aiSaved ? '✓ Saved' : 'Save AI coach'}
+        </button>
       </section>
 
       {/* Backup / share */}

@@ -6,6 +6,7 @@ const navItems = [
   { id: 'home', label: 'Home', emoji: '🏠' },
   { id: 'playbook', label: 'Playbook', emoji: '📋' },
   { id: 'study', label: 'Study', emoji: '🧠' },
+  { id: 'coach', label: 'Ask', emoji: '💬' },
   { id: 'settings', label: 'Settings', emoji: '⚙️' },
 ];
 
