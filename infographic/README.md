@@ -4,10 +4,10 @@
 
 It covers all of the rubric sections:
 
-- **The Problem** – how much food gets wasted and where it happens
-- **Why It Matters** – environmental, economic, and social impacts
-- **Top Solutions** – the three highest-impact fixes
-- **Rating the Top 3 on the Three E's** – each solution weighed against Environment, Economy, and Equity
+- **The Issue** – topic defined, problem identified, and its connection to the Three E's (Economy, Environment, Equity)
+- **Why It Matters: The Impacts** – two impacts each on people, the environment, and non-human organisms (wildlife)
+- **Solutions at Every Level** – two solutions each at the individual, local/national, and global levels
+- **Evaluating the Top 3 Solutions on the Three E's** – each weighed against Environment, Economy, and Equity
 
 `preview.png` is a quick image preview of the same page.
 
