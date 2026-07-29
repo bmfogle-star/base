@@ -11,6 +11,14 @@ It covers all of the rubric sections:
 
 `preview.png` is a quick image preview of the same page.
 
+## Presentation
+
+`Food_Waste_Presentation.pptx` is an 8-slide PowerPoint built for a ~5-minute talk. It
+goes deeper than the infographic (what food waste is, where it happens along the supply
+chain, the impacts, solutions at every level, and the top-3 evaluation) and includes the
+infographic itself on a slide. Every slide has speaker notes with talking points.
+Slide previews are in `presentation_preview/`.
+
 ## Editing
 
 Update the copy or styling in `build_html.js`, then rebuild:
